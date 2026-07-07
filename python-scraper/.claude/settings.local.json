@@ -1,8 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx expo *)",
-      "Bash(git *)"
+      "mcp__claude_ai_Supabase__list_tables"
     ]
   }
 }
