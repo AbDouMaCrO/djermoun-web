@@ -1,0 +1,27 @@
+{
+  "services": {
+    "web": {
+      "root": "apps/web",
+      "framework": "nextjs"
+    },
+    "scraper": {
+      "root": "services/scraper"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/scraper(/.*)?",
+      "destination": {
+        "type": "service",
+        "service": "scraper"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "type": "service",
+        "service": "web"
+      }
+    }
+  ]
+}
