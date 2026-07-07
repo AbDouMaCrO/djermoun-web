@@ -63,13 +63,25 @@ export default async function CarDetailsPage({
       <h1 className="text-3xl font-semibold text-slate-900">
         {car.year} {car.make} {car.model}
       </h1>
-      <p className="mt-2 text-2xl font-bold text-amber-500">{formatPrice(totalPrice)}</p>
+      <p className="mt-2 text-2xl font-bold text-amber-500">
+        {formatPrice(car.price_usd != null ? car.price_usd : totalPrice)}
+      </p>
       {car.customs_duty_dzd != null && (
-        <p className="mt-1 text-sm font-medium text-slate-600">
-          {car.customs_duty_dzd === 0
-            ? "European Origin: Exempt from Customs Duty (EUR.1)"
-            : `Estimated Customs Duty: ${formatDZD(car.customs_duty_dzd)}`}
-        </p>
+        <div className="mt-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            Algerian Customs &amp; Duties Estimate
+          </p>
+          {car.customs_duty_dzd === 0 ? (
+            <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+              European Origin: Exempt from Customs Duty (EUR.1)
+            </span>
+          ) : (
+            <p className="mt-1 text-sm font-medium text-slate-700">
+              Estimated Duty: {formatDZD(car.customs_duty_dzd)}
+            </p>
+          )}
+        </div>
       )}
 
       <div className="mt-6 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
