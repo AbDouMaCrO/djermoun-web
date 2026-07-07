@@ -3,8 +3,15 @@
 import Link from "next/link";
 import { languages, type Language } from "@/i18n/dictionaries";
 import { useLanguage } from "@/i18n/language-context";
+import type { UserRole } from "@/utils/supabase/roles";
 
-export default function NavLinks({ isLoggedIn }: { isLoggedIn: boolean }) {
+export default function NavLinks({
+  isLoggedIn,
+  role,
+}: {
+  isLoggedIn: boolean;
+  role: UserRole | null;
+}) {
   const { lang, setLang, dict } = useLanguage();
 
   const links = [
@@ -13,6 +20,15 @@ export default function NavLinks({ isLoggedIn }: { isLoggedIn: boolean }) {
     { id: "about-us", label: dict.nav.aboutUs, href: "/about-us" },
     { id: "contact", label: dict.nav.contact, href: "/contact" },
   ];
+
+  if (role === "supervisor" || role === "admin") {
+    links.push({ id: "operations", label: "Operations", href: "/admin/dashboard" });
+  }
+  if (role === "admin") {
+    links.push({ id: "system-settings", label: "System Settings", href: "/admin/settings" });
+  }
+
+  const accountHref = role === "admin" || role === "supervisor" ? "/admin" : "/account";
 
   return (
     <>
@@ -43,7 +59,7 @@ export default function NavLinks({ isLoggedIn }: { isLoggedIn: boolean }) {
         </select>
 
         <Link
-          href={isLoggedIn ? "/admin" : "/login"}
+          href={isLoggedIn ? accountHref : "/login"}
           className="press-scale rounded-full bg-amber-500 px-5 py-2 text-sm font-bold text-black transition-colors duration-150 hover:bg-amber-400"
         >
           {isLoggedIn ? dict.nav.account : "Login / Sign Up"}

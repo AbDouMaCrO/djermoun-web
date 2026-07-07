@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
+import { getUserRole } from "@/utils/supabase/roles";
 import NavLinks from "@/components/nav-links";
 
 export default async function Navbar() {
@@ -7,6 +8,7 @@ export default async function Navbar() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const role = user ? await getUserRole(user.id) : null;
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-md">
@@ -15,7 +17,7 @@ export default async function Navbar() {
           DJERMOUN <span className="text-amber-500">AUTO</span>
         </Link>
 
-        <NavLinks isLoggedIn={!!user} />
+        <NavLinks isLoggedIn={!!user} role={role} />
       </nav>
     </header>
   );

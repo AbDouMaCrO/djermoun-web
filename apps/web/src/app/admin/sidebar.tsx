@@ -2,16 +2,28 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { UserRole } from "@/utils/supabase/roles";
 
-const LINKS = [
+const SUPERVISOR_LINKS = [
   { href: "/admin", label: "Dashboard Home" },
   { href: "/admin/dashboard", label: "Scrape & Ingest Vehicles" },
   { href: "/admin/inventory", label: "Vehicle Inventory & Pricing" },
-  { href: "/admin/orders", label: "Manage Orders & Payments" },
 ];
 
-export default function Sidebar() {
+const ADMIN_ONLY_LINKS = [
+  { href: "/admin/orders", label: "Manage Orders & Payments" },
+  { href: "/admin/settings", label: "System Settings & User Management" },
+];
+
+export default function Sidebar({ role }: { role: UserRole | null }) {
   const pathname = usePathname();
+
+  const links =
+    role === "admin"
+      ? [...SUPERVISOR_LINKS, ...ADMIN_ONLY_LINKS]
+      : role === "supervisor"
+        ? SUPERVISOR_LINKS
+        : [];
 
   return (
     <aside className="w-64 shrink-0 border-r border-gray-200 bg-gray-50 p-4">
@@ -19,7 +31,7 @@ export default function Sidebar() {
         Admin Portal
       </div>
       <nav className="flex flex-col gap-1">
-        {LINKS.map((link) => {
+        {links.map((link) => {
           const active =
             link.href === "/admin"
               ? pathname === "/admin"

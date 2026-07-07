@@ -1,8 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-// Protects /admin/* : requires a logged-in user whose email is in ADMIN_EMAILS.
-// Also refreshes the Supabase auth session on every request (required for SSR auth).
+// Admin-only sub-paths of /admin/*; everything else under /admin is shared
+// with supervisors (dashboard home, scrape/intake, inventory).
+const ADMIN_ONLY_PREFIXES = ["/admin/orders", "/admin/settings", "/admin/import"];
+
+// Protects /admin/* by role (profiles.role, set up by the RBAC migration):
+// admins get full access, supervisors get everything except ADMIN_ONLY_PREFIXES,
+// everyone else is sent to login. Also refreshes the Supabase auth session on
+// every request (required for SSR auth).
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -30,16 +36,30 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (request.nextUrl.pathname.startsWith("/admin")) {
-    const admins = (process.env.ADMIN_EMAILS ?? "")
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-    const isAdmin = user?.email && admins.includes(user.email.toLowerCase());
-
-    if (!isAdmin) {
+    if (!user) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("next", request.nextUrl.pathname);
+      return NextResponse.redirect(url);
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    const role = profile?.role;
+
+    const isAdminOnlyPath = ADMIN_ONLY_PREFIXES.some((p) =>
+      request.nextUrl.pathname.startsWith(p),
+    );
+
+    const allowed = role === "admin" || (role === "supervisor" && !isAdminOnlyPath);
+
+    if (!allowed) {
+      const url = request.nextUrl.clone();
+      url.pathname = role === "supervisor" ? "/admin" : "/login";
+      if (role !== "supervisor") url.searchParams.set("next", request.nextUrl.pathname);
       return NextResponse.redirect(url);
     }
   }
