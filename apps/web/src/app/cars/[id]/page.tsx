@@ -15,6 +15,10 @@ function formatPrice(price: number) {
   }).format(price);
 }
 
+function formatDZD(n: number) {
+  return `${Math.round(n).toLocaleString()} DZD`;
+}
+
 export default async function CarDetailsPage({
   params,
 }: {
@@ -60,6 +64,13 @@ export default async function CarDetailsPage({
         {car.year} {car.make} {car.model}
       </h1>
       <p className="mt-2 text-2xl font-bold text-amber-500">{formatPrice(totalPrice)}</p>
+      {car.customs_duty_dzd != null && (
+        <p className="mt-1 text-sm font-medium text-slate-600">
+          {car.customs_duty_dzd === 0
+            ? "European Origin: Exempt from Customs Duty (EUR.1)"
+            : `Estimated Customs Duty: ${formatDZD(car.customs_duty_dzd)}`}
+        </p>
+      )}
 
       <div className="mt-6 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
         {/* Left column: gallery, then specifications */}

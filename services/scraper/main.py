@@ -16,6 +16,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from playwright.sync_api import sync_playwright
 
+from duty_calculator import CustomsDutyCalculator
+
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
@@ -276,9 +278,9 @@ def extract_car_che168(url: str) -> dict:
 def extract_car(url: str) -> dict:
     """Dispatch to the right site-specific extractor by hostname."""
     host = urlparse(url).netloc
-    if "che168.com" in host:
-        return extract_car_che168(url)
-    return extract_car_autocango(url)
+    row = extract_car_che168(url) if "che168.com" in host else extract_car_autocango(url)
+    row["customs_duty_dzd"] = _estimated_duty_dzd(row)
+    return row
 
 
 MISSING_COLUMN_RE = re.compile(r"Could not find the '(\w+)' column")
@@ -295,6 +297,25 @@ NEW_CAR_WEBHOOK_URL = os.environ.get(
 # DEFAULT_USD_TO_DZD_RATE — the server has no visibility into a shopper's
 # per-browser adjusted rate, so this is the same site-wide default.
 USD_TO_DZD_RATE = float(os.environ.get("USD_TO_DZD_RATE", 253))
+
+# Loads the Argus reference-value CSV once at startup rather than per-car (it's
+# a pandas DataFrame load). A missing/broken CSV shouldn't take down scraping
+# for everything else, so failures here just disable duty estimation.
+try:
+    duty_calc = CustomsDutyCalculator(usd_to_dzd_rate=USD_TO_DZD_RATE)
+except Exception as e:
+    log.warning("CustomsDutyCalculator unavailable, duty estimates disabled: %s", e)
+    duty_calc = None
+
+
+def _estimated_duty_dzd(row: dict) -> "float | None":
+    if duty_calc is None or not row.get("make") or not row.get("model") or not row.get("year"):
+        return None
+    try:
+        return duty_calc.get_estimated_duty_dzd(row["make"], row["model"], row["year"])
+    except Exception as e:
+        log.warning("duty calc failed for %s %s %s: %s", row.get("make"), row.get("model"), row.get("year"), e)
+        return None
 
 
 def notify_new_car_webhook(car: dict, source_url: str) -> None:
