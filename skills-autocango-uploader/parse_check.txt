@@ -1,0 +1,4 @@
+<string>:8: SyntaxWarning: "\$" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\$"? A raw string is also an option.
+is_listing single: True
+is_listing brand : False
+parsed: ACU90589222 | ChangAn UNI V 2022 | \$8070 | cc=1494 | loc='Huizhou Guangdong China' | acc=22

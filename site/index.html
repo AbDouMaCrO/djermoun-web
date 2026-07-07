@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=1012, initial-scale=1.0'>
+    <meta name='description' content='Site web multilingue en français et arabe - Algerie'>
+    <title>Mon site - Bienvenue</title>
+    <link rel='stylesheet' href='css/styles.css'>
+    <style>
+        /* Enhanced styles with accessibility */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; }
+        .hero { text-align: center; padding: 50px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .section { padding: 20px; margin-bottom: 20px; } 
+        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .gallery-item { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; }
+        .gallery-item img { width: 100%; height: 180px; object-fit: cover; }
+        .gallery-item p { padding: 10px; margin: 0; font-size: 0.9rem; }
+        form { display: flex; flex-direction: column; max-width: 500px; margin: auto; }
+        input, textarea, button { margin: 10px 0; padding: 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem; }
+        button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; cursor: pointer; border: none; font-weight: bold; transition: transform 0.2s; }
+        button:hover { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); transform: translateY(-2px); }
+        .contact-info { background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .lang-switch { background: #333; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 10px 0; }
+        @media (max-width: 768px) { .container { padding: 10px; } }
+    </style>
+</head>
+<body>
+<div id="arabic-section">
+<header>
+    <h1>مرحبا بيك في الموقع</h1>
+    <p>هنا تلقاو كلشي بالدارجة.</p>
+    <button id="lang-switch" class="lang-switch" onclick="toggleLang()">العربية</button>
+</header>
+<nav>
+    <a href="#arabic-section">الرئيسية</a>
+    <a href="#gallery">الصور</a>
+    <a href="#contact">اتصل بنا</a>
+</nav>
+<div class='container'>
+    <section class='hero'>
+        <h2>أهلاً وسهلاً!</h2>
+        <p>هذا الموقع مخصص لك بالدارجة الجزائرية.</p>
+    </section>
+    <section id='gallery' class='section' aria-labelledby='gallery-heading'>
+        <h3 id='gallery-heading'>المعرض (Gallery)</h3>
+        <div class='gallery'>
+            <div class='gallery-item'>
+                <img src='https://via.placeholder.com/400x300/667eea/ffffff?text=Algerie+1' alt='Vue d'Algerie 1'>
+                <p>المدينة الجزائرية</p>
+            </div>
+            <div class='gallery-item'>
+                <img src='https://via.placeholder.com/400x300/764ba2/ffffff?text=Algerie+2' alt='Vue d'Algerie 2'>
+                <p>الجبال والنهر</p>
+            </div>
+            <div class='gallery-item'>
+                <img src='https://via.placeholder.com/400x300/10b981/ffffff?text=Algerie+3' alt='Vue d'Algerie 3'>
+                <p>الشواطئ الساحرة</p>
+            </div>
+        </div>
+    </section>
+    <section id='contact' class='section' aria-labelledby='contact-heading'>
+        <h3 id='contact-heading'>تواصل معانا (Contact Us)</h3>
+        <div class='contact-info'>
+            <p><strong>البريد الإلكتروني:</strong> <a href='mailto:contact@example.com'>contact@example.com</a></p>
+            <p><strong>الهاتف:</strong> +213 XXX XXX XXX</p>
+        </div>
+        <form action='https://formspree.io/f/your-form-id' method='POST' aria-label='Formulaire de contact'>
+            <label for='name'>الاسم تاعك</label>
+            <input type='text' id='name' name='name' placeholder='الاسم تاعك' required aria-required='true'>
+            
+            <label for='email'>الايميل تاعك</label>
+            <input type='email' id='email' name='_replyto' placeholder='الايميل تاعك' required aria-required='true'>
+            
+            <label for='message'>واش راك حاب تقول؟</label>
+            <textarea id='message' name='message' placeholder='واش راك حاب تقول؟' rows='5' required aria-required='true'></textarea>
+            
+            <button type='submit' aria-label='ارسل رسالتك'>ارسل</button>
+        </form>
+    </section>
+</div>
+<footer>
+    <p>&copy; 2024 - مخدوم بكل حب</p>
+</footer>
+</div>
+
+<section id="french-section" style="display:none;">
+  <header>
+    <h1>Bienvenue sur notre site</h1>
+    <p>Voici notre site conçu spécialement pour vous en dialecte algérien.</p>
+    <button id="lang-switch" class="lang-switch" onclick="toggleLang()">Français</button>
+  </header>
+  <nav>
+    <a href="#french-section">Accueil</a>
+    <a href="#galerie">Galerie</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <div class='container'>
+      <section class='hero'>
+          <h2>Bienvenue!</h2>
+          <p>Ce site est conçu spécialement pour vous en dialecte algérien.</p>
+      </section>
+      <section id='galerie' class='section' aria-labelledby='galerie-heading'>
+          <h3 id='galerie-heading'>Galerie</h3>
+          <div class='gallery'>
+              <div class='gallery-item'>
+                  <img src='https://via.placeholder.com/400x300/667eea/ffffff?text=Algerie+1' alt='Vue d Algerie 1'>
+                  <p>Villes d Algerie</p>
+              </div>
+              <div class='gallery-item'>
+                  <img src='https://via.placeholder.com/400x300/764ba2/ffffff?text=Algerie+2' alt='Vue d Algerie 2'>
+                  <p>Montagnes et fleuves</p>
+              </div>
+              <div class='gallery-item'>
+                  <img src='https://via.placeholder.com/400x300/10b981/ffffff?text=Algerie+3' alt='Vue d Algerie 3'>
+                  <p>Escalades magiques</p>
+              </div>
+          </div>
+      </section>
+      <section id='contact' class='section' aria-labelledby='contact-heading'>
+          <h3 id='contact-heading'>Contactez-nous</h3>
+          <div class='contact-info'>
+              <p><strong>Email:</strong> <a href='mailto:contact@example.com'>contact@example.com</a></p>
+              <p><strong>Tel:</strong> +213 XXX XXX XXX</p>
+          </div>
+          <form action='https://formspree.io/f/your-form-id' method='POST' aria-label='Formulaire de contact'>
+              <label for='name-fr'>Votre nom</label>
+              <input type='text' id='name-fr' name='name' placeholder='Votre nom' required aria-required='true'>
+              
+              <label for='email-fr'>Votre email</label>
+              <input type='email' id='email-fr' name='_replyto' placeholder='Votre email' required aria-required='true'>
+              
+              <label for='message-fr'>Votre message</label>
+              <textarea id='message-fr' name='message' placeholder='Votre message' rows='5' required aria-required='true'></textarea>
+              
+              <button type='submit' aria-label='Envoyer votre message'>Envoyer</button>
+          </form>
+      </section>
+  </div>
+  <footer>
+      <p>&copy; 2024 - Site conçu avec amour</p>
+  </footer>
+</section>
+
+<script>
+function toggleLang() {
+  const arabicSection = document.getElementById('arabic-section');
+  const frenchSection = document.getElementById('french-section');
+  const switchBtn = document.getElementById('lang-switch');
+  if (arabicSection.style.display === 'none') {
+    arabicSection.style.display = 'block';
+    frenchSection.style.display = 'none';
+    switchBtn.textContent = 'العربية';
+  } else {
+    arabicSection.style.display = 'none';
+    frenchSection.style.display = 'block';
+    switchBtn.textContent = 'Français';
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "site_url": "http://djermoun-auto.local",
+  "wc_consumer_key": "ck_033b86258d44dd2e50b25e5853f6031cc6c623f0",
+  "wc_consumer_secret": "cs_3d5465d609cde7c49e14b531bcf23c6f1daa616c",
+  "wp_user": "abdoumacro",
+  "wp_app_password": "5tzs T1KB mSsA rU2Y Az86 atXE",
+  "images_dir": "C:\\Users\\HP\\Downloads\\car_images",
+  "state_dir": "C:\\Users\\HP\\.claude\\skills\\autocango-uploader\\scripts",
+  "workers": 3
+}

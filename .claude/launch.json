@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace=apps/web"],
+      "port": 3000,
+      "autoPort": false
+    },
+    {
+      "name": "scraper",
+      "runtimeExecutable": "services/scraper/.venv/Scripts/uvicorn.exe",
+      "runtimeArgs": ["main:app", "--port", "8000", "--reload", "--app-dir", "services/scraper"],
+      "port": 8000
+    }
+  ]
+}
