@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import ReserveButton from "./reserve-button";
 import PricingBreakdown from "./pricing-breakdown";
+import CustomsCalculator from "./customs-calculator";
 import CarGallery from "@/components/car-gallery";
 
 export const dynamic = "force-dynamic";
@@ -78,6 +79,7 @@ export default async function CarDetailsPage({
         {/* Right column: pricing + reserve, sticky on desktop */}
         <div className="lg:sticky lg:top-24 lg:self-start">
           <PricingBreakdown fobPrice={fobPrice} commission={commission} shipping={shipping} />
+          <CustomsCalculator basePrice={totalPrice} />
           <div className="mt-6">
             <ReserveButton carId={car.id} isAuthenticated={!!user} />
           </div>
