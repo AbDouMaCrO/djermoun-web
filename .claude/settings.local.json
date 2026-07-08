@@ -6,7 +6,10 @@
       "Bash(npm run *)",
       "mcp__claude_ai_Supabase__list_projects",
       "mcp__claude_ai_Supabase__execute_sql",
-      "Bash(python scraper.py)"
+      "Bash(python scraper.py)",
+      "Bash(echo \"\")",
+      "Bash(echo \"# Claude Code worktrees\")",
+      "Bash(echo \".claude/worktrees/\")"
     ]
   }
 }
