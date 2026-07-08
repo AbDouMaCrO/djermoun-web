@@ -29,7 +29,7 @@ export default async function CheckoutPage({
   // Hidden cars can't be reserved via a direct checkout link either.
   if (!car || car.is_visible === false) notFound();
 
-  if (car.status !== "Available") {
+  if (car.status !== "available") {
     redirect(`/cars/${id}`);
   }
 

@@ -31,7 +31,7 @@ export default async function CarDetailsPage({
     .from("cars")
     .select("*")
     .eq("id", id)
-    .eq("status", "Available")
+    .eq("status", "available")
     .eq("is_visible", true)
     .single();
 
