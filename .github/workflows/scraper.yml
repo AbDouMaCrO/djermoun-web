@@ -1,8 +1,8 @@
-name: Automated Nightly Scraper
+name: Automated 24h Scraper
 
 on:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '15 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -12,14 +12,21 @@ jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      # Step 1: Properly checkout your code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python environment correctly
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: |
-          cd python-scraper
-          pip install -r requirements.txt
-          python scraper.py
+
+      # Step 3: Run your code
+      - name: Install and Run Scraper
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          pip install -r requirements.txt
+          python scraper.py
