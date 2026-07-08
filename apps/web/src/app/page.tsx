@@ -24,7 +24,7 @@ export default async function HomePage({
   const { data: allMeta } = await supabase
     .from("cars")
     .select("make, year")
-    .eq("status", "available")
+    .eq("status", "Available")
     .eq("is_visible", true);
 
   const makes = [...new Set((allMeta ?? []).map((c) => c.make))].sort();
@@ -37,7 +37,7 @@ export default async function HomePage({
       "id, make, model, year, mileage, fuel, price_cny, commission, shipping_cost, primary_image, created_at",
       { count: "exact" },
     )
-    .eq("status", "available")
+    .eq("status", "Available")
     .eq("is_visible", true)
     .order("created_at", { ascending: false })
     .range(from, to);

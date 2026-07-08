@@ -31,10 +31,11 @@ export default async function CarDetailsPage({
     .from("cars")
     .select("*")
     .eq("id", id)
+    .eq("status", "Available")
+    .eq("is_visible", true)
     .single();
 
-  // Hidden cars are not publicly reachable, even by direct link.
-  if (!car || car.is_visible === false) notFound();
+  if (!car) notFound();
 
   const {
     data: { user },
