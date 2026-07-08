@@ -13,23 +13,23 @@ DUMMY_CARS = [
 
 def scrape_cars():
     for car in DUMMY_CARS:
-        duty = calculator.get_estimated_duty_dzd(car["make"], car["model"], car["year"])
-
-        payload = {
-            "make":             car["make"],
-            "model":            car["model"],
-            "year":             car["year"],
-            "price_cny":        car["price_cny"],
-            "customs_duty_dzd": duty,
-        }
-
-        res = supabase.table("cars").insert(payload).execute()
-
-        if res.data:
-            duty_fmt = f"{duty:,.0f}" if duty is not None else "N/A"
-            print(f"[OK] Inserted {car['year']} {car['make']} {car['model']} - Duty: {duty_fmt} DZD")
-        else:
-            print(f"[ERR] Failed to insert {car['year']} {car['make']} {car['model']}: {res}")
+        try:
+            duty = calculator.get_estimated_duty_dzd(car["make"], car["model"], car["year"])
+            payload = {
+                "make":             car["make"],
+                "model":            car["model"],
+                "year":             car["year"],
+                "price_cny":        car["price_cny"],
+                "customs_duty_dzd": duty,
+            }
+            res = supabase.table("cars").insert(payload).execute()
+            if res.data:
+                duty_fmt = f"{duty:,.0f}" if duty is not None else "N/A"
+                print(f"[OK] Inserted {car['year']} {car['make']} {car['model']} - Duty: {duty_fmt} DZD")
+            else:
+                print(f"[ERR] Failed to insert {car['year']} {car['make']} {car['model']}: {res}")
+        except Exception as e:
+            print(f"[ERR] {car['year']} {car['make']} {car['model']}: {e}")
 
 
 if __name__ == "__main__":
