@@ -14,6 +14,18 @@ DUMMY_CARS = [
 def scrape_cars():
     for car in DUMMY_CARS:
         try:
+            existing = (
+                supabase.table("cars")
+                .select("id")
+                .eq("make", car["make"])
+                .eq("model", car["model"])
+                .eq("year", car["year"])
+                .execute()
+            )
+            if existing.data:
+                print(f"[SKIP] {car['year']} {car['make']} {car['model']} already in DB")
+                continue
+
             duty = calculator.get_estimated_duty_dzd(car["make"], car["model"], car["year"])
             payload = {
                 "make":             car["make"],
