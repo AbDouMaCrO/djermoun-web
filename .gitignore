@@ -5,3 +5,6 @@ node_modules/
 !.env.example
 __pycache__/
 *.pyc
+
+# Claude Code worktrees
+.claude/worktrees/
