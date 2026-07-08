@@ -2,37 +2,59 @@ import { createClient } from "@/utils/supabase/server";
 import Hero from "@/components/hero";
 import CarCard, { type CarCardData } from "@/components/car-card";
 import WhyChoose from "@/components/why-choose";
+import Pagination from "@/components/Pagination";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 20;
 
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ make?: string; model?: string; year?: string }>;
+  searchParams: Promise<{ make?: string; model?: string; year?: string; page?: string }>;
 }) {
-  const { make, model, year } = await searchParams;
+  const { make, model, year, page: pageParam } = await searchParams;
+  const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+  const from = (currentPage - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+
+  // Separate query for filter dropdowns — must see all makes/years, not just current page
+  const { data: allMeta } = await supabase
+    .from("cars")
+    .select("make, year")
+    .eq("status", "available")
+    .eq("is_visible", true);
+
+  const makes = [...new Set((allMeta ?? []).map((c) => c.make))].sort();
+  const years = [...new Set((allMeta ?? []).map((c) => c.year))].sort((a, b) => b - a);
+
+  // Paginated + filtered query
+  let query = supabase
     .from("cars")
     .select(
       "id, make, model, year, mileage, fuel, price_cny, commission, shipping_cost, primary_image, created_at",
+      { count: "exact" },
     )
     .eq("status", "available")
     .eq("is_visible", true)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
-  const allCars = (data as CarCardData[] | null) ?? [];
+  if (make) query = query.eq("make", make);
+  if (model) query = query.ilike("model", `%${model}%`);
+  if (year) query = query.eq("year", parseInt(year, 10));
 
-  const makes = [...new Set(allCars.map((c) => c.make))].sort();
-  const years = [...new Set(allCars.map((c) => c.year))].sort((a, b) => b - a);
+  const { data, error, count } = await query;
 
-  const cars = allCars.filter(
-    (c) =>
-      (!make || c.make === make) &&
-      (!model || c.model.toLowerCase().includes(model.toLowerCase())) &&
-      (!year || String(c.year) === year),
-  );
+  const cars = (data as CarCardData[] | null) ?? [];
+  const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
+
+  // Pass current filters through to pagination links
+  const paginationParams = Object.fromEntries(
+    Object.entries({ make, model, year }).filter(([, v]) => v != null),
+  ) as Record<string, string>;
 
   return (
     <main>
@@ -67,6 +89,8 @@ export default async function HomePage({
             <CarCard key={car.id} car={car} />
           ))}
         </div>
+
+        <Pagination currentPage={currentPage} totalPages={totalPages} searchParams={paginationParams} />
       </section>
 
       <WhyChoose />

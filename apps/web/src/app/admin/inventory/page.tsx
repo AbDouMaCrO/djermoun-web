@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { createAdminClient } from "@/utils/supabase/admin";
 import VisibilityToggle from "./visibility-toggle";
+import Pagination from "@/components/Pagination";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 20;
 
 type Car = {
   id: string;
@@ -24,14 +27,27 @@ function formatPrice(price: number) {
   }).format(price);
 }
 
-export default async function AdminInventoryPage() {
+export default async function AdminInventoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
+  const from = (currentPage - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from("cars")
-    .select("id, make, model, year, status, price_cny, commission, shipping_cost, is_visible")
-    .order("created_at", { ascending: false });
+    .select("id, make, model, year, status, price_cny, commission, shipping_cost, is_visible", {
+      count: "exact",
+    })
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   const cars = (data as Car[] | null) ?? [];
+  const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
 
   return (
     <main className="min-h-screen bg-slate-50 px-8 py-10">
@@ -107,6 +123,8 @@ export default async function AdminInventoryPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination currentPage={currentPage} totalPages={totalPages} />
     </main>
   );
 }
