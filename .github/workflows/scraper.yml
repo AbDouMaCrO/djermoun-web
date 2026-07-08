@@ -4,23 +4,15 @@ on:
   schedule:
     - cron: '0 2 * * *'
   workflow_dispatch:
-name: Automated Nightly Scraper
 
-on:
-  schedule:
-    - cron: '0 2 * * *'
-  workflow_dispatch:
-
-# --- ADD THIS BLOCK ---
 permissions:
   contents: read
-# ----------------------
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5  # Changed to v5 to fix your Node warning!
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -31,24 +23,3 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-jobs:
-  scrape:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        working-directory: ./python-scraper
-        run: pip install -r requirements.txt
-
-      - name: Run scraper
-        working-directory: ./python-scraper
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-        run: python scraper.py
