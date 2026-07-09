@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '15 * * * *'
   workflow_dispatch:
+  # This opens up the secure API doorway for Appsmith
+  repository_dispatch:
+    types: [appsmith_trigger]
 
 permissions:
   contents: read
@@ -27,6 +30,8 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          # This catches the URL sent by Appsmith and turns it into a Python variable!
+          TARGET_URL: ${{ github.event.client_payload.url }}
         run: |
           pip install -r requirements.txt
           python scraper.py
