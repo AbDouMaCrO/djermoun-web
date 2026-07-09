@@ -56,7 +56,7 @@ def insert_car_record(car):
             "year":             car["year"],
             "price_cny":        car["price_cny"],
             "customs_duty_dzd": duty,
-            "status":           "active",               # Passes standard 'active' queries
+            "status":           "available",             # Matches frontend .eq("status", "available") filter
             "is_visible":       True,                   # Passes visibility flags
             "image_url":        "https://placehold.co/600x400?text=Car+Image", # Prevents missing image filtering
             "images":           ["https://placehold.co/600x400?text=Car+Image"] # Supports array fields if needed
