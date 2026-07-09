@@ -1,6 +1,24 @@
 from db import supabase
 from duty_calculator import CustomsDutyCalculator
+import os
+import sys
 
+# Check if GitHub Actions passed a specific URL from Appsmith
+target_url = os.environ.get("TARGET_URL")
+
+if target_url:
+    print(f"Target URL received from Appsmith CRM: {target_url}")
+    # --------------------------------------------------------
+    # TODO: Put your single-car scraping function call here!
+    # e.g., scrape_single_car(target_url)
+    # --------------------------------------------------------
+else:
+    print("No TARGET_URL environment variable found. Running default bulk sweep...")
+    # --------------------------------------------------------
+    # TODO: Put your standard main bulk scraper loop here!
+    # e.g., run_main_bulk_scraper()
+    # --------------------------------------------------------
+    
 calculator = CustomsDutyCalculator()
 
 DUMMY_CARS = [
