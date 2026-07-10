@@ -1,0 +1,13 @@
+services:
+  - type: cron
+    name: djermoun-auto-scraper
+    runtime: python
+    plan: free
+    schedule: "0 * * * *"
+    buildCommand: pip install -r python-scraper/requirements.txt
+    startCommand: python python-scraper/scraper.py
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
