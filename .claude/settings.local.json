@@ -9,7 +9,9 @@
       "Bash(python scraper.py)",
       "Bash(echo \"\")",
       "Bash(echo \"# Claude Code worktrees\")",
-      "Bash(echo \".claude/worktrees/\")"
+      "Bash(echo \".claude/worktrees/\")",
+      "Bash(python -c ' *)",
+      "Bash(python *)"
     ]
   }
 }
