@@ -197,7 +197,7 @@ def insert_car_record(car):
             "customs_duty_dzd": duty,
             "status":           "available",
             "is_visible":       True,
-            "image_url":        "https://placehold.co/600x400?text=Car+Image",
+            "primary_image":    "https://placehold.co/600x400?text=Car+Image",
             "images":           ["https://placehold.co/600x400?text=Car+Image"],
         }
         res = supabase.table("cars").insert(payload).execute()
