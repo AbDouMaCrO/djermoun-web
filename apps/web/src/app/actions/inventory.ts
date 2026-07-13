@@ -17,6 +17,7 @@ export type CarDetailsPayload = {
   shipping_cost: number;
   source_url: string | null;
   autohome_url: string | null;
+  destination_country: string;
 };
 
 // Flips a car's public visibility. currentStatus is the row's current

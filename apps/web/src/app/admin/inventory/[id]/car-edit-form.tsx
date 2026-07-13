@@ -18,6 +18,7 @@ type Car = {
   shipping_cost: number | null;
   source_url: string | null;
   autohome_url: string | null;
+  destination_country: string | null;
 };
 
 function formatPrice(price: number) {
@@ -73,6 +74,7 @@ export default function CarEditForm({ car }: { car: Car }) {
   const [shippingCost, setShippingCost] = useState(String(car.shipping_cost ?? 0));
   const [sourceUrl, setSourceUrl] = useState(car.source_url ?? "");
   const [autohomeUrl, setAutohomeUrl] = useState(car.autohome_url ?? "");
+  const [destinationCountry, setDestinationCountry] = useState(car.destination_country ?? "algeria");
 
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,6 +99,7 @@ export default function CarEditForm({ car }: { car: Car }) {
       shipping_cost: Number(shippingCost) || 0,
       source_url: sourceUrl.trim() || null,
       autohome_url: autohomeUrl.trim() || null,
+      destination_country: destinationCountry,
     });
 
     setPending(false);
@@ -180,6 +183,18 @@ export default function CarEditForm({ car }: { car: Car }) {
               onChange={(e) => setShippingCost(e.target.value)}
               className={inputClass}
             />
+          </Field>
+
+          <Field label="Destination Country">
+            <select
+              value={destinationCountry}
+              onChange={(e) => setDestinationCountry(e.target.value)}
+              className={inputClass}
+            >
+              <option value="algeria">Algeria</option>
+              <option value="uae">UAE</option>
+              <option value="tunisia">Tunisia</option>
+            </select>
           </Field>
 
           <div className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">

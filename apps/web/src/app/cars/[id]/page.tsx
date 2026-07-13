@@ -117,7 +117,11 @@ export default async function CarDetailsPage({
         {/* Right column: pricing + reserve, sticky on desktop */}
         <div className="lg:sticky lg:top-24 lg:self-start">
           <PricingBreakdown fobPrice={fobPrice} commission={commission} shipping={shipping} />
-          <CustomsCalculator basePrice={totalPrice} />
+          <CustomsCalculator
+                basePrice={totalPrice}
+                customsDutyDzd={car.customs_duty_dzd ?? null}
+                defaultDestination={car.destination_country ?? "algeria"}
+              />
           <div className="mt-6">
             <ReserveButton carId={car.id} isAuthenticated={!!user} />
           </div>
