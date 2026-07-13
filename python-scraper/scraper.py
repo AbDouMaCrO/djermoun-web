@@ -90,7 +90,7 @@ def upload_to_storage(slug: str, idx: int, img_bytes: bytes) -> str | None:
             file_options={"content-type": "image/jpeg", "x-upsert": "true"},
         )
         url = supabase.storage.from_(STORAGE_BUCKET).get_public_url(path)
-        print(f"[STORAGE] Uploaded {path} → {url}")
+        print(f"[STORAGE] Uploaded -> {url}")
         return url
     except Exception as e:
         print(f"[STORAGE] Upload failed ({slug}/{idx}): {e}")
