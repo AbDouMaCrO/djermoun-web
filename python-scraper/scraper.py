@@ -4,12 +4,13 @@ from collections import Counter
 from datetime import datetime
 
 import io
+import time
 import traceback
 import urllib.request
 
 import cv2
-import httpx
 import numpy as np
+import requests
 import pytesseract
 from bs4 import BeautifulSoup
 from curl_cffi import requests as cf_requests
@@ -29,7 +30,9 @@ CDN_PATTERN = re.compile(
 CDN_SUFFIX = "/d?imageMogr2/format/jpg/strip"
 
 STORAGE_BUCKET = "car-images"
-CLIPDROP_API_KEY = os.environ.get("CLIPDROP_API_KEY")
+DASHSCOPE_API_KEY = os.environ.get("DASHSCOPE_API_KEY")
+DASHSCOPE_SUBMIT = "https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/image2image/image-synthesis"
+DASHSCOPE_TASK   = "https://dashscope-intl.aliyuncs.com/api/v1/tasks/{task_id}"
 
 DUMMY_CARS = [
     {"make": "CHERY",  "model": "TIGGO 8 PRO", "year": 2025, "price_cny": 145000},
@@ -63,50 +66,90 @@ def _download_cdn_image(image_url: str) -> bytes | None:
     return None
 
 
-def _clean_via_clipdrop(img_bytes: bytes) -> bytes | None:
-    """Send image bytes to Clipdrop Remove Text API.
-    Returns cleaned JPEG bytes, or None if API unavailable/failed.
+def clean_image_alibaba(image_url: str) -> bytes | None:
+    """Submit image to Alibaba DashScope wanx2.1-imageedit for text/watermark removal.
+    Polls until task completes, downloads result, returns JPEG bytes.
+    Returns None if key absent, API fails, or task times out.
     """
-    if not CLIPDROP_API_KEY:
+    if not DASHSCOPE_API_KEY:
         return None
     try:
-        r = httpx.post(
-            "https://clipdrop-api.co/remove-text/v1",
-            headers={"x-api-key": CLIPDROP_API_KEY},
-            files={"image_file": ("image.jpg", img_bytes, "image/jpeg")},
+        # Submit async task
+        resp = requests.post(
+            DASHSCOPE_SUBMIT,
+            headers={
+                "Authorization": f"Bearer {DASHSCOPE_API_KEY}",
+                "X-DashScope-Async": "enable",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "wanx2.1-imageedit",
+                "input": {
+                    "function": "description_edit",
+                    "prompt": "remove all text, watermarks and logos from the image, keep the car photo clean",
+                    "base_image_url": image_url,
+                },
+                "parameters": {"n": 1},
+            },
             timeout=30,
         )
-        r.raise_for_status()
-        # Clipdrop returns PNG — convert to JPEG for storage consistency
-        pil = Image.open(io.BytesIO(r.content)).convert("RGB")
-        buf = io.BytesIO()
-        pil.save(buf, format="JPEG", quality=92)
-        result = buf.getvalue()
-        print(f"[CLIPDROP] Text removed: {len(result)}b JPEG")
-        return result
+        resp.raise_for_status()
+        task_id = resp.json()["output"]["task_id"]
+        print(f"[ALIBABA] Task submitted: {task_id}")
+
+        # Poll up to 30 × 5s = 2.5 min
+        for attempt in range(30):
+            time.sleep(5)
+            poll = requests.get(
+                DASHSCOPE_TASK.format(task_id=task_id),
+                headers={"Authorization": f"Bearer {DASHSCOPE_API_KEY}"},
+                timeout=15,
+            )
+            poll.raise_for_status()
+            output = poll.json()["output"]
+            status = output["task_status"]
+            print(f"[ALIBABA] Poll {attempt + 1}: {status}")
+            if status == "SUCCEEDED":
+                out_url = output["results"][0]["url"]
+                img_resp = requests.get(out_url, timeout=30)
+                img_resp.raise_for_status()
+                pil = Image.open(io.BytesIO(img_resp.content)).convert("RGB")
+                buf = io.BytesIO()
+                pil.save(buf, format="JPEG", quality=92)
+                result = buf.getvalue()
+                print(f"[ALIBABA] Done: {len(result)}b JPEG")
+                return result
+            elif status in ("FAILED", "CANCELLED"):
+                print(f"[ALIBABA] Task {status}: {output.get('message', '')}")
+                return None
+
+        print(f"[ALIBABA] Timed out after 30 polls")
+        return None
+
     except Exception as e:
-        print(f"[CLIPDROP] Failed ({e}) — falling back to OpenCV")
+        print(f"[ALIBABA] Failed ({e}) — falling back to OpenCV")
         return None
 
 
 def remove_watermark_cv2(image_url: str) -> bytes | None:
     """Download image, clean watermark, return JPEG bytes.
-    Priority: Clipdrop API → OpenCV OCR+inpaint → raw re-encode.
-    Returns None only if download fails.
+    Priority: Alibaba DashScope → OpenCV OCR+inpaint → raw re-encode.
+    Returns None only if local download fails.
     """
     try:
         print(f"[WATERMARK] Processing: {image_url}")
+
+        # 1. Try Alibaba AI (passes URL directly — no local download needed)
+        cleaned = clean_image_alibaba(image_url)
+        if cleaned:
+            return cleaned
+
+        # 2. Fall back to local download + OpenCV OCR+inpaint
         raw = _download_cdn_image(image_url)
         if raw is None:
             print(f"[WATERMARK] Download failed — skipping")
             return None
 
-        # 1. Try Clipdrop AI text removal
-        cleaned = _clean_via_clipdrop(raw)
-        if cleaned:
-            return cleaned
-
-        # 2. Fall back to OpenCV OCR+inpaint
         pil_img = Image.open(io.BytesIO(raw)).convert("RGB")
         img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
         print(f"[WATERMARK] OpenCV fallback: shape={img.shape}")

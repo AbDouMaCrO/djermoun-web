@@ -35,7 +35,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          CLIPDROP_API_KEY: ${{ secrets.CLIPDROP_API_KEY }}
+          DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
           TARGET_URL: ${{ github.event.inputs.target_url || github.event.client_payload.url }}
         run: |
           pip install -r requirements.txt
