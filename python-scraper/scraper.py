@@ -32,8 +32,9 @@ CDN_SUFFIX = "/d?imageMogr2/format/jpg/strip"
 
 STORAGE_BUCKET = "car-images"
 DASHSCOPE_API_KEY = os.environ.get("DASHSCOPE_API_KEY")
-DASHSCOPE_SUBMIT = "https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/image2image/image-synthesis"
-DASHSCOPE_TASK   = "https://dashscope-intl.aliyuncs.com/api/v1/tasks/{task_id}"
+DASHSCOPE_BASE   = "https://ws-62wy5cbs495glx3q.ap-southeast-1.maasaliyuncs.com/api/v1"
+DASHSCOPE_SUBMIT = f"{DASHSCOPE_BASE}/services/aigc/image2image/image-synthesis"
+DASHSCOPE_TASK   = f"{DASHSCOPE_BASE}/tasks/{{task_id}}"
 
 DUMMY_CARS = [
     {"make": "CHERY",  "model": "TIGGO 8 PRO", "year": 2025, "price_cny": 145000},
