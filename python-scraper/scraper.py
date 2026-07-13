@@ -1,13 +1,12 @@
+import base64
 import os
 import re
 from collections import Counter
 from datetime import datetime
 
 import io
-import time
 import traceback
 import urllib.request
-import uuid
 
 import cv2
 import numpy as np
@@ -31,10 +30,7 @@ CDN_PATTERN = re.compile(
 CDN_SUFFIX = "/d?imageMogr2/format/jpg/strip"
 
 STORAGE_BUCKET = "car-images"
-DASHSCOPE_API_KEY = os.environ.get("DASHSCOPE_API_KEY")
-DASHSCOPE_BASE   = "https://ws-62wy5cbs495glx3q.ap-southeast-1.maasaliyuncs.com/api/v1"
-DASHSCOPE_SUBMIT = f"{DASHSCOPE_BASE}/services/aigc/image2image/image-synthesis"
-DASHSCOPE_TASK   = f"{DASHSCOPE_BASE}/tasks/{{task_id}}"
+REPLICATE_API_KEY = os.environ.get("REPLICATE_API_KEY")
 
 DUMMY_CARS = [
     {"make": "CHERY",  "model": "TIGGO 8 PRO", "year": 2025, "price_cny": 145000},
@@ -68,103 +64,62 @@ def _download_cdn_image(image_url: str) -> bytes | None:
     return None
 
 
-def clean_image_alibaba(image_url: str) -> bytes | None:
-    """Submit image to Alibaba DashScope wanx2.1-imageedit for watermark removal.
-    tichetech.com CDN blocks Alibaba's servers, so we download locally first,
-    stage in Supabase Storage (public URL), then pass that URL to DashScope.
+def clean_image_replicate(image_url: str) -> bytes | None:
+    """Submit image to Replicate flux-kontext-pro for watermark/logo removal.
+    Downloads locally (CDN blocks remote fetches), encodes as base64 data URI,
+    and sends directly — no staging needed.
     Returns cleaned JPEG bytes, or None if key absent / API fails.
     """
-    if not DASHSCOPE_API_KEY:
+    if not REPLICATE_API_KEY:
         return None
 
-    temp_path = None
     try:
-        # 1. Download locally (CDN blocks Alibaba's IPs)
+        import replicate
+
         raw = _download_cdn_image(image_url)
         if raw is None:
-            print("[ALIBABA] Local download failed — skipping")
+            print("[REPLICATE] Local download failed — skipping")
             return None
 
-        # Convert to JPEG before staging
         pil_in = Image.open(io.BytesIO(raw)).convert("RGB")
         jpeg_buf = io.BytesIO()
         pil_in.save(jpeg_buf, format="JPEG", quality=92)
         jpeg_bytes = jpeg_buf.getvalue()
 
-        # 2. Stage in Supabase so DashScope has a public URL to fetch
-        temp_path = f"_temp/{uuid.uuid4()}.jpg"
-        supabase.storage.from_(STORAGE_BUCKET).upload(
-            path=temp_path,
-            file=jpeg_bytes,
-            file_options={"content-type": "image/jpeg", "x-upsert": "true"},
-        )
-        staged_url = supabase.storage.from_(STORAGE_BUCKET).get_public_url(temp_path)
-        print(f"[ALIBABA] Staged: {staged_url}")
+        b64 = base64.b64encode(jpeg_bytes).decode()
+        data_uri = f"data:image/jpeg;base64,{b64}"
 
-        # 3. Submit async task
-        resp = requests.post(
-            DASHSCOPE_SUBMIT,
-            headers={
-                "Authorization": f"Bearer {DASHSCOPE_API_KEY}",
-                "X-DashScope-Async": "enable",
-                "Content-Type": "application/json",
+        client = replicate.Client(api_token=REPLICATE_API_KEY)
+        output = client.run(
+            "black-forest-labs/flux-kontext-pro",
+            input={
+                "prompt": "Remove all watermarks, logos, and text overlays. Keep the car and background completely unchanged.",
+                "input_image": data_uri,
             },
-            json={
-                "model": "wanx2.1-imageedit",
-                "input": {
-                    "function": "description_edit",
-                    "prompt": "remove all text, watermarks and logos from the image, keep the car photo clean",
-                    "base_image_url": staged_url,
-                },
-                "parameters": {"n": 1},
-            },
-            timeout=30,
         )
-        if not resp.ok:
-            print(f"[ALIBABA] Submit error {resp.status_code}: {resp.text}")
-        resp.raise_for_status()
-        task_id = resp.json()["output"]["task_id"]
-        print(f"[ALIBABA] Task submitted: {task_id}")
 
-        # 4. Poll up to 30 × 5s = 2.5 min
-        for attempt in range(30):
-            time.sleep(5)
-            poll = requests.get(
-                DASHSCOPE_TASK.format(task_id=task_id),
-                headers={"Authorization": f"Bearer {DASHSCOPE_API_KEY}"},
-                timeout=15,
-            )
-            poll.raise_for_status()
-            output = poll.json()["output"]
-            status = output["task_status"]
-            print(f"[ALIBABA] Poll {attempt + 1}: {status}")
-            if status == "SUCCEEDED":
-                out_url = output["results"][0]["url"]
-                img_resp = requests.get(out_url, timeout=30)
-                img_resp.raise_for_status()
-                pil_out = Image.open(io.BytesIO(img_resp.content)).convert("RGB")
-                result_buf = io.BytesIO()
-                pil_out.save(result_buf, format="JPEG", quality=92)
-                result = result_buf.getvalue()
-                print(f"[ALIBABA] Done: {len(result)}b JPEG")
-                return result
-            elif status in ("FAILED", "CANCELLED"):
-                print(f"[ALIBABA] Task {status}: {output.get('message', '')}")
-                return None
+        # SDK returns FileOutput, URL string, or list depending on version
+        if hasattr(output, "read"):
+            result = output.read()
+        else:
+            if isinstance(output, list):
+                output = output[0]
+            result_url = output.url if hasattr(output, "url") else str(output)
+            img_resp = requests.get(result_url, timeout=60)
+            img_resp.raise_for_status()
+            result = img_resp.content
 
-        print("[ALIBABA] Timed out after 30 polls")
-        return None
+        pil_out = Image.open(io.BytesIO(result)).convert("RGB")
+        out_buf = io.BytesIO()
+        pil_out.save(out_buf, format="JPEG", quality=92)
+        final = out_buf.getvalue()
+        print(f"[REPLICATE] Done: {len(final)}b JPEG")
+        return final
 
     except Exception as e:
-        print(f"[ALIBABA] Failed ({e}) — falling back to OpenCV")
+        print(f"[REPLICATE] Failed ({e}) — falling back to OpenCV")
+        traceback.print_exc()
         return None
-
-    finally:
-        if temp_path:
-            try:
-                supabase.storage.from_(STORAGE_BUCKET).remove([temp_path])
-            except Exception:
-                pass
 
 
 def remove_watermark_cv2(image_url: str) -> bytes | None:
@@ -175,8 +130,8 @@ def remove_watermark_cv2(image_url: str) -> bytes | None:
     try:
         print(f"[WATERMARK] Processing: {image_url}")
 
-        # 1. Try Alibaba AI (passes URL directly — no local download needed)
-        cleaned = clean_image_alibaba(image_url)
+        # 1. Try Replicate AI
+        cleaned = clean_image_replicate(image_url)
         if cleaned:
             return cleaned
 
