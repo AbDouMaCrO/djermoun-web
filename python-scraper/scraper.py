@@ -7,6 +7,7 @@ import io
 import time
 import traceback
 import urllib.request
+import uuid
 
 import cv2
 import numpy as np
@@ -67,14 +68,39 @@ def _download_cdn_image(image_url: str) -> bytes | None:
 
 
 def clean_image_alibaba(image_url: str) -> bytes | None:
-    """Submit image to Alibaba DashScope wanx2.1-imageedit for text/watermark removal.
-    Polls until task completes, downloads result, returns JPEG bytes.
-    Returns None if key absent, API fails, or task times out.
+    """Submit image to Alibaba DashScope wanx2.1-imageedit for watermark removal.
+    tichetech.com CDN blocks Alibaba's servers, so we download locally first,
+    stage in Supabase Storage (public URL), then pass that URL to DashScope.
+    Returns cleaned JPEG bytes, or None if key absent / API fails.
     """
     if not DASHSCOPE_API_KEY:
         return None
+
+    temp_path = None
     try:
-        # Submit async task
+        # 1. Download locally (CDN blocks Alibaba's IPs)
+        raw = _download_cdn_image(image_url)
+        if raw is None:
+            print("[ALIBABA] Local download failed — skipping")
+            return None
+
+        # Convert to JPEG before staging
+        pil_in = Image.open(io.BytesIO(raw)).convert("RGB")
+        jpeg_buf = io.BytesIO()
+        pil_in.save(jpeg_buf, format="JPEG", quality=92)
+        jpeg_bytes = jpeg_buf.getvalue()
+
+        # 2. Stage in Supabase so DashScope has a public URL to fetch
+        temp_path = f"_temp/{uuid.uuid4()}.jpg"
+        supabase.storage.from_(STORAGE_BUCKET).upload(
+            path=temp_path,
+            file=jpeg_bytes,
+            file_options={"content-type": "image/jpeg", "x-upsert": "true"},
+        )
+        staged_url = supabase.storage.from_(STORAGE_BUCKET).get_public_url(temp_path)
+        print(f"[ALIBABA] Staged: {staged_url}")
+
+        # 3. Submit async task
         resp = requests.post(
             DASHSCOPE_SUBMIT,
             headers={
@@ -87,7 +113,7 @@ def clean_image_alibaba(image_url: str) -> bytes | None:
                 "input": {
                     "function": "description_edit",
                     "prompt": "remove all text, watermarks and logos from the image, keep the car photo clean",
-                    "base_image_url": image_url,
+                    "base_image_url": staged_url,
                 },
                 "parameters": {"n": 1},
             },
@@ -97,7 +123,7 @@ def clean_image_alibaba(image_url: str) -> bytes | None:
         task_id = resp.json()["output"]["task_id"]
         print(f"[ALIBABA] Task submitted: {task_id}")
 
-        # Poll up to 30 × 5s = 2.5 min
+        # 4. Poll up to 30 × 5s = 2.5 min
         for attempt in range(30):
             time.sleep(5)
             poll = requests.get(
@@ -113,22 +139,29 @@ def clean_image_alibaba(image_url: str) -> bytes | None:
                 out_url = output["results"][0]["url"]
                 img_resp = requests.get(out_url, timeout=30)
                 img_resp.raise_for_status()
-                pil = Image.open(io.BytesIO(img_resp.content)).convert("RGB")
-                buf = io.BytesIO()
-                pil.save(buf, format="JPEG", quality=92)
-                result = buf.getvalue()
+                pil_out = Image.open(io.BytesIO(img_resp.content)).convert("RGB")
+                result_buf = io.BytesIO()
+                pil_out.save(result_buf, format="JPEG", quality=92)
+                result = result_buf.getvalue()
                 print(f"[ALIBABA] Done: {len(result)}b JPEG")
                 return result
             elif status in ("FAILED", "CANCELLED"):
                 print(f"[ALIBABA] Task {status}: {output.get('message', '')}")
                 return None
 
-        print(f"[ALIBABA] Timed out after 30 polls")
+        print("[ALIBABA] Timed out after 30 polls")
         return None
 
     except Exception as e:
         print(f"[ALIBABA] Failed ({e}) — falling back to OpenCV")
         return None
+
+    finally:
+        if temp_path:
+            try:
+                supabase.storage.from_(STORAGE_BUCKET).remove([temp_path])
+            except Exception:
+                pass
 
 
 def remove_watermark_cv2(image_url: str) -> bytes | None:
