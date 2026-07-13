@@ -99,6 +99,19 @@ export default async function CarDetailsPage({
               </div>
             ))}
           </dl>
+
+          {car.accessories?.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Accessories</h3>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {(car.accessories as string[]).map((item) => (
+                  <li key={item} className="rounded-full border border-amber-500/40 px-3 py-1 text-xs font-medium text-slate-700">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Right column: pricing + reserve, sticky on desktop */}
