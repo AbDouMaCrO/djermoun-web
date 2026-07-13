@@ -84,7 +84,10 @@ export default async function CarDetailsPage({
             </span>
           ) : (
             <p className="mt-1 text-sm font-medium text-slate-700">
-              Estimated Duty: {formatDZD(car.customs_duty_dzd)}
+              ~{Math.floor(Number(car.customs_duty_dzd) / 10_000)} millions centimes
+              <span className="ml-1.5 text-xs font-normal text-slate-400">
+                ({formatDZD(car.customs_duty_dzd)})
+              </span>
             </p>
           )}
         </div>

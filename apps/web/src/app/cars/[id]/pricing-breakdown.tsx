@@ -8,7 +8,7 @@ const AUTOCANGO_FEES = [
   { label: "Export Handling Fee",    amount: 450 },
   { label: "Domestic Transport Fee", amount: 330 },
   { label: "Port Local Fee",         amount: 400, note: "Guangzhou, CN" },
-  { label: "AutoCango Service Fee",  amount: 300 },
+  { label: "Service Fee",            amount: 400 },
   { label: "Banking Transfer Fee",   amount: 50  },
 ] as const;
 
@@ -70,7 +70,7 @@ export default function PricingBreakdown({
             className="flex w-full items-center justify-between text-sm text-slate-600 hover:text-slate-800"
           >
             <span>
-              AutoCango Standard Fees
+              Standard Fees
               <span className="ml-1.5 text-xs text-slate-400">(click to {feesOpen ? "hide" : "show"})</span>
             </span>
             <span className="font-medium text-slate-900">{formatUSD(AUTOCANGO_FEES_TOTAL)}</span>
