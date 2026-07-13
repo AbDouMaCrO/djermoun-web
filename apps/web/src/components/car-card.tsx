@@ -92,7 +92,9 @@ export default function CarCard({ car }: { car: CarCardData }) {
           <div>
             <p className="text-xl font-bold text-slate-900">{formatUSD(total)}</p>
             {total != null && (
-              <p className="text-xs text-slate-500">~ {formatDZD(total * rate)}</p>
+              <p className="text-xs text-slate-500">
+                ~{Math.floor((total * rate) / 10_000)} M centimes
+              </p>
             )}
           </div>
           <span className="press-scale rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-colors duration-150 group-hover:bg-amber-400">

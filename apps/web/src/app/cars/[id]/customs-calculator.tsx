@@ -29,6 +29,10 @@ function formatDZD(n: number) {
   return `${Math.round(n).toLocaleString()} DZD`;
 }
 
+function formatMillions(n: number) {
+  return `~${Math.floor(n / 10_000)} millions centimes`;
+}
+
 export default function CustomsCalculator({
   basePrice,
   customsDutyDzd = null,
@@ -120,8 +124,13 @@ export default function CustomsCalculator({
         {/* Duties */}
         <div className="flex justify-between text-sm">
           <dt className="text-slate-600">Estimated Customs &amp; Duties</dt>
-          <dd className="font-medium text-slate-900">
-            {isAlgeria ? formatDZD(dutyDzd) : formatUSD(dutyUsd)}
+          <dd className="text-right font-medium text-slate-900">
+            {isAlgeria ? (
+              <>
+                <span>{formatMillions(dutyDzd)}</span>
+                <span className="ml-1.5 text-xs font-normal text-slate-400">({formatDZD(dutyDzd)})</span>
+              </>
+            ) : formatUSD(dutyUsd)}
           </dd>
         </div>
 
@@ -150,8 +159,13 @@ export default function CustomsCalculator({
               Estimated Total Delivered Price
               <span className="ml-1.5 text-xs font-normal text-slate-400">(without port fees)</span>
             </dt>
-            <dd className="font-bold text-amber-500">
-              {isAlgeria ? formatDZD(totalDzd) : formatUSD(totalUsd)}
+            <dd className="text-right font-bold text-amber-500">
+              {isAlgeria ? (
+                <>
+                  <span>{formatMillions(totalDzd)}</span>
+                  <span className="ml-1.5 text-xs font-normal text-slate-400">({formatDZD(totalDzd)})</span>
+                </>
+              ) : formatUSD(totalUsd)}
             </dd>
           </div>
         </div>
