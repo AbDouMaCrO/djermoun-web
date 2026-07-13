@@ -4,6 +4,7 @@ import ReserveButton from "./reserve-button";
 import PricingBreakdown from "./pricing-breakdown";
 import CustomsCalculator from "./customs-calculator";
 import CarGallery from "@/components/car-gallery";
+import { getSiteSettings } from "@/app/actions/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,10 @@ export default async function CarDetailsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
+  const [supabase, { show_customs_calculator }] = await Promise.all([
+    createClient(),
+    getSiteSettings(),
+  ]);
 
   const { data: car } = await supabase
     .from("cars")
@@ -117,11 +121,13 @@ export default async function CarDetailsPage({
         {/* Right column: pricing + reserve, sticky on desktop */}
         <div className="lg:sticky lg:top-24 lg:self-start">
           <PricingBreakdown fobPrice={fobPrice} commission={commission} shipping={shipping} />
-          <CustomsCalculator
-                basePrice={totalPrice}
-                customsDutyDzd={car.customs_duty_dzd ?? null}
-                defaultDestination={car.destination_country ?? "algeria"}
-              />
+          {show_customs_calculator && (
+            <CustomsCalculator
+              basePrice={totalPrice}
+              customsDutyDzd={car.customs_duty_dzd ?? null}
+              defaultDestination={car.destination_country ?? "algeria"}
+            />
+          )}
           <div className="mt-6">
             <ReserveButton carId={car.id} isAuthenticated={!!user} />
           </div>

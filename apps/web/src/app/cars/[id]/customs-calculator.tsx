@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { useExchangeRate } from "@/currency/exchange-rate-context";
 
 type Destination = "algeria" | "uae" | "tunisia";
@@ -44,6 +45,7 @@ export default function CustomsCalculator({
   const [shippingInput, setShippingInput] = useState("800");
   const shippingUsd = Math.max(0, Number(shippingInput) || 0);
 
+  const [open, setOpen] = useState(false);
   const isAlgeria = destination === "algeria";
 
   // Algeria: all in DZD
@@ -60,12 +62,24 @@ export default function CustomsCalculator({
   const totalUsd = basePrice + dutyUsd + shippingUsd;
 
   return (
-    <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-6">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-amber-500">
-        Estimated Customs &amp; Duties Calculator
-      </h2>
+    <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between px-6 py-4 text-left"
+      >
+        <span className="text-sm font-semibold uppercase tracking-wide text-amber-500">
+          Estimated Customs &amp; Duties Calculator
+        </span>
+        <ChevronDown
+          size={16}
+          className={`text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
 
-      <label className="mt-4 flex flex-col gap-1.5">
+      {open && (
+      <div className="border-t border-slate-200 px-6 pb-6 pt-4">
+      <label className="flex flex-col gap-1.5">
         <span className="text-sm font-medium text-slate-700">Destination Country</span>
         <select
           value={destination}
@@ -147,6 +161,8 @@ export default function CustomsCalculator({
         Disclaimer: Rough estimate for informational purposes. Exact customs fees may vary by
         local regulations and engine specifications.
       </p>
+      </div>
+      )}
     </div>
   );
 }
