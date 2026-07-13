@@ -8,6 +8,7 @@ import traceback
 import urllib.request
 
 import cv2
+import httpx
 import numpy as np
 import pytesseract
 from bs4 import BeautifulSoup
@@ -28,6 +29,7 @@ CDN_PATTERN = re.compile(
 CDN_SUFFIX = "/d?imageMogr2/format/jpg/strip"
 
 STORAGE_BUCKET = "car-images"
+CLIPDROP_API_KEY = os.environ.get("CLIPDROP_API_KEY")
 
 DUMMY_CARS = [
     {"make": "CHERY",  "model": "TIGGO 8 PRO", "year": 2025, "price_cny": 145000},
@@ -61,10 +63,36 @@ def _download_cdn_image(image_url: str) -> bytes | None:
     return None
 
 
+def _clean_via_clipdrop(img_bytes: bytes) -> bytes | None:
+    """Send image bytes to Clipdrop Remove Text API.
+    Returns cleaned JPEG bytes, or None if API unavailable/failed.
+    """
+    if not CLIPDROP_API_KEY:
+        return None
+    try:
+        r = httpx.post(
+            "https://clipdrop-api.co/remove-text/v1",
+            headers={"x-api-key": CLIPDROP_API_KEY},
+            files={"image_file": ("image.jpg", img_bytes, "image/jpeg")},
+            timeout=30,
+        )
+        r.raise_for_status()
+        # Clipdrop returns PNG — convert to JPEG for storage consistency
+        pil = Image.open(io.BytesIO(r.content)).convert("RGB")
+        buf = io.BytesIO()
+        pil.save(buf, format="JPEG", quality=92)
+        result = buf.getvalue()
+        print(f"[CLIPDROP] Text removed: {len(result)}b JPEG")
+        return result
+    except Exception as e:
+        print(f"[CLIPDROP] Failed ({e}) — falling back to OpenCV")
+        return None
+
+
 def remove_watermark_cv2(image_url: str) -> bytes | None:
-    """Download image, attempt OCR+inpaint watermark removal, return JPEG bytes.
-    Always returns bytes on download success — falls back to plain JPEG convert if inpaint fails.
-    Returns None only if the download itself fails.
+    """Download image, clean watermark, return JPEG bytes.
+    Priority: Clipdrop API → OpenCV OCR+inpaint → raw re-encode.
+    Returns None only if download fails.
     """
     try:
         print(f"[WATERMARK] Processing: {image_url}")
@@ -73,12 +101,16 @@ def remove_watermark_cv2(image_url: str) -> bytes | None:
             print(f"[WATERMARK] Download failed — skipping")
             return None
 
-        # PIL handles webp natively; cv2.imdecode fails on webp without system libs
+        # 1. Try Clipdrop AI text removal
+        cleaned = _clean_via_clipdrop(raw)
+        if cleaned:
+            return cleaned
+
+        # 2. Fall back to OpenCV OCR+inpaint
         pil_img = Image.open(io.BytesIO(raw)).convert("RGB")
         img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-        print(f"[WATERMARK] Decoded: shape={img.shape}")
+        print(f"[WATERMARK] OpenCV fallback: shape={img.shape}")
 
-        # OCR — if tesseract fails, skip inpainting and just re-encode
         try:
             data = pytesseract.image_to_data(
                 cv2.cvtColor(img, cv2.COLOR_BGR2RGB),
