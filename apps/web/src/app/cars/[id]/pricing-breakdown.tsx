@@ -107,12 +107,15 @@ export default function PricingBreakdown({
             <dd className="font-medium text-slate-900">{formatUSD(commission)}</dd>
           </div>
         )}
-        {shipping > 0 && (
-          <div className="flex justify-between text-sm">
-            <dt className="text-slate-600">Global Shipping</dt>
-            <dd className="font-medium text-slate-900">{formatUSD(shipping)}</dd>
-          </div>
-        )}
+        <div className="flex justify-between text-sm">
+          <dt className="text-slate-600">Global Shipping</dt>
+          <dd className="text-right font-medium text-slate-900">
+            {formatUSD(shipping)}
+            <span className="ml-1.5 text-xs font-normal text-slate-400">
+              = {formatDZD(shipping * effectiveRate)}
+            </span>
+          </dd>
+        </div>
 
         <div className="flex justify-between border-t border-slate-200 pt-3 text-base">
           <dt className="font-semibold text-slate-900">Total Price</dt>
@@ -138,7 +141,10 @@ export default function PricingBreakdown({
           <p className="text-xs font-medium uppercase tracking-wide text-amber-500">
             Total in DZD
           </p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">~ {formatDZD(totalDZD)}</p>
+          <p className="mt-1 text-2xl font-bold text-slate-900">
+            ~{Math.floor(totalDZD / 10_000)} millions centimes
+          </p>
+          <p className="mt-0.5 text-xs text-slate-500">{formatDZD(totalDZD)}</p>
         </div>
       </div>
     </div>

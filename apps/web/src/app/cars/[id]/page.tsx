@@ -60,7 +60,7 @@ export default async function CarDetailsPage({
 
   const fobPrice = Number(car.price_cny ?? 0);
   const commission = Number(car.commission ?? 0);
-  const shipping = Number(car.shipping_cost ?? 0);
+  const shipping = Number(car.shipping_cost) || 1900;
   const AUTOCANGO_FEES = 1595;
   const totalPrice = fobPrice + AUTOCANGO_FEES + commission + shipping;
 

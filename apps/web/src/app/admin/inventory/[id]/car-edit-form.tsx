@@ -71,7 +71,7 @@ export default function CarEditForm({ car }: { car: Car }) {
   const [fuel, setFuel] = useState(car.fuel ?? "");
   const [fobPrice, setFobPrice] = useState(car.price_cny != null ? String(car.price_cny) : "");
   const [commission, setCommission] = useState(String(car.commission ?? 0));
-  const [shippingCost, setShippingCost] = useState(String(car.shipping_cost ?? 0));
+  const [shippingCost, setShippingCost] = useState(String(car.shipping_cost || 1900));
   const [sourceUrl, setSourceUrl] = useState(car.source_url ?? "");
   const [autohomeUrl, setAutohomeUrl] = useState(car.autohome_url ?? "");
   const [destinationCountry, setDestinationCountry] = useState(car.destination_country ?? "algeria");
