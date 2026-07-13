@@ -25,15 +25,6 @@ KNOWN_MAKES = [
     "VOLKSWAGEN", "TOYOTA", "HONDA", "HYUNDAI", "KIA",
 ]
 
-_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
-    ),
-    "Accept-Language": "fr-DZ,fr;q=0.9,en;q=0.8",
-}
-
 
 def _extract_year(text):
     m = re.search(r"\b(20[12][0-9])\b", text)
@@ -41,11 +32,23 @@ def _extract_year(text):
 
 
 def _extract_price(text):
-    m = re.search(r"([\d\s .,]+)\s*(DZD|DA|dinar|CNY|USD|€|\$)", text, re.IGNORECASE)
+    m = re.search(r"([\d\s .,]+)\s*(DZD|DA|dinar|CNY|USD|€|\$)", text, re.IGNORECASE)
     if m:
-        cleaned = re.sub(r"[\s ,]", "", m.group(1)).replace(",", "")
+        cleaned = re.sub(r"[\s ,]", "", m.group(1)).replace(",", "")
         try:
             return float(cleaned)
+        except ValueError:
+            pass
+    return None
+
+
+def _extract_mileage(text):
+    m = re.search(r"([\d\s]+)\s*km", text, re.IGNORECASE)
+    if m:
+        cleaned = re.sub(r"\s", "", m.group(1))
+        try:
+            val = int(cleaned)
+            return val if 100 < val < 1_000_000 else None
         except ValueError:
             pass
     return None
@@ -62,15 +65,23 @@ def _make_from_text(text):
 def parse_url_to_car_data(url):
     print(f"[SCRAPE] Fetching: {url}")
 
-    make = model = year = price_cny = None
+    make = model = year = price_cny = primary_image = mileage = fuel = transmission = title = None
     page_title = ""
+    all_images = []
 
     try:
-        resp = requests.get(url, headers=_HEADERS, timeout=15)
+        resp = requests.get(url, headers={
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/124.0.0.0 Safari/537.36"
+            ),
+            "Accept-Language": "fr-DZ,fr;q=0.9,en;q=0.8",
+        }, timeout=15)
         resp.raise_for_status()
         soup = BeautifulSoup(resp.text, "html.parser")
 
-        # --- 1. JSON-LD structured data (most reliable) ---
+        # --- 1. JSON-LD structured data ---
         for script in soup.find_all("script", type="application/ld+json"):
             try:
                 data = json.loads(script.string or "")
@@ -83,16 +94,26 @@ def parse_url_to_car_data(url):
                     year = year or data.get("vehicleModelDate") or data.get("productionDate")
                     offers = data.get("offers") or {}
                     price_cny = price_cny or (offers.get("price") if isinstance(offers, dict) else None)
+                    mileage = mileage or data.get("mileageFromOdometer", {}).get("value") if isinstance(data.get("mileageFromOdometer"), dict) else mileage
+                    fuel = fuel or data.get("fuelType")
+                    transmission = transmission or data.get("vehicleTransmission")
+                    img = data.get("image")
+                    if img:
+                        primary_image = primary_image or (img[0] if isinstance(img, list) else img)
             except Exception:
                 pass
 
-        # --- 2. OG / meta title ---
-        og = soup.find("meta", property="og:title")
+        # --- 2. OG / meta tags ---
+        og_title = soup.find("meta", property="og:title")
+        og_image = soup.find("meta", property="og:image")
         title_tag = soup.find("title")
         page_title = (
-            og.get("content", "").strip() if og else
+            og_title.get("content", "").strip() if og_title else
             (title_tag.get_text(strip=True) if title_tag else "")
         )
+        title = page_title or None
+        if og_image and og_image.get("content"):
+            primary_image = primary_image or og_image["content"].strip()
 
         # --- 3. Common HTML selectors ---
         if not make:
@@ -126,17 +147,45 @@ def parse_url_to_car_data(url):
                     price_cny = _extract_price(el.get_text())
                     break
 
+        if not mileage:
+            for sel in ["[itemprop='mileageFromOdometer']", ".mileage", ".kilometrage", ".km"]:
+                el = soup.select_one(sel)
+                if el:
+                    mileage = _extract_mileage(el.get_text())
+                    break
+
+        if not fuel:
+            for sel in ["[itemprop='fuelType']", ".fuel", ".carburant", ".fuel-type"]:
+                el = soup.select_one(sel)
+                if el:
+                    fuel = el.get_text(strip=True) or None
+                    break
+
+        if not transmission:
+            for sel in ["[itemprop='vehicleTransmission']", ".transmission", ".boite", ".gearbox"]:
+                el = soup.select_one(sel)
+                if el:
+                    transmission = el.get_text(strip=True) or None
+                    break
+
+        # Collect gallery images
+        for img in soup.select("img[src]"):
+            src = img.get("src", "")
+            if src.startswith("http") and any(x in src for x in ["car", "vehicl", "photo", "img", "upload"]):
+                all_images.append(src)
+        all_images = list(dict.fromkeys(all_images))[:10]  # dedupe, cap at 10
+
         # --- 4. Regex sweep on full page text ---
         full_text = soup.get_text(" ", strip=True)
 
         if not year:
             year = _extract_year(full_text)
-
         if not price_cny:
             price_cny = _extract_price(full_text)
-
         if not make:
             make = _make_from_text(full_text)
+        if not mileage:
+            mileage = _extract_mileage(full_text)
 
         # --- 5. Title fallback ---
         if (not make or not model) and page_title:
@@ -149,28 +198,37 @@ def parse_url_to_car_data(url):
     except requests.RequestException as e:
         print(f"[WARN] HTTP fetch failed ({e}), falling back to URL parsing")
 
-    # --- 6. URL slug fallback (always runs as safety net) ---
+    # --- 6. URL slug fallback ---
     if not make:
         make = _make_from_text(url)
-
     if not model:
         slug = url.rstrip("/").split("/")[-1]
         slug = re.sub(r"[_\-]+", " ", slug).split("?")[0].strip()
         model = slug.upper() if slug else "UNKNOWN"
-
     if not year:
         year = datetime.now().year
-
     if not price_cny:
         price_cny = 0
 
+    # Use first gallery image as primary if og:image missed
+    if not primary_image and all_images:
+        primary_image = all_images[0]
+
     result = {
-        "make":      (str(make).upper().strip() if make else "UNKNOWN"),
-        "model":     (str(model).upper().strip() if model else "UNKNOWN"),
-        "year":      int(year),
-        "price_cny": float(price_cny),
+        "make":          str(make).upper().strip() if make else "UNKNOWN",
+        "model":         str(model).upper().strip() if model else "UNKNOWN",
+        "year":          int(year),
+        "price_cny":     float(price_cny),
+        "primary_image": primary_image,
+        "images":        all_images if all_images else ([primary_image] if primary_image else []),
+        "mileage":       int(mileage) if mileage else None,
+        "fuel":          str(fuel).strip() if fuel else None,
+        "transmission":  str(transmission).strip() if transmission else None,
+        "title":         title,
+        "source_url":    url,
     }
-    print(f"[SCRAPE] Parsed: {result}")
+    print(f"[SCRAPE] Parsed: make={result['make']} model={result['model']} year={result['year']} "
+          f"price={result['price_cny']} image={'yes' if primary_image else 'NO'} mileage={result['mileage']}")
     return result
 
 
@@ -189,6 +247,7 @@ def insert_car_record(car):
             return
 
         duty = calculator.get_estimated_duty_dzd(car["make"], car["model"], car["year"])
+
         payload = {
             "make":             car["make"],
             "model":            car["model"],
@@ -197,9 +256,17 @@ def insert_car_record(car):
             "customs_duty_dzd": duty,
             "status":           "available",
             "is_visible":       True,
-            "primary_image":    "https://placehold.co/600x400?text=Car+Image",
-            "images":           ["https://placehold.co/600x400?text=Car+Image"],
+            "primary_image":    car.get("primary_image"),
+            "images":           car.get("images") or [],
+            "mileage":          car.get("mileage"),
+            "fuel":             car.get("fuel"),
+            "transmission":     car.get("transmission"),
+            "title":            car.get("title"),
+            "source_url":       car.get("source_url"),
         }
+        # Drop None values so DB defaults apply
+        payload = {k: v for k, v in payload.items() if v is not None}
+
         res = supabase.table("cars").insert(payload).execute()
         if res.data:
             duty_fmt = f"{duty:,.0f}" if duty is not None else "N/A"
@@ -214,7 +281,7 @@ def main():
     target_url = os.environ.get("TARGET_URL", "").strip()
 
     if target_url:
-        print(f"Target URL detected from Appsmith CRM: {target_url}")
+        print(f"Target URL detected: {target_url}")
         scraped_car = parse_url_to_car_data(target_url)
         insert_car_record(scraped_car)
     else:
