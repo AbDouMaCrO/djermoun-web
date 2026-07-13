@@ -3,6 +3,17 @@
 import { useState } from "react";
 import { useExchangeRate } from "@/currency/exchange-rate-context";
 
+const AUTOCANGO_FEES = [
+  { label: "Inspection Fee",         amount: 65  },
+  { label: "Export Handling Fee",    amount: 450 },
+  { label: "Domestic Transport Fee", amount: 330 },
+  { label: "Port Local Fee",         amount: 400, note: "Guangzhou, CN" },
+  { label: "AutoCango Service Fee",  amount: 300 },
+  { label: "Banking Transfer Fee",   amount: 50  },
+] as const;
+
+const AUTOCANGO_FEES_TOTAL = AUTOCANGO_FEES.reduce((s, f) => s + f.amount, 0); // 1595
+
 function formatUSD(n: number) {
   return new Intl.NumberFormat(undefined, {
     style: "currency",
@@ -26,8 +37,9 @@ export default function PricingBreakdown({
 }) {
   const { rate, setRate } = useExchangeRate();
   const [rateInput, setRateInput] = useState(String(rate));
+  const [feesOpen, setFeesOpen] = useState(false);
 
-  const totalUSD = fobPrice + commission + shipping;
+  const totalUSD = fobPrice + AUTOCANGO_FEES_TOTAL + commission + shipping;
   const parsedRate = Number(rateInput);
   const effectiveRate = Number.isFinite(parsedRate) && parsedRate > 0 ? parsedRate : rate;
   const totalDZD = totalUSD * effectiveRate;
@@ -44,20 +56,64 @@ export default function PricingBreakdown({
         Transparent Pricing
       </h2>
       <dl className="mt-4 space-y-3">
+        {/* Vehicle price */}
         <div className="flex justify-between text-sm">
-          <dt className="text-slate-600">Vehicle FOB Price (China)</dt>
+          <dt className="text-slate-600">Vehicle Price (FOB China)</dt>
           <dd className="font-medium text-slate-900">{formatUSD(fobPrice)}</dd>
         </div>
-        <div className="text-xs text-slate-600">Includes: Vehicle Cost, Export Handling, Domestic Transport, Port &amp; Inspection Fees</div>
 
-        <div className="flex justify-between text-sm">
-          <dt className="text-slate-600">DJERMOUN Brokerage Fee</dt>
-          <dd className="font-medium text-slate-900">{formatUSD(commission)}</dd>
+        {/* AutoCango standard fees — collapsible */}
+        <div>
+          <button
+            type="button"
+            onClick={() => setFeesOpen((o) => !o)}
+            className="flex w-full items-center justify-between text-sm text-slate-600 hover:text-slate-800"
+          >
+            <span>
+              AutoCango Standard Fees
+              <span className="ml-1.5 text-xs text-slate-400">(click to {feesOpen ? "hide" : "show"})</span>
+            </span>
+            <span className="font-medium text-slate-900">{formatUSD(AUTOCANGO_FEES_TOTAL)}</span>
+          </button>
+
+          {feesOpen && (
+            <dl className="mt-2 space-y-1.5 rounded-lg bg-slate-50 px-4 py-3">
+              {AUTOCANGO_FEES.map((f) => (
+                <div key={f.label} className="flex justify-between text-xs text-slate-500">
+                  <dt>
+                    {f.label}
+                    {"note" in f && (
+                      <span className="ml-1.5 rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+                        {f.note}
+                      </span>
+                    )}
+                  </dt>
+                  <dd>{formatUSD(f.amount)}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
         </div>
-        <div className="flex justify-between text-sm">
-          <dt className="text-slate-600">Global Shipping</dt>
-          <dd className="font-medium text-slate-900">{formatUSD(shipping)}</dd>
-        </div>
+
+        {/* Shipping port notice */}
+        <p className="flex items-center gap-1.5 text-xs text-slate-500">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400" />
+          Shipping port: <span className="font-medium text-slate-700">Guangzhou, CN</span>
+        </p>
+
+        {commission > 0 && (
+          <div className="flex justify-between text-sm">
+            <dt className="text-slate-600">DJERMOUN Brokerage Fee</dt>
+            <dd className="font-medium text-slate-900">{formatUSD(commission)}</dd>
+          </div>
+        )}
+        {shipping > 0 && (
+          <div className="flex justify-between text-sm">
+            <dt className="text-slate-600">Global Shipping</dt>
+            <dd className="font-medium text-slate-900">{formatUSD(shipping)}</dd>
+          </div>
+        )}
+
         <div className="flex justify-between border-t border-slate-200 pt-3 text-base">
           <dt className="font-semibold text-slate-900">Total Price</dt>
           <dd className="font-bold text-amber-500">{formatUSD(totalUSD)}</dd>

@@ -57,7 +57,8 @@ export default async function CarDetailsPage({
   const fobPrice = Number(car.price_cny ?? 0);
   const commission = Number(car.commission ?? 0);
   const shipping = Number(car.shipping_cost ?? 0);
-  const totalPrice = fobPrice + commission + shipping;
+  const AUTOCANGO_FEES = 1595;
+  const totalPrice = fobPrice + AUTOCANGO_FEES + commission + shipping;
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
