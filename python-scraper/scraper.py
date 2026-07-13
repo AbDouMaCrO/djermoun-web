@@ -5,6 +5,7 @@ from datetime import datetime
 
 import io
 import traceback
+import urllib.request
 
 import cv2
 import numpy as np
@@ -36,23 +37,56 @@ DUMMY_CARS = [
 ]
 
 
-def remove_watermark_cv2(image_url: str) -> bytes | None:
-    """Download image (webp/jpg), attempt OCR+inpaint watermark removal, return JPEG bytes.
-    Always returns bytes on download success — falls back to plain JPEG convert if inpaint fails.
-    Returns None only if the download itself fails.
-    """
+def _download_cdn_image(image_url: str) -> bytes | None:
+    """Download image bytes from CDN. Returns None on any failure."""
+    # Try curl_cffi (Chrome impersonation) first
     try:
         r = SESSION.get(
             image_url, timeout=40,
             headers={"Referer": "https://www.autocango.com/"},
         )
-        if r.status_code != 200 or len(r.content) < 5000:
-            print(f"[WATERMARK] Bad response {r.status_code}/{len(r.content)}b — {image_url}")
+        print(f"[DOWNLOAD] curl_cffi: status={r.status_code} size={len(r.content)}b")
+        if r.status_code == 200 and len(r.content) >= 5000:
+            return r.content
+    except Exception as e:
+        print(f"[DOWNLOAD] curl_cffi error: {e}")
+
+    # Fallback: plain urllib (different TLS fingerprint)
+    try:
+        req = urllib.request.Request(
+            image_url,
+            headers={
+                "Referer": "https://www.autocango.com/",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=40) as resp:
+            data = resp.read()
+        print(f"[DOWNLOAD] urllib fallback: status={resp.status} size={len(data)}b")
+        if len(data) >= 5000:
+            return data
+    except Exception as e2:
+        print(f"[DOWNLOAD] urllib fallback error: {e2}")
+
+    return None
+
+
+def remove_watermark_cv2(image_url: str) -> bytes | None:
+    """Download image, attempt OCR+inpaint watermark removal, return JPEG bytes.
+    Always returns bytes on download success — falls back to plain JPEG convert if inpaint fails.
+    Returns None only if the download itself fails.
+    """
+    try:
+        print(f"[WATERMARK] Processing: {image_url}")
+        raw = _download_cdn_image(image_url)
+        if raw is None:
+            print(f"[WATERMARK] Download failed — skipping")
             return None
 
         # PIL handles webp natively; cv2.imdecode fails on webp without system libs
-        pil_img = Image.open(io.BytesIO(r.content)).convert("RGB")
+        pil_img = Image.open(io.BytesIO(raw)).convert("RGB")
         img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+        print(f"[WATERMARK] Decoded: shape={img.shape}")
 
         # OCR — if tesseract fails, skip inpainting and just re-encode
         try:
@@ -70,7 +104,7 @@ def remove_watermark_cv2(image_url: str) -> bytes | None:
                 kernel = np.ones((7, 7), np.uint8)
                 mask = cv2.dilate(mask, kernel, iterations=2)
                 img = cv2.inpaint(img, mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
-                print(f"[WATERMARK] Inpainted {image_url}")
+                print(f"[WATERMARK] Inpainted successfully")
             else:
                 print(f"[WATERMARK] No text detected — uploading as-is")
 
@@ -78,7 +112,9 @@ def remove_watermark_cv2(image_url: str) -> bytes | None:
             print(f"[WATERMARK] OCR failed ({tess_err}) — uploading without inpaint")
 
         ok, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 92])
-        return buf.tobytes() if ok else r.content
+        result_bytes = buf.tobytes() if ok else raw
+        print(f"[WATERMARK] Done: {len(result_bytes)}b JPEG")
+        return result_bytes
 
     except Exception as e:
         print(f"[WATERMARK] Fatal error for {image_url}: {e}")
