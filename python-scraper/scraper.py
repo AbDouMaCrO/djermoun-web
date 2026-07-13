@@ -36,8 +36,9 @@ DUMMY_CARS = [
 
 
 def remove_watermark_cv2(image_url: str) -> bytes | None:
-    """Download image (webp/jpg), erase text watermarks via OCR+inpaint, return JPEG bytes.
-    Returns None on any failure so callers fall back to the original URL.
+    """Download image (webp/jpg), attempt OCR+inpaint watermark removal, return JPEG bytes.
+    Always returns bytes on download success — falls back to plain JPEG convert if inpaint fails.
+    Returns None only if the download itself fails.
     """
     try:
         r = SESSION.get(
@@ -45,38 +46,41 @@ def remove_watermark_cv2(image_url: str) -> bytes | None:
             headers={"Referer": "https://www.autocango.com/"},
         )
         if r.status_code != 200 or len(r.content) < 5000:
-            print(f"[WATERMARK] Bad response {r.status_code} / {len(r.content)}b for {image_url}")
+            print(f"[WATERMARK] Bad response {r.status_code}/{len(r.content)}b — {image_url}")
             return None
 
-        # PIL handles webp/jpg/png; cv2.imdecode fails on webp without system libs
+        # PIL handles webp natively; cv2.imdecode fails on webp without system libs
         pil_img = Image.open(io.BytesIO(r.content)).convert("RGB")
         img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
 
-        data = pytesseract.image_to_data(
-            cv2.cvtColor(img, cv2.COLOR_BGR2RGB),
-            output_type=pytesseract.Output.DICT,
-        )
+        # OCR — if tesseract fails, skip inpainting and just re-encode
+        try:
+            data = pytesseract.image_to_data(
+                cv2.cvtColor(img, cv2.COLOR_BGR2RGB),
+                output_type=pytesseract.Output.DICT,
+            )
+            mask = np.zeros(img.shape[:2], dtype=np.uint8)
+            for i, text in enumerate(data["text"]):
+                if text.strip() and int(data["conf"][i]) > 20:
+                    x, y, w, h = data["left"][i], data["top"][i], data["width"][i], data["height"][i]
+                    mask[y : y + h, x : x + w] = 255
 
-        mask = np.zeros(img.shape[:2], dtype=np.uint8)
-        for i, text in enumerate(data["text"]):
-            if text.strip() and int(data["conf"][i]) > 20:
-                x, y, w, h = data["left"][i], data["top"][i], data["width"][i], data["height"][i]
-                mask[y : y + h, x : x + w] = 255
+            if mask.max() > 0:
+                kernel = np.ones((7, 7), np.uint8)
+                mask = cv2.dilate(mask, kernel, iterations=2)
+                img = cv2.inpaint(img, mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
+                print(f"[WATERMARK] Inpainted {image_url}")
+            else:
+                print(f"[WATERMARK] No text detected — uploading as-is")
 
-        if mask.max() == 0:
-            print(f"[WATERMARK] No text detected — keeping original for {image_url}")
-            return r.content
+        except Exception as tess_err:
+            print(f"[WATERMARK] OCR failed ({tess_err}) — uploading without inpaint")
 
-        kernel = np.ones((7, 7), np.uint8)
-        mask = cv2.dilate(mask, kernel, iterations=2)
-        cleaned = cv2.inpaint(img, mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
-
-        ok, buf = cv2.imencode(".jpg", cleaned, [cv2.IMWRITE_JPEG_QUALITY, 92])
-        print(f"[WATERMARK] Inpainted {image_url}")
+        ok, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 92])
         return buf.tobytes() if ok else r.content
 
     except Exception as e:
-        print(f"[WATERMARK] Error for {image_url}: {e}")
+        print(f"[WATERMARK] Fatal error for {image_url}: {e}")
         return None
 
 
