@@ -83,6 +83,12 @@ def parse_autocango(url):
     usd_prices = re.findall(r'\$([\d,]+)', html)
     price_usd = float(usd_prices[0].replace(",", "")) if usd_prices else 0.0
 
+    # Accessories
+    accessories = []
+    acc_ul = soup.find("ul", class_="accessories")
+    if acc_ul:
+        accessories = [li.get_text(strip=True) for li in acc_ul.find_all("li") if li.get_text(strip=True)]
+
     # Images — use Counter on CDN car_id to isolate primary car's images
     matches = CDN_PATTERN.findall(html)
     primary_image = None
@@ -111,6 +117,7 @@ def parse_autocango(url):
         "transmission":   details.get("Transmission") or None,
         "engine":         details.get("Engine") or None,
         "exterior_color": details.get("Exterior Color") or None,
+        "accessories":    accessories or None,
         "primary_image":  primary_image,
         "images":         images,
     }
@@ -134,7 +141,18 @@ def insert_car_record(car):
             .execute()
         )
         if existing.data:
-            print(f"[SKIP] {car['year']} {car['make']} {car['model']} already in DB")
+            row_id = existing.data[0]["id"]
+            update = {}
+            existing_full = supabase.table("cars").select("accessories,images,engine,transmission,fuel,mileage,exterior_color,primary_image").eq("id", row_id).single().execute().data
+            for field in ("accessories", "images", "engine", "transmission", "fuel", "mileage", "exterior_color", "primary_image"):
+                new_val = car.get(field) or car.get("fuel_type" if field == "fuel" else field)
+                if not existing_full.get(field) and new_val:
+                    update[field] = new_val
+            if update:
+                supabase.table("cars").update(update).eq("id", row_id).execute()
+                print(f"[UPDATE] {car['year']} {car['make']} {car['model']} — filled: {list(update.keys())}")
+            else:
+                print(f"[SKIP] {car['year']} {car['make']} {car['model']} already in DB")
             return
 
         duty = calculator.get_estimated_duty_dzd(car["make"], car["model"], car["year"])
@@ -154,6 +172,7 @@ def insert_car_record(car):
             "transmission":     car.get("transmission"),
             "engine":           car.get("engine"),
             "exterior_color":   car.get("exterior_color"),
+            "accessories":      car.get("accessories"),
             "title":            car.get("title"),
             "source_url":       car.get("source_url"),
         }
