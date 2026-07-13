@@ -38,20 +38,10 @@ DUMMY_CARS = [
 
 
 def _download_cdn_image(image_url: str) -> bytes | None:
-    """Download image bytes from CDN. Returns None on any failure."""
-    # Try curl_cffi (Chrome impersonation) first
-    try:
-        r = SESSION.get(
-            image_url, timeout=40,
-            headers={"Referer": "https://www.autocango.com/"},
-        )
-        print(f"[DOWNLOAD] curl_cffi: status={r.status_code} size={len(r.content)}b")
-        if r.status_code == 200 and len(r.content) >= 5000:
-            return r.content
-    except Exception as e:
-        print(f"[DOWNLOAD] curl_cffi error: {e}")
-
-    # Fallback: plain urllib (different TLS fingerprint)
+    """Download image bytes from CDN using urllib.
+    curl_cffi Chrome impersonation is blocked by tichetech.com (returns 403);
+    plain urllib works fine.
+    """
     try:
         req = urllib.request.Request(
             image_url,
@@ -62,12 +52,12 @@ def _download_cdn_image(image_url: str) -> bytes | None:
         )
         with urllib.request.urlopen(req, timeout=40) as resp:
             data = resp.read()
-        print(f"[DOWNLOAD] urllib fallback: status={resp.status} size={len(data)}b")
+        print(f"[DOWNLOAD] status={resp.status} size={len(data)}b")
         if len(data) >= 5000:
             return data
-    except Exception as e2:
-        print(f"[DOWNLOAD] urllib fallback error: {e2}")
-
+        print(f"[DOWNLOAD] too small ({len(data)}b) — skipping")
+    except Exception as e:
+        print(f"[DOWNLOAD] error: {e}")
     return None
 
 
