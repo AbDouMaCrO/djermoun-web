@@ -119,6 +119,8 @@ def clean_image_alibaba(image_url: str) -> bytes | None:
             },
             timeout=30,
         )
+        if not resp.ok:
+            print(f"[ALIBABA] Submit error {resp.status_code}: {resp.text}")
         resp.raise_for_status()
         task_id = resp.json()["output"]["task_id"]
         print(f"[ALIBABA] Task submitted: {task_id}")
