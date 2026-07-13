@@ -27,6 +27,9 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install Tesseract OCR
+        run: sudo apt-get install -y tesseract-ocr
+
       - name: Install and Run Scraper
         working-directory: python-scraper
         env:

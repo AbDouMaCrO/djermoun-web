@@ -3,6 +3,9 @@ import re
 from collections import Counter
 from datetime import datetime
 
+import cv2
+import numpy as np
+import pytesseract
 from bs4 import BeautifulSoup
 from curl_cffi import requests as cf_requests
 
@@ -19,12 +22,92 @@ CDN_PATTERN = re.compile(
 )
 CDN_SUFFIX = "/d?imageMogr2/format/jpg/strip"
 
+STORAGE_BUCKET = "car-images"
+
 DUMMY_CARS = [
     {"make": "CHERY",  "model": "TIGGO 8 PRO", "year": 2025, "price_cny": 145000},
     {"make": "GEELY",  "model": "COOLRAY",      "year": 2024, "price_cny": 98000},
     {"make": "BYD",    "model": "ATTO 3",        "year": 2025, "price_cny": 160000},
     {"make": "HAVAL",  "model": "JOLION",        "year": 2024, "price_cny": 110000},
 ]
+
+
+def remove_watermark_cv2(image_url: str) -> bytes | None:
+    """Download image, erase text watermarks via OCR+inpaint, return JPEG bytes.
+    Returns None on any failure so callers can fall back to the original URL.
+    """
+    try:
+        r = SESSION.get(
+            image_url, timeout=40,
+            headers={"Referer": "https://www.autocango.com/"},
+        )
+        if r.status_code != 200 or len(r.content) < 5000:
+            return None
+
+        arr = np.frombuffer(r.content, dtype=np.uint8)
+        img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+        if img is None:
+            return None
+
+        rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        data = pytesseract.image_to_data(rgb, output_type=pytesseract.Output.DICT)
+
+        mask = np.zeros(img.shape[:2], dtype=np.uint8)
+        for i, text in enumerate(data["text"]):
+            if text.strip() and int(data["conf"][i]) > 20:
+                x = data["left"][i]
+                y = data["top"][i]
+                w = data["width"][i]
+                h = data["height"][i]
+                mask[y : y + h, x : x + w] = 255
+
+        if mask.max() == 0:
+            # No text detected — skip inpaint, return original bytes as-is
+            return r.content
+
+        kernel = np.ones((7, 7), np.uint8)
+        mask = cv2.dilate(mask, kernel, iterations=2)
+
+        cleaned = cv2.inpaint(img, mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
+
+        ok, buf = cv2.imencode(".jpg", cleaned, [cv2.IMWRITE_JPEG_QUALITY, 92])
+        return buf.tobytes() if ok else r.content
+
+    except Exception as e:
+        print(f"[WATERMARK] {image_url}: {e}")
+        return None
+
+
+def upload_to_storage(slug: str, idx: int, img_bytes: bytes) -> str | None:
+    """Upload processed image bytes to Supabase Storage, return public URL."""
+    try:
+        path = f"{slug}/{idx}.jpg"
+        supabase.storage.from_(STORAGE_BUCKET).upload(
+            path=path,
+            file=img_bytes,
+            file_options={"content-type": "image/jpeg", "upsert": "true"},
+        )
+        return supabase.storage.from_(STORAGE_BUCKET).get_public_url(path)
+    except Exception as e:
+        print(f"[STORAGE] Upload failed ({slug}/{idx}): {e}")
+        return None
+
+
+def process_images(images: list[str], make: str, model: str, year: int) -> list[str]:
+    """Remove watermarks from each image and upload to storage.
+    Falls back to original CDN URL on any failure.
+    """
+    slug = f"{year}-{make}-{model}".lower().replace(" ", "-")
+    result = []
+    for idx, url in enumerate(images):
+        cleaned_bytes = remove_watermark_cv2(url)
+        if cleaned_bytes:
+            stored_url = upload_to_storage(slug, idx, cleaned_bytes)
+            result.append(stored_url if stored_url else url)
+        else:
+            result.append(url)
+        print(f"[IMG] {idx + 1}/{len(images)} processed for {make} {model}")
+    return result
 
 
 def parse_autocango(url):
@@ -36,7 +119,6 @@ def parse_autocango(url):
 
     soup = BeautifulSoup(r.text, "html.parser")
     html = r.text
-    text = soup.get_text(separator="\n", strip=True)
 
     # Title
     title_tag = soup.find("title")
@@ -52,7 +134,6 @@ def parse_autocango(url):
     make = model = "UNKNOWN"
     if slug_m:
         parts = slug_m.group(1).split("-")
-        # Last part is SKU (starts with ACU or similar), rest is make-model
         non_sku = [p for p in parts if not re.match(r'^[A-Z]{2,3}\d+$', p)]
         if non_sku:
             make = non_sku[0].upper()
@@ -91,8 +172,7 @@ def parse_autocango(url):
 
     # Images — use Counter on CDN car_id to isolate primary car's images
     matches = CDN_PATTERN.findall(html)
-    primary_image = None
-    images = []
+    raw_images = []
     if matches:
         id_counts = Counter(cid for _, cid in matches)
         primary_id = id_counts.most_common(1)[0][0]
@@ -101,8 +181,11 @@ def parse_autocango(url):
             base = full_url.split("?")[0]
             if cid == primary_id and base not in seen:
                 seen.add(base)
-                images.append(base + CDN_SUFFIX)
-        primary_image = images[0] if images else None
+                raw_images.append(base + CDN_SUFFIX)
+
+    # Watermark removal — process images before storing
+    images = process_images(raw_images, make, model, year) if raw_images else []
+    primary_image = images[0] if images else None
 
     result = {
         "make":           make,
@@ -176,7 +259,6 @@ def insert_car_record(car):
             "title":            car.get("title"),
             "source_url":       car.get("source_url"),
         }
-        # Drop None so DB defaults apply
         payload = {k: v for k, v in payload.items() if v is not None}
 
         res = supabase.table("cars").insert(payload).execute()
