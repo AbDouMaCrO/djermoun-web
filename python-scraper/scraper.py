@@ -3,11 +3,14 @@ import re
 from collections import Counter
 from datetime import datetime
 
+import io
+
 import cv2
 import numpy as np
 import pytesseract
 from bs4 import BeautifulSoup
 from curl_cffi import requests as cf_requests
+from PIL import Image
 
 from db import supabase
 from duty_calculator import CustomsDutyCalculator
@@ -33,8 +36,8 @@ DUMMY_CARS = [
 
 
 def remove_watermark_cv2(image_url: str) -> bytes | None:
-    """Download image, erase text watermarks via OCR+inpaint, return JPEG bytes.
-    Returns None on any failure so callers can fall back to the original URL.
+    """Download image (webp/jpg), erase text watermarks via OCR+inpaint, return JPEG bytes.
+    Returns None on any failure so callers fall back to the original URL.
     """
     try:
         r = SESSION.get(
@@ -42,39 +45,38 @@ def remove_watermark_cv2(image_url: str) -> bytes | None:
             headers={"Referer": "https://www.autocango.com/"},
         )
         if r.status_code != 200 or len(r.content) < 5000:
+            print(f"[WATERMARK] Bad response {r.status_code} / {len(r.content)}b for {image_url}")
             return None
 
-        arr = np.frombuffer(r.content, dtype=np.uint8)
-        img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-        if img is None:
-            return None
+        # PIL handles webp/jpg/png; cv2.imdecode fails on webp without system libs
+        pil_img = Image.open(io.BytesIO(r.content)).convert("RGB")
+        img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
 
-        rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        data = pytesseract.image_to_data(rgb, output_type=pytesseract.Output.DICT)
+        data = pytesseract.image_to_data(
+            cv2.cvtColor(img, cv2.COLOR_BGR2RGB),
+            output_type=pytesseract.Output.DICT,
+        )
 
         mask = np.zeros(img.shape[:2], dtype=np.uint8)
         for i, text in enumerate(data["text"]):
             if text.strip() and int(data["conf"][i]) > 20:
-                x = data["left"][i]
-                y = data["top"][i]
-                w = data["width"][i]
-                h = data["height"][i]
+                x, y, w, h = data["left"][i], data["top"][i], data["width"][i], data["height"][i]
                 mask[y : y + h, x : x + w] = 255
 
         if mask.max() == 0:
-            # No text detected — skip inpaint, return original bytes as-is
+            print(f"[WATERMARK] No text detected — keeping original for {image_url}")
             return r.content
 
         kernel = np.ones((7, 7), np.uint8)
         mask = cv2.dilate(mask, kernel, iterations=2)
-
         cleaned = cv2.inpaint(img, mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
 
         ok, buf = cv2.imencode(".jpg", cleaned, [cv2.IMWRITE_JPEG_QUALITY, 92])
+        print(f"[WATERMARK] Inpainted {image_url}")
         return buf.tobytes() if ok else r.content
 
     except Exception as e:
-        print(f"[WATERMARK] {image_url}: {e}")
+        print(f"[WATERMARK] Error for {image_url}: {e}")
         return None
 
 
@@ -85,9 +87,11 @@ def upload_to_storage(slug: str, idx: int, img_bytes: bytes) -> str | None:
         supabase.storage.from_(STORAGE_BUCKET).upload(
             path=path,
             file=img_bytes,
-            file_options={"content-type": "image/jpeg", "upsert": "true"},
+            file_options={"content-type": "image/jpeg", "x-upsert": "true"},
         )
-        return supabase.storage.from_(STORAGE_BUCKET).get_public_url(path)
+        url = supabase.storage.from_(STORAGE_BUCKET).get_public_url(path)
+        print(f"[STORAGE] Uploaded {path} → {url}")
+        return url
     except Exception as e:
         print(f"[STORAGE] Upload failed ({slug}/{idx}): {e}")
         return None
