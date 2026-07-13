@@ -4,6 +4,7 @@ from collections import Counter
 from datetime import datetime
 
 import io
+import traceback
 
 import cv2
 import numpy as np
@@ -81,6 +82,7 @@ def remove_watermark_cv2(image_url: str) -> bytes | None:
 
     except Exception as e:
         print(f"[WATERMARK] Fatal error for {image_url}: {e}")
+        traceback.print_exc()
         return None
 
 
@@ -98,6 +100,7 @@ def upload_to_storage(slug: str, idx: int, img_bytes: bytes) -> str | None:
         return url
     except Exception as e:
         print(f"[STORAGE] Upload failed ({slug}/{idx}): {e}")
+        traceback.print_exc()
         return None
 
 
