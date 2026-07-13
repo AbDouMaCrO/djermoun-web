@@ -1,5 +1,5 @@
 supabase
 pandas
-requests
 beautifulsoup4
 python-dotenv
+curl_cffi
