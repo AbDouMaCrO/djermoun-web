@@ -99,22 +99,26 @@ def parse_autocango(url):
         primary_image = images[0] if images else None
 
     result = {
-        "make":         make,
-        "model":        model,
-        "year":         year,
-        "price_cny":    price_usd,   # FOB USD stored in price_cny field
-        "title":        full_title,
-        "source_url":   url,
-        "mileage":      mileage,
-        "fuel":         details.get("Fuel") or None,
-        "transmission": details.get("Transmission") or None,
-        "primary_image": primary_image,
-        "images":       images,
+        "make":           make,
+        "model":          model,
+        "year":           year,
+        "price_cny":      price_usd,
+        "title":          full_title,
+        "source_url":     url,
+        "mileage":        mileage,
+        "fuel":           details.get("Fuel") or None,
+        "fuel_type":      details.get("Fuel") or None,
+        "transmission":   details.get("Transmission") or None,
+        "engine":         details.get("Engine") or None,
+        "exterior_color": details.get("Exterior Color") or None,
+        "primary_image":  primary_image,
+        "images":         images,
     }
     print(
         f"[SCRAPE] {result['year']} {result['make']} {result['model']} | "
         f"${result['price_cny']} | mileage={result['mileage']} | "
-        f"images={len(images)} | fuel={result['fuel']}"
+        f"images={len(images)} | fuel={result['fuel']} | "
+        f"engine={result['engine']} | color={result['exterior_color']}"
     )
     return result
 
@@ -146,7 +150,10 @@ def insert_car_record(car):
             "images":           car.get("images") or [],
             "mileage":          car.get("mileage"),
             "fuel":             car.get("fuel"),
+            "fuel_type":        car.get("fuel_type"),
             "transmission":     car.get("transmission"),
+            "engine":           car.get("engine"),
+            "exterior_color":   car.get("exterior_color"),
             "title":            car.get("title"),
             "source_url":       car.get("source_url"),
         }
