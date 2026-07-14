@@ -5,6 +5,8 @@ import WhyChoose from "@/components/why-choose";
 import HowItWorks from "@/components/how-it-works";
 import ExportSolutions from "@/components/export-solutions";
 import HowToBuyTeaser from "@/components/how-to-buy-teaser";
+import ShippingHighlights from "@/components/shipping-highlights";
+import AboutSection from "@/components/about-section";
 import Pagination from "@/components/Pagination";
 import FilterBar from "@/components/filter-bar";
 import BrandPicker, { KNOWN_MAKES } from "@/components/brand-picker";
@@ -174,11 +176,15 @@ export default async function HomePage({
         />
       </section>
 
+      <ShippingHighlights />
+
       <HowToBuyTeaser />
 
       <HowItWorks />
 
       <ExportSolutions />
+
+      <AboutSection />
 
       <WhyChoose />
     </main>
