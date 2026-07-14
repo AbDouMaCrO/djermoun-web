@@ -3,21 +3,47 @@ import Hero from "@/components/hero";
 import CarCard, { type CarCardData } from "@/components/car-card";
 import WhyChoose from "@/components/why-choose";
 import Pagination from "@/components/Pagination";
+import FilterBar from "@/components/filter-bar";
 
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 20;
+const DZD_RATE = 240;        // DZD per USD reference rate for price filter
+const AUTOCANGO_FEES = 1595; // constant overhead applied to every car
+const DEFAULT_SHIPPING = 1900;
 
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ make?: string; model?: string; year?: string; page?: string; tab?: string }>;
+  searchParams: Promise<{
+    make?: string;
+    model?: string;
+    year?: string;
+    page?: string;
+    tab?: string;
+    minMc?: string;
+    maxMc?: string;
+    wasla?: string;
+  }>;
 }) {
-  const { make, model, year, page: pageParam, tab } = await searchParams;
+  const {
+    make, model, year, page: pageParam, tab,
+    minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam,
+  } = await searchParams;
+
   const condition = tab === "new" ? "new" : tab === "used" ? "used" : null;
   const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
+
+  // Price filter
+  const minMc = Math.max(0, Number(minMcParam ?? 150));
+  const maxMc = Math.max(0, Number(maxMcParam ?? 250));
+  const wasla = waslaParam === "1";
+  const shipping = wasla ? DEFAULT_SHIPPING : 0;
+  const overhead = AUTOCANGO_FEES + shipping;
+  const minUsd = Math.max(0, Math.round((minMc * 10_000) / DZD_RATE - overhead));
+  const maxUsd = Math.round((maxMc * 10_000) / DZD_RATE - overhead);
 
   const supabase = await createClient();
 
@@ -38,6 +64,8 @@ export default async function HomePage({
     )
     .eq("status", "available")
     .eq("is_visible", true)
+    .gte("price_cny", minUsd)
+    .lte("price_cny", maxUsd)
     .order("created_at", { ascending: false })
     .range(from, to);
 
@@ -52,12 +80,19 @@ export default async function HomePage({
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
 
   const paginationParams = Object.fromEntries(
+    Object.entries({ make, model, year, tab, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam })
+      .filter(([, v]) => v != null),
+  ) as Record<string, string>;
+
+  // Current params for FilterBar to preserve when updating
+  const filterCurrentParams = Object.fromEntries(
     Object.entries({ make, model, year, tab }).filter(([, v]) => v != null),
   ) as Record<string, string>;
 
   function tabHref(t: string) {
     const params = new URLSearchParams(
-      Object.entries({ make, model, year }).filter(([, v]) => v != null) as [string, string][],
+      Object.entries({ make, model, year, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam })
+        .filter(([, v]) => v != null) as [string, string][],
     );
     if (t !== "all") params.set("tab", t);
     const qs = params.toString();
@@ -97,12 +132,20 @@ export default async function HomePage({
           ))}
         </div>
 
+        {/* Price + Wasla filter */}
+        <FilterBar
+          initialMin={minMc}
+          initialMax={maxMc}
+          initialWasla={wasla}
+          currentParams={filterCurrentParams}
+        />
+
         {error && (
           <p className="mt-6 text-sm text-red-400">Failed to load cars: {error.message}</p>
         )}
 
         {cars.length === 0 && !error && (
-          <p className="mt-6 text-sm text-slate-600">No vehicles match your search.</p>
+          <p className="mt-6 text-sm text-slate-600">No vehicles match your filters.</p>
         )}
 
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
