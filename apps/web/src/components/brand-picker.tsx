@@ -12,7 +12,12 @@ const BRANDS = [
   { name: "Chery",       make: "CHERY",        logo: "/brands/chery.png",      accent: "#003080" },
   { name: "Volkswagen",  make: "VOLKSWAGEN",   logo: "/brands/volkswagen.png", accent: "#001E50" },
   { name: "ChangAn",     make: "CHANGAN",      logo: "/brands/changan.png",    accent: "#003366" },
+  { name: "MG",          make: "MG",           logo: "/brands/mg.png",         accent: "#B22222" },
+  { name: "Jetour",      make: "JETOUR",       logo: "/brands/jetour.png",     accent: "#1A3A5C" },
+  { name: "Toyota",      make: "TOYOTA",       logo: "/brands/toyota.png",     accent: "#EB0A1E" },
 ];
+
+export const KNOWN_MAKES = BRANDS.map((b) => b.make);
 
 function BrandLogo({ logo, name, accent }: { logo: string; name: string; accent: string }) {
   const [err, setErr] = useState(false);
@@ -90,6 +95,41 @@ export default function BrandPicker({
             </Link>
           );
         })}
+
+        {/* Other Cars */}
+        {(() => {
+          const active = currentMake === "__other__";
+          return (
+            <Link
+              href={href("__other__")}
+              className={`group relative flex shrink-0 flex-col items-center gap-2.5 rounded-2xl border px-5 py-4 transition-all duration-200 ${
+                active
+                  ? "border-slate-700 bg-slate-800 shadow-md shadow-slate-300"
+                  : "border-slate-100 bg-white shadow-sm hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+              }`}
+            >
+              <div
+                className={`flex h-16 w-16 items-center justify-center rounded-full text-2xl transition-colors ${
+                  active ? "bg-slate-700 text-white" : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
+                }`}
+              >
+                ···
+              </div>
+              <span
+                className={`text-[11px] font-bold uppercase tracking-wide ${
+                  active ? "text-white" : "text-slate-500 group-hover:text-slate-700"
+                }`}
+              >
+                Other
+              </span>
+              {active && (
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-slate-600 text-[9px] font-black text-white">
+                  ✓
+                </span>
+              )}
+            </Link>
+          );
+        })()}
       </div>
     </div>
   );

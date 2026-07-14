@@ -4,7 +4,7 @@ import CarCard, { type CarCardData } from "@/components/car-card";
 import WhyChoose from "@/components/why-choose";
 import Pagination from "@/components/Pagination";
 import FilterBar from "@/components/filter-bar";
-import BrandPicker from "@/components/brand-picker";
+import BrandPicker, { KNOWN_MAKES } from "@/components/brand-picker";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +72,8 @@ export default async function HomePage({
     .range(from, to);
 
   if (condition) query = query.eq("condition", condition);
-  if (make)  query = query.eq("make", make);
+  if (make === "__other__") query = query.not("make", "in", `(${KNOWN_MAKES.join(",")})`);
+  else if (make) query = query.eq("make", make);
   if (model) query = query.ilike("model", `%${model}%`);
   if (year)  query = query.eq("year", parseInt(year, 10));
   if (fuel)  query = query.ilike("fuel", `%${fuel}%`);
