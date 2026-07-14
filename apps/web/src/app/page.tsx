@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import Hero from "@/components/hero";
 import CarCard, { type CarCardData } from "@/components/car-card";
 import WhyChoose from "@/components/why-choose";
+import HowItWorks from "@/components/how-it-works";
 import Pagination from "@/components/Pagination";
 import FilterBar from "@/components/filter-bar";
 import BrandPicker, { KNOWN_MAKES } from "@/components/brand-picker";
@@ -170,6 +171,8 @@ export default async function HomePage({
           ) as Record<string, string>}
         />
       </section>
+
+      <HowItWorks />
 
       <WhyChoose />
     </main>
