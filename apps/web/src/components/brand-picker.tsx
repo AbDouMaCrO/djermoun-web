@@ -4,17 +4,17 @@ import { useState } from "react";
 import Link from "next/link";
 
 const BRANDS = [
-  { name: "Geely",       make: "GEELY",       logo: "/brands/geely.png",      accent: "#003087" },
-  { name: "Livan",       make: "LIVAN",        logo: "/brands/livan.png",      accent: "#E31937" },
-  { name: "KIA",         make: "KIA",          logo: "/brands/kia.png",        accent: "#05141F" },
-  { name: "HAVAL",       make: "HAVAL",        logo: "/brands/haval.png",      accent: "#CC0000" },
-  { name: "BYD",         make: "BYD",          logo: "/brands/byd.png",        accent: "#1B4F9C" },
-  { name: "Chery",       make: "CHERY",        logo: "/brands/chery.png",      accent: "#003080" },
-  { name: "Volkswagen",  make: "VOLKSWAGEN",   logo: "/brands/volkswagen.png", accent: "#001E50" },
-  { name: "ChangAn",     make: "CHANGAN",      logo: "/brands/changan.png",    accent: "#003366" },
-  { name: "MG",          make: "MG",           logo: "/brands/mg.png",         accent: "#B22222" },
-  { name: "Jetour",      make: "JETOUR",       logo: "/brands/jetour.png",     accent: "#1A3A5C" },
-  { name: "Toyota",      make: "TOYOTA",       logo: "/brands/toyota.png",     accent: "#EB0A1E" },
+  { name: "Geely",       make: "GEELY",       logo: "/brands/geely.svg",      accent: "#0070b2" },
+  { name: "Livan",       make: "LIVAN",        logo: "/brands/livan.svg",      accent: "#E31937" },
+  { name: "KIA",         make: "KIA",          logo: "/brands/kia.svg",        accent: "#131E29" },
+  { name: "HAVAL",       make: "HAVAL",        logo: "/brands/haval.svg",      accent: "#CC0000" },
+  { name: "BYD",         make: "BYD",          logo: "/brands/byd.svg",        accent: "#d70c19" },
+  { name: "Chery",       make: "CHERY",        logo: "/brands/chery.svg",      accent: "#003080" },
+  { name: "Volkswagen",  make: "VOLKSWAGEN",   logo: "/brands/volkswagen.svg", accent: "#001E50" },
+  { name: "ChangAn",     make: "CHANGAN",      logo: "/brands/changan.svg",    accent: "#003366" },
+  { name: "MG",          make: "MG",           logo: "/brands/mg.svg",         accent: "#FF0000" },
+  { name: "Jetour",      make: "JETOUR",       logo: "/brands/jetour.svg",     accent: "#1A3A5C" },
+  { name: "Toyota",      make: "TOYOTA",       logo: "/brands/toyota.svg",     accent: "#EB0A1E" },
 ];
 
 export const KNOWN_MAKES = BRANDS.map((b) => b.make);
