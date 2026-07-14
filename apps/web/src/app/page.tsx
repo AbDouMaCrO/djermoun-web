@@ -11,16 +11,16 @@ const PAGE_SIZE = 20;
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ make?: string; model?: string; year?: string; page?: string }>;
+  searchParams: Promise<{ make?: string; model?: string; year?: string; page?: string; tab?: string }>;
 }) {
-  const { make, model, year, page: pageParam } = await searchParams;
+  const { make, model, year, page: pageParam, tab } = await searchParams;
+  const condition = tab === "new" ? "new" : tab === "used" ? "used" : null;
   const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
   const supabase = await createClient();
 
-  // Separate query for filter dropdowns — must see all makes/years, not just current page
   const { data: allMeta } = await supabase
     .from("cars")
     .select("make, year")
@@ -30,11 +30,10 @@ export default async function HomePage({
   const makes = [...new Set((allMeta ?? []).map((c) => c.make))].sort();
   const years = [...new Set((allMeta ?? []).map((c) => c.year))].sort((a, b) => b - a);
 
-  // Paginated + filtered query
   let query = supabase
     .from("cars")
     .select(
-      "id, make, model, year, mileage, fuel, price_cny, commission, shipping_cost, primary_image, created_at",
+      "id, make, model, year, mileage, fuel, price_cny, commission, shipping_cost, primary_image, created_at, condition",
       { count: "exact" },
     )
     .eq("status", "available")
@@ -42,6 +41,7 @@ export default async function HomePage({
     .order("created_at", { ascending: false })
     .range(from, to);
 
+  if (condition) query = query.eq("condition", condition);
   if (make) query = query.eq("make", make);
   if (model) query = query.ilike("model", `%${model}%`);
   if (year) query = query.eq("year", parseInt(year, 10));
@@ -51,10 +51,20 @@ export default async function HomePage({
   const cars = (data as CarCardData[] | null) ?? [];
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
 
-  // Pass current filters through to pagination links
   const paginationParams = Object.fromEntries(
-    Object.entries({ make, model, year }).filter(([, v]) => v != null),
+    Object.entries({ make, model, year, tab }).filter(([, v]) => v != null),
   ) as Record<string, string>;
+
+  function tabHref(t: string) {
+    const params = new URLSearchParams(
+      Object.entries({ make, model, year }).filter(([, v]) => v != null) as [string, string][],
+    );
+    if (t !== "all") params.set("tab", t);
+    const qs = params.toString();
+    return `/#inventory${qs ? `?${qs}` : ""}`;
+  }
+
+  const activeTab = tab === "new" ? "new" : tab === "used" ? "used" : "all";
 
   return (
     <main>
@@ -68,12 +78,23 @@ export default async function HomePage({
             </p>
             <h2 className="mt-2 text-3xl font-bold text-slate-900">Exceptional Vehicles</h2>
           </div>
-          <a
-            href="#inventory"
-            className="hidden text-sm font-medium text-amber-500 transition-colors duration-150 hover:text-amber-400 sm:block"
-          >
-            View all vehicles →
-          </a>
+        </div>
+
+        {/* Condition tabs */}
+        <div className="mt-6 flex gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1 w-fit">
+          {(["all", "new", "used"] as const).map((t) => (
+            <a
+              key={t}
+              href={tabHref(t)}
+              className={`rounded-lg px-5 py-2 text-sm font-semibold capitalize transition-colors duration-150 ${
+                activeTab === t
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {t === "all" ? "All Cars" : t === "new" ? "New Cars" : "Used Cars"}
+            </a>
+          ))}
         </div>
 
         {error && (
@@ -84,7 +105,7 @@ export default async function HomePage({
           <p className="mt-6 text-sm text-slate-600">No vehicles match your search.</p>
         )}
 
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {cars.map((car) => (
             <CarCard key={car.id} car={car} />
           ))}

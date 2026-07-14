@@ -18,6 +18,7 @@ export type CarDetailsPayload = {
   source_url: string | null;
   autohome_url: string | null;
   destination_country: string;
+  condition: string;
 };
 
 export type CreateCarPayload = CarDetailsPayload & {

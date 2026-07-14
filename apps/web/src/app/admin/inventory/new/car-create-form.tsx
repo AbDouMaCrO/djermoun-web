@@ -71,6 +71,7 @@ export default function CarCreateForm() {
   // Settings
   const [status, setStatus] = useState("available");
   const [isVisible, setIsVisible] = useState(true);
+  const [condition, setCondition] = useState("used");
 
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -107,6 +108,7 @@ export default function CarCreateForm() {
       accessories: parseLines(accessoriesText),
       source_url: sourceUrl.trim() || null,
       autohome_url: autohomeUrl.trim() || null,
+      condition,
       status,
       is_visible: isVisible,
     });
@@ -188,6 +190,12 @@ export default function CarCreateForm() {
           </Section>
 
           <Section title="Settings">
+            <Field label="Condition">
+              <select value={condition} onChange={(e) => setCondition(e.target.value)} className={selectClass}>
+                <option value="used">Used</option>
+                <option value="new">New</option>
+              </select>
+            </Field>
             <Field label="Status">
               <select value={status} onChange={(e) => setStatus(e.target.value)} className={selectClass}>
                 <option value="available">Available</option>

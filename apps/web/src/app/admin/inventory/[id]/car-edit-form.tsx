@@ -19,6 +19,7 @@ type Car = {
   source_url: string | null;
   autohome_url: string | null;
   destination_country: string | null;
+  condition: string;
 };
 
 function formatPrice(price: number) {
@@ -75,6 +76,7 @@ export default function CarEditForm({ car }: { car: Car }) {
   const [sourceUrl, setSourceUrl] = useState(car.source_url ?? "");
   const [autohomeUrl, setAutohomeUrl] = useState(car.autohome_url ?? "");
   const [destinationCountry, setDestinationCountry] = useState(car.destination_country ?? "algeria");
+  const [condition, setCondition] = useState(car.condition ?? "used");
 
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,6 +102,7 @@ export default function CarEditForm({ car }: { car: Car }) {
       source_url: sourceUrl.trim() || null,
       autohome_url: autohomeUrl.trim() || null,
       destination_country: destinationCountry,
+      condition,
     });
 
     setPending(false);
@@ -185,6 +188,12 @@ export default function CarEditForm({ car }: { car: Car }) {
             />
           </Field>
 
+          <Field label="Condition">
+            <select value={condition} onChange={(e) => setCondition(e.target.value)} className={inputClass}>
+              <option value="used">Used</option>
+              <option value="new">New</option>
+            </select>
+          </Field>
           <Field label="Destination Country">
             <select
               value={destinationCountry}

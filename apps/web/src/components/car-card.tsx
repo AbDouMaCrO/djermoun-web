@@ -17,6 +17,7 @@ export type CarCardData = {
   shipping_cost: number | null;
   primary_image: string | null;
   created_at: string;
+  condition: string;
 };
 
 function formatUSD(price: number | null) {
@@ -57,12 +58,16 @@ export default function CarCard({ car }: { car: CarCardData }) {
           className="h-full w-full object-cover transition-transform duration-300 ease-[var(--ease-out-strong)] group-hover:scale-105"
         />
         <div className="absolute left-3 top-3 flex gap-2">
-          <span className="rounded-full bg-emerald-500/90 px-2.5 py-1 text-xs font-semibold text-black">
-            Available
+          <span
+            className={`rounded-full px-2.5 py-1 text-xs font-semibold text-black ${
+              car.condition === "new" ? "bg-sky-400/90" : "bg-emerald-500/90"
+            }`}
+          >
+            {car.condition === "new" ? "New" : "Used"}
           </span>
           {isNew && (
             <span className="rounded-full bg-amber-500/90 px-2.5 py-1 text-xs font-semibold text-black">
-              New
+              Recent
             </span>
           )}
         </div>

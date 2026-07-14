@@ -342,17 +342,21 @@ def insert_car_record(car):
             return
 
         duty = calculator.get_estimated_duty_dzd(car["make"], car["model"], car["year"])
+        mileage = car.get("mileage")
+        year = car["year"]
+        condition = "new" if (year == 2026 and (mileage is None or mileage <= 100)) else "used"
         payload = {
             "make":             car["make"],
             "model":            car["model"],
-            "year":             car["year"],
+            "year":             year,
             "price_cny":        car["price_cny"],
             "customs_duty_dzd": duty,
+            "condition":        condition,
             "status":           "available",
             "is_visible":       True,
             "primary_image":    car.get("primary_image"),
             "images":           car.get("images") or [],
-            "mileage":          car.get("mileage"),
+            "mileage":          mileage,
             "fuel":             car.get("fuel"),
             "fuel_type":        car.get("fuel_type"),
             "transmission":     car.get("transmission"),
