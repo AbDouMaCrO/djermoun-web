@@ -4,6 +4,7 @@ import CarCard, { type CarCardData } from "@/components/car-card";
 import WhyChoose from "@/components/why-choose";
 import HowItWorks from "@/components/how-it-works";
 import ExportSolutions from "@/components/export-solutions";
+import HowToBuyTeaser from "@/components/how-to-buy-teaser";
 import Pagination from "@/components/Pagination";
 import FilterBar from "@/components/filter-bar";
 import BrandPicker, { KNOWN_MAKES } from "@/components/brand-picker";
@@ -172,6 +173,8 @@ export default async function HomePage({
           ) as Record<string, string>}
         />
       </section>
+
+      <HowToBuyTeaser />
 
       <HowItWorks />
 
