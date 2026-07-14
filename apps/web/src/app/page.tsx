@@ -4,12 +4,13 @@ import CarCard, { type CarCardData } from "@/components/car-card";
 import WhyChoose from "@/components/why-choose";
 import Pagination from "@/components/Pagination";
 import FilterBar from "@/components/filter-bar";
+import BrandPicker from "@/components/brand-picker";
 
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 20;
-const DZD_RATE = 240;        // DZD per USD reference rate for price filter
-const AUTOCANGO_FEES = 1595; // constant overhead applied to every car
+const DZD_RATE = 240;
+const AUTOCANGO_FEES = 1595;
 const DEFAULT_SHIPPING = 1900;
 
 export default async function HomePage({
@@ -24,11 +25,12 @@ export default async function HomePage({
     minMc?: string;
     maxMc?: string;
     wasla?: string;
+    fuel?: string;
   }>;
 }) {
   const {
     make, model, year, page: pageParam, tab,
-    minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam,
+    minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam,
   } = await searchParams;
 
   const condition = tab === "new" ? "new" : tab === "used" ? "used" : null;
@@ -36,12 +38,12 @@ export default async function HomePage({
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  // Price filter
   const minMc = Math.max(0, Number(minMcParam ?? 150));
   const maxMc = Math.max(0, Number(maxMcParam ?? 250));
   const wasla = waslaParam === "1";
-  const shipping = wasla ? DEFAULT_SHIPPING : 0;
-  const overhead = AUTOCANGO_FEES + shipping;
+  const fuel = fuelParam ?? "";
+
+  const overhead = AUTOCANGO_FEES + (wasla ? DEFAULT_SHIPPING : 0);
   const minUsd = Math.max(0, Math.round((minMc * 10_000) / DZD_RATE - overhead));
   const maxUsd = Math.round((maxMc * 10_000) / DZD_RATE - overhead);
 
@@ -70,31 +72,35 @@ export default async function HomePage({
     .range(from, to);
 
   if (condition) query = query.eq("condition", condition);
-  if (make) query = query.eq("make", make);
+  if (make)  query = query.eq("make", make);
   if (model) query = query.ilike("model", `%${model}%`);
-  if (year) query = query.eq("year", parseInt(year, 10));
+  if (year)  query = query.eq("year", parseInt(year, 10));
+  if (fuel)  query = query.ilike("fuel", `%${fuel}%`);
 
   const { data, error, count } = await query;
 
   const cars = (data as CarCardData[] | null) ?? [];
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
 
-  const paginationParams = Object.fromEntries(
-    Object.entries({ make, model, year, tab, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam })
+  // Params kept across tab / filter changes
+  const sharedParams = Object.fromEntries(
+    Object.entries({ make, model, year, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam })
       .filter(([, v]) => v != null),
   ) as Record<string, string>;
 
-  // Current params for FilterBar to preserve when updating
   const filterCurrentParams = Object.fromEntries(
     Object.entries({ make, model, year, tab }).filter(([, v]) => v != null),
   ) as Record<string, string>;
 
+  const brandPickerParams = Object.fromEntries(
+    Object.entries({ tab, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam })
+      .filter(([, v]) => v != null),
+  ) as Record<string, string>;
+
   function tabHref(t: string) {
-    const params = new URLSearchParams(
-      Object.entries({ make, model, year, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam })
-        .filter(([, v]) => v != null) as [string, string][],
-    );
-    if (t !== "all") params.set("tab", t);
+    const params = new URLSearchParams(sharedParams);
+    if (t !== "all") params.set("tab", t); else params.delete("tab");
+    params.delete("page");
     const qs = params.toString();
     return `/#inventory${qs ? `?${qs}` : ""}`;
   }
@@ -106,17 +112,16 @@ export default async function HomePage({
       <Hero makes={makes} years={years} defaultMake={make} defaultModel={model} defaultYear={year} />
 
       <section id="inventory" className="mx-auto max-w-7xl px-6 pb-20 pt-36">
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">
-              Inventory
-            </p>
-            <h2 className="mt-2 text-3xl font-bold text-slate-900">Exceptional Vehicles</h2>
-          </div>
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">Inventory</p>
+          <h2 className="mt-2 text-3xl font-bold text-slate-900">Exceptional Vehicles</h2>
         </div>
 
+        {/* Brand picker */}
+        <BrandPicker currentMake={make} extraParams={brandPickerParams} />
+
         {/* Condition tabs */}
-        <div className="mt-6 flex gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1 w-fit">
+        <div className="mt-8 flex gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1 w-fit">
           {(["all", "new", "used"] as const).map((t) => (
             <a
               key={t}
@@ -132,11 +137,12 @@ export default async function HomePage({
           ))}
         </div>
 
-        {/* Price + Wasla filter */}
+        {/* Price + Fuel filter */}
         <FilterBar
           initialMin={minMc}
           initialMax={maxMc}
           initialWasla={wasla}
+          initialFuel={fuel}
           currentParams={filterCurrentParams}
         />
 
@@ -154,7 +160,14 @@ export default async function HomePage({
           ))}
         </div>
 
-        <Pagination currentPage={currentPage} totalPages={totalPages} searchParams={paginationParams} />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          searchParams={Object.fromEntries(
+            Object.entries({ make, model, year, tab, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam })
+              .filter(([, v]) => v != null),
+          ) as Record<string, string>}
+        />
       </section>
 
       <WhyChoose />
