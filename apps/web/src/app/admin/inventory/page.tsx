@@ -51,11 +51,20 @@ export default async function AdminInventoryPage({
 
   return (
     <main className="min-h-screen bg-slate-50 px-8 py-10">
-      <h1 className="text-2xl font-semibold text-slate-900">Vehicle Inventory</h1>
-      <p className="mt-1 text-sm text-slate-600">
-        Base price, commission, and shipping cost roll up into the customer-facing
-        final price.
-      </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">Vehicle Inventory</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            Base price, commission, and shipping cost roll up into the customer-facing final price.
+          </p>
+        </div>
+        <Link
+          href="/admin/inventory/new"
+          className="rounded-md bg-amber-500 px-5 py-2.5 text-sm font-semibold text-black hover:bg-amber-400"
+        >
+          + Add Listing
+        </Link>
+      </div>
 
       {error && <p className="mt-4 text-sm text-red-400">Failed to load cars: {error.message}</p>}
 

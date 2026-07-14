@@ -20,6 +20,34 @@ export type CarDetailsPayload = {
   destination_country: string;
 };
 
+export type CreateCarPayload = CarDetailsPayload & {
+  fuel_type: string | null;
+  transmission: string | null;
+  engine: string | null;
+  exterior_color: string | null;
+  customs_duty_dzd: number | null;
+  primary_image: string | null;
+  images: string[];
+  accessories: string[];
+  status: string;
+  is_visible: boolean;
+};
+
+export async function createCar(
+  payload: CreateCarPayload,
+): Promise<{ success: true; id: string } | { success: false; error: string }> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("cars")
+    .insert({ ...payload })
+    .select("id")
+    .single();
+  if (error) return { success: false, error: error.message };
+  revalidatePath("/admin/inventory");
+  revalidatePath("/");
+  return { success: true, id: data.id };
+}
+
 // Flips a car's public visibility. currentStatus is the row's current
 // is_visible; we persist the opposite.
 export async function toggleCarVisibility(
