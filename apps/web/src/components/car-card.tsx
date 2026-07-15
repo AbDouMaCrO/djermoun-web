@@ -29,15 +29,30 @@ function waLink(car: CarCardData, pageUrl: string) {
 
 const NEW_LISTING_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
 
+// Must match AUTOCANGO_FEES in pricing-breakdown.tsx
+const AUTOCANGO_FEES_TOTAL = 1595;
+
 export default function CarCard({ car }: { car: CarCardData }) {
   const { formatPrice, country } = useCountry();
   const [now] = useState(() => Date.now());
   const isNew = now - new Date(car.created_at).getTime() < NEW_LISTING_WINDOW_MS;
-  const total = car.price_cny;
+
+  const totalUSD =
+    car.price_cny != null
+      ? car.price_cny + AUTOCANGO_FEES_TOTAL + (car.commission ?? 0) + (car.shipping_cost ?? 0)
+      : null;
+
   const detailHref = `/cars/${car.id}`;
   const carPageUrl = typeof window !== "undefined"
     ? `${window.location.origin}${detailHref}`
     : detailHref;
+
+  const priceLabel =
+    country === "international"
+      ? "All-in USD estimate"
+      : country === "uae"
+      ? "All-in estimate incl. shipping"
+      : "Estimation totale incl. transport";
 
   return (
     <div className="group overflow-hidden rounded-xl border border-slate-200 bg-white transition-shadow duration-200 hover:shadow-md">
@@ -87,17 +102,8 @@ export default function CarCard({ car }: { car: CarCardData }) {
           </div>
 
           <div className="mt-4">
-            <p className="text-xl font-bold text-slate-900">{formatPrice(total)}</p>
-            {total != null && country !== "international" && (
-              <p className="text-xs text-slate-500">
-                {country === "uae"
-                  ? `≈ $${total.toLocaleString()} USD`
-                  : `≈ $${total.toLocaleString()} USD`}
-              </p>
-            )}
-            {total != null && country === "international" && (
-              <p className="text-xs text-slate-500">FOB price</p>
-            )}
+            <p className="text-xl font-bold text-slate-900">{formatPrice(totalUSD)}</p>
+            <p className="text-xs text-slate-500">{priceLabel}</p>
           </div>
         </div>
       </Link>
