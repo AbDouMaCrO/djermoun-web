@@ -6,7 +6,9 @@
     "dev": "npm run dev --workspace=apps/web",
     "build": "npm run build --workspace=apps/web",
     "mobile": "npm run start --workspace=apps/mobile",
-    "marketing:generate": "tsx scripts/generate-marketing.ts"
+    "marketing:generate": "tsx scripts/generate-marketing.ts",
+    "marketing:images": "tsx scripts/download-images.ts",
+    "marketing:all": "npm run marketing:generate && npm run marketing:images"
   },
   "devDependencies": {
     "dotenv": "^17.4.2",
