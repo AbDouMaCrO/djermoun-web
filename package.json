@@ -5,10 +5,13 @@
   "scripts": {
     "dev": "npm run dev --workspace=apps/web",
     "build": "npm run build --workspace=apps/web",
-    "mobile": "npm run start --workspace=apps/mobile"
+    "mobile": "npm run start --workspace=apps/mobile",
+    "marketing:generate": "tsx scripts/generate-marketing.ts"
   },
   "devDependencies": {
-    "expo-router": "56.2.11"
+    "dotenv": "^17.4.2",
+    "expo-router": "56.2.11",
+    "tsx": "^4.23.1"
   },
   "workspaces": [
     "apps/*",

@@ -1,4 +1,5 @@
 node_modules/
+marketing-output/
 .next/
 .env
 .env.*

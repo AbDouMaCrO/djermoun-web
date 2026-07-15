@@ -1,0 +1,44 @@
+name: Marketing Content Generator
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # Every Monday at 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      car_id:
+        description: "Single car UUID (leave blank to process all active cars)"
+        required: false
+        default: ""
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate marketing content
+        run: |
+          if [ -n "${{ inputs.car_id }}" ]; then
+            npm run marketing:generate -- --car-id "${{ inputs.car_id }}"
+          else
+            npm run marketing:generate
+          fi
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DZD_RATE: ${{ secrets.DZD_RATE }}
+          WHATSAPP_NUMBER: ${{ secrets.WHATSAPP_NUMBER }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: marketing-output-${{ github.run_number }}
+          path: marketing-output/
+          retention-days: 30
