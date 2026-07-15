@@ -2,17 +2,17 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
+import { useCountry } from "@/country/country-context";
 
-const PRICE_MIN = 0;
-const PRICE_MAX = 2000;
-const PRICE_STEP = 10;
-const PRICE_DEFAULT_MIN = 0;
-const PRICE_DEFAULT_MAX = 2000;
+const MC_MIN = 0;
+const MC_MAX = 2000;
+const MC_DEFAULT_MIN = 0;
+const MC_DEFAULT_MAX = 2000;
 
 const MLG_MIN = 0;
 const MLG_MAX = 300_000;
 const MLG_STEP = 5_000;
-const MLG_DEFAULT = 300_000; // no filter
+const MLG_DEFAULT = 300_000;
 
 const FUEL_OPTIONS = [
   { label: "All",    value: ""       },
@@ -25,7 +25,6 @@ const FUEL_OPTIONS = [
 
 // ─── Dual range slider ───────────────────────────────────────────────────────
 
-// pointer-events-none on the track; only the thumb is interactive
 const thumbCls = [
   "pointer-events-none",
   "[&::-webkit-slider-thumb]:pointer-events-auto",
@@ -53,14 +52,12 @@ function DualRange({
   const pct = (v: number) => ((v - min) / (max - min)) * 100;
   return (
     <div className="relative flex h-5 items-center">
-      {/* Background track */}
       <div className="pointer-events-none absolute h-1.5 w-full rounded-full bg-slate-200">
         <div
           className="absolute h-1.5 rounded-full bg-amber-400"
           style={{ left: `${pct(lo)}%`, width: `${pct(hi) - pct(lo)}%` }}
         />
       </div>
-      {/* Both inputs span full width; only thumbs are interactive so no z-index conflict */}
       <input
         type="range" min={min} max={max} step={step} value={lo}
         onChange={e => onLo(Math.min(+e.target.value, hi - step))}
@@ -98,8 +95,8 @@ function SingleRange({
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export default function FilterBar({
-  initialMin = PRICE_DEFAULT_MIN,
-  initialMax = PRICE_DEFAULT_MAX,
+  initialMin = MC_DEFAULT_MIN,
+  initialMax = MC_DEFAULT_MAX,
   initialWasla = false,
   initialFuel = "",
   initialMaxMileage = MLG_DEFAULT,
@@ -114,7 +111,9 @@ export default function FilterBar({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { mcToDisplay, displayToMc, filterBounds, filterUnit } = useCountry();
 
+  // Internal state in M centimes (URL format), display shows converted values
   const [minMc, setMinMc] = useState(initialMin);
   const [maxMc, setMaxMc] = useState(initialMax);
   const [wasla, setWasla] = useState(initialWasla);
@@ -133,18 +132,41 @@ export default function FilterBar({
   }
 
   const isDefault =
-    minMc === PRICE_DEFAULT_MIN &&
-    maxMc === PRICE_DEFAULT_MAX &&
+    minMc === MC_DEFAULT_MIN &&
+    maxMc === MC_DEFAULT_MAX &&
     !wasla && !fuel &&
     maxMileage === MLG_DEFAULT;
 
   function reset() {
-    setMinMc(PRICE_DEFAULT_MIN);
-    setMaxMc(PRICE_DEFAULT_MAX);
+    setMinMc(MC_DEFAULT_MIN);
+    setMaxMc(MC_DEFAULT_MAX);
     setWasla(false);
     setFuel("");
     setMaxMileage(MLG_DEFAULT);
-    push(PRICE_DEFAULT_MIN, PRICE_DEFAULT_MAX, false, "", MLG_DEFAULT);
+    push(MC_DEFAULT_MIN, MC_DEFAULT_MAX, false, "", MLG_DEFAULT);
+  }
+
+  // Display values converted from M centimes
+  const displayMin = mcToDisplay(minMc);
+  const displayMax = mcToDisplay(maxMc);
+  const { max: sliderMax, step: sliderStep } = filterBounds;
+
+  function onDisplayLo(displayVal: number) {
+    const mc = displayToMc(displayVal);
+    setMinMc(mc);
+    push(mc, maxMc, wasla, fuel, maxMileage);
+  }
+
+  function onDisplayHi(displayVal: number) {
+    const mc = displayToMc(displayVal);
+    setMaxMc(mc);
+    push(minMc, mc, wasla, fuel, maxMileage);
+  }
+
+  function formatDisplayValue(v: number): string {
+    if (filterUnit === "USD") return `$${v.toLocaleString()}`;
+    if (filterUnit === "AED") return `${v.toLocaleString()} AED`;
+    return `${v} M`;
   }
 
   return (
@@ -157,18 +179,18 @@ export default function FilterBar({
           <div className="mb-3 flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Budget</span>
             <span className="text-xs font-semibold text-slate-600">
-              {minMc} – {maxMc}
-              <span className="ml-1 text-slate-400">M centimes</span>
+              {formatDisplayValue(displayMin)} – {formatDisplayValue(displayMax)}
+              <span className="ml-1 text-slate-400">{filterUnit}</span>
             </span>
           </div>
           <DualRange
-            min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP}
-            lo={minMc} hi={maxMc}
-            onLo={v => { setMinMc(v); push(v, maxMc, wasla, fuel, maxMileage); }}
-            onHi={v => { setMaxMc(v); push(minMc, v, wasla, fuel, maxMileage); }}
+            min={0} max={sliderMax} step={sliderStep}
+            lo={displayMin} hi={displayMax}
+            onLo={onDisplayLo}
+            onHi={onDisplayHi}
           />
           <div className="mt-1.5 flex justify-between text-[10px] text-slate-300">
-            <span>{PRICE_MIN} M</span><span>{PRICE_MAX} M</span>
+            <span>0</span><span>{formatDisplayValue(sliderMax)}</span>
           </div>
         </div>
 

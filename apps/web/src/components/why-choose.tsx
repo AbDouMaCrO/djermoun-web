@@ -1,47 +1,52 @@
-import { ShieldCheck, MapPin, Wrench, Headphones, FileCheck, Wallet } from "lucide-react";
+"use client";
 
-const FEATURES = [
-  {
-    icon: ShieldCheck,
-    title: "Secure Transactions",
-    description: "Every deposit and payment is tracked and protected end-to-end.",
-  },
-  {
-    icon: MapPin,
-    title: "Global Shipping",
-    description: "We export to ports worldwide with full customs documentation.",
-  },
-  {
-    icon: Wrench,
-    title: "Full Inspections",
-    description: "Every vehicle passes a complete multi-point inspection before listing.",
-  },
-  {
-    icon: Headphones,
-    title: "Dedicated Support",
-    description: "A sales rep is with you from reservation through delivery.",
-  },
-  {
-    icon: FileCheck,
-    title: "Transparent Paperwork",
-    description: "Clear titles and export documents, no hidden fees or surprises.",
-  },
-  {
-    icon: Wallet,
-    title: "Fair Pricing",
-    description: "Direct sourcing means competitive prices without markup layers.",
-  },
-];
+import { ShieldCheck, MapPin, Wrench, Headphones, FileCheck, Wallet } from "lucide-react";
+import { useLanguage } from "@/i18n/language-context";
 
 export default function WhyChoose() {
+  const { dict } = useLanguage();
+
+  const FEATURES = [
+    {
+      icon: ShieldCheck,
+      title: dict.home.secureTransactions as string,
+      description: dict.home.secureTransactionsDesc as string,
+    },
+    {
+      icon: MapPin,
+      title: dict.home.globalShipping as string,
+      description: dict.home.globalShippingDesc as string,
+    },
+    {
+      icon: Wrench,
+      title: dict.home.fullInspections as string,
+      description: dict.home.fullInspectionsDesc as string,
+    },
+    {
+      icon: Headphones,
+      title: dict.home.dedicatedSupport as string,
+      description: dict.home.dedicatedSupportDesc as string,
+    },
+    {
+      icon: FileCheck,
+      title: dict.home.transparentPaperwork as string,
+      description: dict.home.transparentPaperworkDesc as string,
+    },
+    {
+      icon: Wallet,
+      title: dict.home.fairPricing as string,
+      description: dict.home.fairPricingDesc as string,
+    },
+  ];
+
   return (
     <section className="mx-auto max-w-7xl px-6 py-20">
       <div className="text-center">
         <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">
-          Why Choose Us
+          {dict.home.whyChooseUs as string}
         </p>
         <h2 className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
-          Why Choose DJERMOUN AUTO
+          {dict.home.whyChooseDjermoun as string}
         </h2>
       </div>
 

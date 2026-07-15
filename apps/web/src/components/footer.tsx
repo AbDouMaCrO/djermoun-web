@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MapPin, Phone, Mail } from "lucide-react";
+import CountrySelector from "@/components/country-selector";
 
 const WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
 const FB = process.env.NEXT_PUBLIC_FACEBOOK_URL ?? "";
@@ -128,8 +129,17 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-slate-200 px-6 py-6 text-center text-xs text-slate-500">
-        © {new Date().getFullYear()} Djermoun Auto. All rights reserved.
+      {/* Bottom bar with country selector */}
+      <div className="border-t border-slate-200 px-6 py-5">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 sm:flex-row">
+          <p className="text-xs text-slate-500">
+            © {new Date().getFullYear()} Djermoun Auto. All rights reserved.
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400">Region:</span>
+            <CountrySelector />
+          </div>
+        </div>
       </div>
     </footer>
   );

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useExchangeRate } from "@/currency/exchange-rate-context";
+import { useCountry, AED_PER_USD } from "@/country/country-context";
 
 const AUTOCANGO_FEES = [
   { label: "Inspection Fee",         amount: 65  },
@@ -16,9 +17,7 @@ const AUTOCANGO_FEES_TOTAL = AUTOCANGO_FEES.reduce((s, f) => s + f.amount, 0); /
 
 function formatUSD(n: number) {
   return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
+    style: "currency", currency: "USD", maximumFractionDigits: 0,
   }).format(n);
 }
 
@@ -36,6 +35,7 @@ export default function PricingBreakdown({
   shipping: number;
 }) {
   const { rate, setRate } = useExchangeRate();
+  const { country } = useCountry();
   const [rateInput, setRateInput] = useState(String(rate));
   const [feesOpen, setFeesOpen] = useState(false);
 
@@ -43,6 +43,7 @@ export default function PricingBreakdown({
   const parsedRate = Number(rateInput);
   const effectiveRate = Number.isFinite(parsedRate) && parsedRate > 0 ? parsedRate : rate;
   const totalDZD = totalUSD * effectiveRate;
+  const totalAED = totalUSD * AED_PER_USD;
 
   function onRateChange(value: string) {
     setRateInput(value);
@@ -111,9 +112,11 @@ export default function PricingBreakdown({
           <dt className="text-slate-600">Global Shipping</dt>
           <dd className="text-right font-medium text-slate-900">
             {formatUSD(shipping)}
-            <span className="ml-1.5 text-xs font-normal text-slate-400">
-              = {formatDZD(shipping * effectiveRate)}
-            </span>
+            {country === "algeria" && (
+              <span className="ml-1.5 text-xs font-normal text-slate-400">
+                = {formatDZD(shipping * effectiveRate)}
+              </span>
+            )}
           </dd>
         </div>
 
@@ -123,30 +126,65 @@ export default function PricingBreakdown({
         </div>
       </dl>
 
-      <div className="mt-6 border-t border-slate-200 pt-5">
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">
-            Your USD to DZD Exchange Rate
-          </span>
-          <input
-            type="number"
-            min={1}
-            value={rateInput}
-            onChange={(e) => onRateChange(e.target.value)}
-            className="w-full max-w-[160px] rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-500"
-          />
-        </label>
+      {/* Country-specific total display */}
+      {country === "algeria" && (
+        <div className="mt-6 border-t border-slate-200 pt-5">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-slate-700">
+              Your USD to DZD Exchange Rate
+            </span>
+            <input
+              type="number"
+              min={1}
+              value={rateInput}
+              onChange={(e) => onRateChange(e.target.value)}
+              className="w-full max-w-[160px] rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-500"
+            />
+          </label>
 
-        <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-amber-500">
-            Total in DZD
-          </p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">
-            ~{Math.floor(totalDZD / 10_000)} millions centimes
-          </p>
-          <p className="mt-0.5 text-xs text-slate-500">{formatDZD(totalDZD)}</p>
+          <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-amber-500">
+              Total in DZD
+            </p>
+            <p className="mt-1 text-2xl font-bold text-slate-900">
+              ~{Math.floor(totalDZD / 10_000)} millions centimes
+            </p>
+            <p className="mt-0.5 text-xs text-slate-500">{formatDZD(totalDZD)}</p>
+          </div>
         </div>
-      </div>
+      )}
+
+      {country === "uae" && (
+        <div className="mt-6 border-t border-slate-200 pt-5">
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-amber-500">
+              Total in AED
+            </p>
+            <p className="mt-1 text-2xl font-bold text-slate-900">
+              {new Intl.NumberFormat(undefined, {
+                style: "currency", currency: "AED", maximumFractionDigits: 0,
+              }).format(totalAED)}
+            </p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              1 USD = {AED_PER_USD} AED (fixed peg)
+            </p>
+          </div>
+        </div>
+      )}
+
+      {country === "international" && (
+        <div className="mt-6 border-t border-slate-200 pt-5">
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-amber-500">
+              Total in USD
+            </p>
+            <p className="mt-1 text-2xl font-bold text-slate-900">
+              {formatUSD(totalUSD)}
+            </p>
+            <p className="mt-0.5 text-xs text-slate-500">FOB price — shipping to your port</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

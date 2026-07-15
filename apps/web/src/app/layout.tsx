@@ -3,8 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import ExchangeRateBanner from "@/components/exchange-rate-banner";
+import CountryModal from "@/components/country-modal";
 import { LanguageProvider } from "@/i18n/language-context";
 import { ExchangeRateProvider } from "@/currency/exchange-rate-context";
+import { CountryProvider } from "@/country/country-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,10 +34,13 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col bg-slate-50 text-slate-900">
         <LanguageProvider>
           <ExchangeRateProvider>
-            <ExchangeRateBanner />
-            <Navbar />
-            <div className="flex-1">{children}</div>
-            <Footer />
+            <CountryProvider>
+              <CountryModal />
+              <ExchangeRateBanner />
+              <Navbar />
+              <div className="flex-1">{children}</div>
+              <Footer />
+            </CountryProvider>
           </ExchangeRateProvider>
         </LanguageProvider>
       </body>

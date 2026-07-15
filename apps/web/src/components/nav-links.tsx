@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { languages, type Language } from "@/i18n/dictionaries";
 import { useLanguage } from "@/i18n/language-context";
+import CountrySelector from "@/components/country-selector";
 import type { UserRole } from "@/utils/supabase/roles";
 
 export default function NavLinks({
@@ -15,11 +16,11 @@ export default function NavLinks({
   const { lang, setLang, dict } = useLanguage();
 
   const links = [
-    { id: "inventory",  label: dict.nav.inventory,   href: "/"           },
-    { id: "how-it-works", label: dict.nav.howItWorks, href: "/how-it-works" },
-    { id: "about-us",   label: dict.nav.aboutUs,     href: "/about-us"   },
-    { id: "contact",    label: dict.nav.contact,     href: "/contact"    },
-    { id: "terms",      label: "Terms",              href: "/terms"      },
+    { id: "inventory",    label: dict.nav.inventory,   href: "/"             },
+    { id: "how-it-works", label: dict.nav.howItWorks,  href: "/how-it-works" },
+    { id: "about-us",     label: dict.nav.aboutUs,     href: "/about-us"     },
+    { id: "contact",      label: dict.nav.contact,     href: "/contact"      },
+    { id: "terms",        label: "Terms",              href: "/terms"        },
   ];
 
   if (role === "supervisor" || role === "admin") {
@@ -45,7 +46,9 @@ export default function NavLinks({
         ))}
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        <CountrySelector />
+
         <select
           value={lang}
           onChange={(e) => setLang(e.target.value as Language)}

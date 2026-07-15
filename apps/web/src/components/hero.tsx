@@ -1,10 +1,7 @@
-import { ShieldCheck, Globe2, Car as CarIcon } from "lucide-react";
+"use client";
 
-const STATS = [
-  { icon: CarIcon, label: "300+ Vehicles" },
-  { icon: Globe2, label: "50+ Brands" },
-  { icon: ShieldCheck, label: "100% Secure" },
-];
+import { ShieldCheck, Globe2, Car as CarIcon } from "lucide-react";
+import { useLanguage } from "@/i18n/language-context";
 
 export default function Hero({
   makes,
@@ -19,6 +16,15 @@ export default function Hero({
   defaultModel?: string;
   defaultYear?: string;
 }) {
+  const { dict } = useLanguage();
+  const STATS = [
+    { icon: CarIcon, label: dict.home.statsVehicles as string },
+    { icon: Globe2, label: dict.home.statsBrands as string },
+    { icon: ShieldCheck, label: dict.home.statsSecure as string },
+  ];
+
+  const heroTitle = dict.home.heroTitle as string[];
+
   return (
     <section className="relative border-b border-slate-200 bg-[url('/hero-car.jpg')] bg-cover bg-center bg-no-repeat">
       {/* Light overlay so dark text stays readable over the hero image. */}
@@ -26,17 +32,17 @@ export default function Hero({
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 pb-32 pt-24 text-center sm:pt-32">
         <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl">
-          Discover Your <span className="text-amber-500">Dream Car</span>
+          {heroTitle[0]}
+          <span className="text-amber-500">{heroTitle[1]}</span>
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-base text-slate-600 sm:text-lg">
-          Transparent pricing, complete inspections, and seamless global shipping right to
-          your port.
+          {dict.home.heroSubtitle as string}
         </p>
         <a
           href="#inventory"
           className="press-scale mt-8 inline-block rounded-full bg-amber-500 px-8 py-3 text-sm font-bold text-black transition-colors duration-150 hover:bg-amber-400"
         >
-          Browse Inventory
+          {dict.home.browseInventory as string}
         </a>
 
         <div className="mt-14 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
@@ -57,13 +63,15 @@ export default function Hero({
       >
         <div className="grid gap-4 sm:grid-cols-4">
           <label className="flex flex-col gap-1.5 text-left">
-            <span className="text-xs font-medium text-slate-600">Make</span>
+            <span className="text-xs font-medium text-slate-600">
+              {dict.home.searchMake as string}
+            </span>
             <select
               name="make"
               defaultValue={defaultMake ?? ""}
               className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-500"
             >
-              <option value="">All Makes</option>
+              <option value="">{dict.home.searchAllMakes as string}</option>
               {makes.map((make) => (
                 <option key={make} value={make}>
                   {make}
@@ -73,23 +81,27 @@ export default function Hero({
           </label>
 
           <label className="flex flex-col gap-1.5 text-left">
-            <span className="text-xs font-medium text-slate-600">Model</span>
+            <span className="text-xs font-medium text-slate-600">
+              {dict.home.searchModel as string}
+            </span>
             <input
               name="model"
               defaultValue={defaultModel ?? ""}
-              placeholder="Any model"
+              placeholder={dict.home.searchAnyModel as string}
               className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-500 focus:border-amber-500"
             />
           </label>
 
           <label className="flex flex-col gap-1.5 text-left">
-            <span className="text-xs font-medium text-slate-600">Year</span>
+            <span className="text-xs font-medium text-slate-600">
+              {dict.home.searchYear as string}
+            </span>
             <select
               name="year"
               defaultValue={defaultYear ?? ""}
               className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-500"
             >
-              <option value="">Any Year</option>
+              <option value="">{dict.home.searchAnyYear as string}</option>
               {years.map((year) => (
                 <option key={year} value={year}>
                   {year}
@@ -102,7 +114,7 @@ export default function Hero({
             type="submit"
             className="press-scale self-end rounded-md bg-amber-500 px-4 py-2 text-sm font-bold text-black transition-colors duration-150 hover:bg-amber-400"
           >
-            Search Vehicle
+            {dict.home.searchButton as string}
           </button>
         </div>
       </form>
