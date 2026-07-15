@@ -1,8 +1,30 @@
 import Link from "next/link";
 import { MapPin, Phone, Mail } from "lucide-react";
 
-// lucide-react dropped brand/logo icons (trademark reasons) — lettered badges instead.
-const SOCIALS = ["FB", "IG", "X"];
+const WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
+const FB = process.env.NEXT_PUBLIC_FACEBOOK_URL ?? "";
+const IG = process.env.NEXT_PUBLIC_INSTAGRAM_URL ?? "";
+
+const SOCIALS = [
+  {
+    label: "WA",
+    href: WA ? `https://wa.me/${WA}` : "#",
+    title: "WhatsApp",
+    color: "hover:border-green-500 hover:text-green-600",
+  },
+  {
+    label: "FB",
+    href: FB || "#",
+    title: "Facebook",
+    color: "hover:border-blue-500 hover:text-blue-600",
+  },
+  {
+    label: "IG",
+    href: IG || "#",
+    title: "Instagram",
+    color: "hover:border-pink-500 hover:text-pink-600",
+  },
+];
 
 const QUICK_LINKS = [
   { label: "Inventory", href: "/" },
@@ -51,12 +73,15 @@ export default function Footer() {
             inspections, and seamless shipping to your port.
           </p>
           <div className="mt-5 flex gap-3">
-            {SOCIALS.map((label) => (
+            {SOCIALS.map(({ label, href, title, color }) => (
               <a
                 key={label}
-                href="#"
-                aria-label={label}
-                className="press-scale flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold text-slate-600 transition-colors duration-150 hover:border-amber-500 hover:text-amber-500"
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={title}
+                title={title}
+                className={`press-scale flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-xs font-semibold text-slate-600 transition-colors duration-150 ${color}`}
               >
                 {label}
               </a>
