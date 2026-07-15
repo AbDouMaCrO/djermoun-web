@@ -15,10 +15,11 @@ export default function NavLinks({
   const { lang, setLang, dict } = useLanguage();
 
   const links = [
-    { id: "inventory", label: dict.nav.inventory, href: "/" },
+    { id: "inventory",  label: dict.nav.inventory,   href: "/"           },
     { id: "how-it-works", label: dict.nav.howItWorks, href: "/how-it-works" },
-    { id: "about-us", label: dict.nav.aboutUs, href: "/about-us" },
-    { id: "contact", label: dict.nav.contact, href: "/contact" },
+    { id: "about-us",   label: dict.nav.aboutUs,     href: "/about-us"   },
+    { id: "contact",    label: dict.nav.contact,     href: "/contact"    },
+    { id: "terms",      label: "Terms",              href: "/terms"      },
   ];
 
   if (role === "supervisor" || role === "admin") {
