@@ -39,7 +39,7 @@ export default function CarCard({ car }: { car: CarCardData }) {
 
   const totalUSD =
     car.price_cny != null
-      ? car.price_cny + AUTOCANGO_FEES_TOTAL + (car.commission ?? 0) + (car.shipping_cost ?? 0)
+      ? car.price_cny + AUTOCANGO_FEES_TOTAL + (car.commission ?? 0) + (Number(car.shipping_cost) || 1900)
       : null;
 
   const detailHref = `/cars/${car.id}`;

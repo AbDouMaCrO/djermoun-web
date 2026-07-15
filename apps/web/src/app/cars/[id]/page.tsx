@@ -55,22 +55,24 @@ export default async function CarDetailsPage({
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
-      <h1 className="text-3xl font-semibold text-slate-900">
-        {car.year} {car.make} {car.model}
-      </h1>
-      <CarPriceHeading totalUSD={car.price_usd != null ? car.price_usd : totalPrice} />
+      <div className="flex items-baseline justify-between gap-6">
+        <h1 className="text-3xl font-semibold text-slate-900">
+          {car.year} {car.make} {car.model}
+        </h1>
+        <CarPriceHeading totalUSD={totalPrice} />
+      </div>
       {car.customs_duty_dzd != null && (
-        <div className="mt-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <div className="mt-3 flex items-center justify-between gap-4">
+          <p className="shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-400">
             Algerian Customs &amp; Duties Estimate
           </p>
           {car.customs_duty_dzd === 0 ? (
-            <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
               <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-              European Origin: Exempt from Customs Duty (EUR.1)
+              European Origin: Exempt (EUR.1)
             </span>
           ) : (
-            <p className="mt-1 text-sm font-medium text-slate-700">
+            <p className="text-sm font-medium text-slate-700">
               ~{Math.floor(Number(car.customs_duty_dzd) / 10_000)} millions centimes
             </p>
           )}
