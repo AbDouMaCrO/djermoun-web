@@ -18,6 +18,7 @@ from PIL import Image
 
 from db import supabase
 from duty_calculator import CustomsDutyCalculator
+from tiktok_publisher import publish_car_to_tiktok
 
 calculator = CustomsDutyCalculator()
 
@@ -372,6 +373,8 @@ def insert_car_record(car):
         if res.data:
             duty_fmt = f"{duty:,.0f}" if duty is not None else "N/A"
             print(f"[OK] Inserted {car['year']} {car['make']} {car['model']} — Duty: {duty_fmt} DZD")
+            # Push new listing to TikTok as a draft
+            publish_car_to_tiktok(car, car.get("images") or [])
         else:
             print(f"[ERR] Insert failed: {res}")
     except Exception as e:
