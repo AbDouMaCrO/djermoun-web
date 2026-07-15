@@ -6,7 +6,8 @@ import ExchangeRateBanner from "@/components/exchange-rate-banner";
 import CountryModal from "@/components/country-modal";
 import { LanguageProvider } from "@/i18n/language-context";
 import { ExchangeRateProvider } from "@/currency/exchange-rate-context";
-import { CountryProvider } from "@/country/country-context";
+import { CountryProvider, type Country } from "@/country/country-context";
+import { getSiteSettings } from "@/app/actions/settings";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -24,17 +25,25 @@ export const metadata: Metadata = {
   description: "Transparent pricing, complete inspections, and seamless global shipping.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getSiteSettings();
+
+  const enabledCountries: Country[] = [];
+  if (settings.country_algeria_enabled) enabledCountries.push("algeria");
+  if (settings.country_international_enabled) enabledCountries.push("international");
+  if (settings.country_uae_enabled) enabledCountries.push("uae");
+  if (enabledCountries.length === 0) enabledCountries.push("algeria");
+
   return (
     <html className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-slate-50 text-slate-900">
         <LanguageProvider>
           <ExchangeRateProvider>
-            <CountryProvider>
+            <CountryProvider enabledCountries={enabledCountries}>
               <CountryModal />
               <ExchangeRateBanner />
               <Navbar />

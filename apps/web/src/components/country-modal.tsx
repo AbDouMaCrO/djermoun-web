@@ -7,11 +7,11 @@ const MODAL_KEY = "djermoun-country-selected";
 
 export default function CountryModal() {
   const [open, setOpen] = useState(false);
-  const { setCountry } = useCountry();
+  const { setCountry, enabledCountries } = useCountry();
 
   useEffect(() => {
-    if (!localStorage.getItem(MODAL_KEY)) setOpen(true);
-  }, []);
+    if (enabledCountries.length > 1 && !localStorage.getItem(MODAL_KEY)) setOpen(true);
+  }, [enabledCountries.length]);
 
   function pick(c: Country) {
     setCountry(c);
@@ -29,8 +29,9 @@ export default function CountryModal() {
           Select your region to see prices in your local currency.
         </p>
         <div className="mt-6 grid gap-3">
-          {(Object.entries(COUNTRY_CONFIG) as [Country, (typeof COUNTRY_CONFIG)[Country]][]).map(
-            ([key, cfg]) => (
+          {enabledCountries.map((key) => {
+            const cfg = COUNTRY_CONFIG[key];
+            return (
               <button
                 key={key}
                 onClick={() => pick(key)}
@@ -42,8 +43,8 @@ export default function CountryModal() {
                   <p className="text-xs text-slate-500">Prices in {cfg.currency}</p>
                 </div>
               </button>
-            ),
-          )}
+            );
+          })}
         </div>
       </div>
     </div>

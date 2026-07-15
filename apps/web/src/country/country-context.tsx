@@ -5,6 +5,8 @@ import { useExchangeRate } from "@/currency/exchange-rate-context";
 
 export type Country = "international" | "algeria" | "uae";
 
+export const ALL_COUNTRIES: Country[] = ["algeria", "international", "uae"];
+
 export const AED_PER_USD = 3.67;
 
 export const COUNTRY_CONFIG = {
@@ -23,6 +25,7 @@ export const FILTER_BOUNDS: Record<Country, { max: number; step: number }> = {
 type CountryContextValue = {
   country: Country;
   setCountry: (c: Country) => void;
+  enabledCountries: Country[];
   formatPrice: (usdPrice: number | null) => string;
   // filter bar helpers (M centimes ↔ display unit)
   mcToDisplay: (mc: number) => number;
@@ -34,14 +37,16 @@ type CountryContextValue = {
 const CountryContext = createContext<CountryContextValue | null>(null);
 const STORAGE_KEY = "djermoun-country";
 
-export function CountryProvider({ children }: { children: ReactNode }) {
+export function CountryProvider({ children, enabledCountries = ["algeria"] }: { children: ReactNode; enabledCountries?: Country[] }) {
   const [country, setCountryState] = useState<Country>("algeria");
   const { rate: dzdRate } = useExchangeRate();
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as Country | null;
-    if (stored && stored in COUNTRY_CONFIG) setCountryState(stored);
-  }, []);
+    const fallback = enabledCountries[0] ?? "algeria";
+    if (stored && enabledCountries.includes(stored)) setCountryState(stored);
+    else setCountryState(fallback);
+  }, [enabledCountries.join(",")]);
 
   function setCountry(c: Country) {
     setCountryState(c);
@@ -82,7 +87,7 @@ export function CountryProvider({ children }: { children: ReactNode }) {
   const filterUnit = country === "international" ? "USD" : country === "uae" ? "AED" : "M centimes";
 
   return (
-    <CountryContext.Provider value={{ country, setCountry, formatPrice, mcToDisplay, displayToMc, filterBounds, filterUnit }}>
+    <CountryContext.Provider value={{ country, setCountry, enabledCountries, formatPrice, mcToDisplay, displayToMc, filterBounds, filterUnit }}>
       {children}
     </CountryContext.Provider>
   );
