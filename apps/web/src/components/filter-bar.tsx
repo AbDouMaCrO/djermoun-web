@@ -3,29 +3,113 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 
-const DEFAULT_MIN = 150;
-const DEFAULT_MAX = 250;
+const PRICE_MIN = 0;
+const PRICE_MAX = 500;
+const PRICE_STEP = 5;
+const PRICE_DEFAULT_MIN = 150;
+const PRICE_DEFAULT_MAX = 250;
+
+const MLG_MIN = 0;
+const MLG_MAX = 300_000;
+const MLG_STEP = 5_000;
+const MLG_DEFAULT = 300_000; // no filter
 
 const FUEL_OPTIONS = [
-  { label: "All Fuels", value: "" },
-  { label: "PHEV",      value: "PHEV" },
-  { label: "Essence",   value: "Petrol" },
-  { label: "Hybrid",    value: "Hybrid" },
-  { label: "EV",        value: "EV" },
-  { label: "Diesel",    value: "Diesel" },
+  { label: "All",    value: ""       },
+  { label: "PHEV",   value: "PHEV"   },
+  { label: "Petrol", value: "Petrol" },
+  { label: "Hybrid", value: "Hybrid" },
+  { label: "EV",     value: "EV"     },
+  { label: "Diesel", value: "Diesel" },
 ];
 
+// ─── Dual range slider ───────────────────────────────────────────────────────
+
+const thumbCls = [
+  "[&::-webkit-slider-thumb]:appearance-none",
+  "[&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5",
+  "[&::-webkit-slider-thumb]:rounded-full",
+  "[&::-webkit-slider-thumb]:bg-white",
+  "[&::-webkit-slider-thumb]:border-[2.5px] [&::-webkit-slider-thumb]:border-amber-500",
+  "[&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-grab",
+  "[&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5",
+  "[&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white",
+  "[&::-moz-range-thumb]:border-[2.5px] [&::-moz-range-thumb]:border-amber-500",
+  "[&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-grab",
+  "[&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:border-solid",
+].join(" ");
+
+function DualRange({
+  min, max, step, lo, hi,
+  onLo, onHi,
+}: {
+  min: number; max: number; step: number;
+  lo: number; hi: number;
+  onLo: (v: number) => void; onHi: (v: number) => void;
+}) {
+  const pct = (v: number) => ((v - min) / (max - min)) * 100;
+  return (
+    <div className="relative flex h-5 items-center">
+      {/* Background track */}
+      <div className="pointer-events-none absolute h-1.5 w-full rounded-full bg-slate-200">
+        <div
+          className="absolute h-1.5 rounded-full bg-amber-400"
+          style={{ left: `${pct(lo)}%`, width: `${pct(hi) - pct(lo)}%` }}
+        />
+      </div>
+      {/* Min input */}
+      <input
+        type="range" min={min} max={max} step={step} value={lo}
+        onChange={e => onLo(Math.min(+e.target.value, hi - step))}
+        className={`absolute w-full appearance-none bg-transparent cursor-pointer ${thumbCls}`}
+        style={{ zIndex: lo > max * 0.5 ? 5 : 3 }}
+      />
+      {/* Max input */}
+      <input
+        type="range" min={min} max={max} step={step} value={hi}
+        onChange={e => onHi(Math.max(+e.target.value, lo + step))}
+        className={`absolute w-full appearance-none bg-transparent cursor-pointer ${thumbCls}`}
+        style={{ zIndex: lo > max * 0.5 ? 3 : 5 }}
+      />
+    </div>
+  );
+}
+
+function SingleRange({
+  min, max, step, value, onChange,
+}: {
+  min: number; max: number; step: number; value: number; onChange: (v: number) => void;
+}) {
+  const pct = ((value - min) / (max - min)) * 100;
+  return (
+    <div className="relative flex h-5 items-center">
+      <div className="pointer-events-none absolute h-1.5 w-full rounded-full bg-slate-200">
+        <div className="absolute h-1.5 rounded-full bg-amber-400" style={{ width: `${pct}%` }} />
+      </div>
+      <input
+        type="range" min={min} max={max} step={step} value={value}
+        onChange={e => onChange(+e.target.value)}
+        className={`absolute w-full appearance-none bg-transparent cursor-pointer ${thumbCls}`}
+      />
+    </div>
+  );
+}
+
+// ─── Main component ──────────────────────────────────────────────────────────
+
 export default function FilterBar({
-  initialMin = DEFAULT_MIN,
-  initialMax = DEFAULT_MAX,
+  initialMin = PRICE_DEFAULT_MIN,
+  initialMax = PRICE_DEFAULT_MAX,
   initialWasla = false,
   initialFuel = "",
+  initialMaxMileage = MLG_DEFAULT,
   currentParams = {},
 }: {
   initialMin?: number;
   initialMax?: number;
   initialWasla?: boolean;
   initialFuel?: string;
+  initialMaxMileage?: number;
   currentParams?: Record<string, string>;
 }) {
   const router = useRouter();
@@ -35,172 +119,131 @@ export default function FilterBar({
   const [maxMc, setMaxMc] = useState(initialMax);
   const [wasla, setWasla] = useState(initialWasla);
   const [fuel, setFuel] = useState(initialFuel);
+  const [maxMileage, setMaxMileage] = useState(initialMaxMileage);
 
-  function push(min: number, max: number, w: boolean, f: string) {
+  function push(mn: number, mx: number, w: boolean, f: string, mlg: number) {
     const params = new URLSearchParams(currentParams);
-    params.set("minMc", String(min));
-    params.set("maxMc", String(max));
+    params.set("minMc", String(mn));
+    params.set("maxMc", String(mx));
     if (w) params.set("wasla", "1"); else params.delete("wasla");
     if (f) params.set("fuel", f); else params.delete("fuel");
+    if (mlg < MLG_DEFAULT) params.set("maxMileage", String(mlg)); else params.delete("maxMileage");
     params.delete("page");
     router.push(`${pathname}?${params.toString()}#inventory`);
   }
 
-  function apply(min = minMc, max = maxMc, w = wasla, f = fuel) {
-    push(min, max, w, f);
-  }
-
-  function toggleWasla() {
-    const next = !wasla;
-    setWasla(next);
-    apply(minMc, maxMc, next, fuel);
-  }
-
-  function selectFuel(f: string) {
-    setFuel(f);
-    apply(minMc, maxMc, wasla, f);
-  }
-
-  function handleKey(e: React.KeyboardEvent) {
-    if (e.key === "Enter") apply();
-  }
-
   const isDefault =
-    minMc === DEFAULT_MIN && maxMc === DEFAULT_MAX && !wasla && !fuel;
+    minMc === PRICE_DEFAULT_MIN &&
+    maxMc === PRICE_DEFAULT_MAX &&
+    !wasla && !fuel &&
+    maxMileage === MLG_DEFAULT;
+
+  function reset() {
+    setMinMc(PRICE_DEFAULT_MIN);
+    setMaxMc(PRICE_DEFAULT_MAX);
+    setWasla(false);
+    setFuel("");
+    setMaxMileage(MLG_DEFAULT);
+    push(PRICE_DEFAULT_MIN, PRICE_DEFAULT_MAX, false, "", MLG_DEFAULT);
+  }
 
   return (
-    <div className="mt-4 space-y-3 rounded-2xl border border-slate-100 bg-white px-5 py-4 shadow-[0_2px_16px_-4px_rgba(0,0,0,0.08)]">
-      {/* Row 1: Price range + Wasla */}
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="shrink-0 text-xs font-bold uppercase tracking-widest text-slate-400">
-          Budget
-        </span>
+    <div className="mt-4 rounded-2xl border border-slate-100 bg-white shadow-[0_2px_20px_-4px_rgba(0,0,0,0.08)]">
+      {/* ── Sliders row ─────────────────────────────────── */}
+      <div className="grid gap-6 px-6 pt-6 pb-5 sm:grid-cols-2">
 
-        <div className="flex flex-1 flex-wrap items-center gap-2">
-          <PriceInput
-            value={minMc}
-            onChange={setMinMc}
-            onBlur={() => apply()}
-            onKeyDown={handleKey}
-            label="Min"
-          />
-
-          <div className="flex items-center gap-1">
-            <div className="h-px w-4 bg-slate-200" />
-            <span className="text-xs text-slate-300">to</span>
-            <div className="h-px w-4 bg-slate-200" />
+        {/* Budget */}
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Budget</span>
+            <span className="text-xs font-semibold text-slate-600">
+              {minMc} – {maxMc}
+              <span className="ml-1 text-slate-400">M centimes</span>
+            </span>
           </div>
-
-          <PriceInput
-            value={maxMc}
-            onChange={setMaxMc}
-            onBlur={() => apply()}
-            onKeyDown={handleKey}
-            label="Max"
+          <DualRange
+            min={PRICE_MIN} max={PRICE_MAX} step={PRICE_STEP}
+            lo={minMc} hi={maxMc}
+            onLo={v => { setMinMc(v); push(v, maxMc, wasla, fuel, maxMileage); }}
+            onHi={v => { setMaxMc(v); push(minMc, v, wasla, fuel, maxMileage); }}
           />
-
-          <span className="text-xs font-semibold text-slate-400">M centimes</span>
-
-          {!isDefault && (
-            <button
-              type="button"
-              onClick={() => {
-                setMinMc(DEFAULT_MIN);
-                setMaxMc(DEFAULT_MAX);
-                setWasla(false);
-                setFuel("");
-                apply(DEFAULT_MIN, DEFAULT_MAX, false, "");
-              }}
-              className="text-xs text-amber-500 underline underline-offset-2 hover:text-amber-400"
-            >
-              Reset
-            </button>
-          )}
+          <div className="mt-1.5 flex justify-between text-[10px] text-slate-300">
+            <span>{PRICE_MIN} M</span><span>{PRICE_MAX} M</span>
+          </div>
         </div>
 
-        {/* Wasla */}
-        <button
-          type="button"
-          onClick={toggleWasla}
-          className={`group flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
-            wasla
-              ? "bg-sky-500 text-white shadow-lg shadow-sky-200/60"
-              : "border border-slate-200 bg-slate-50 text-slate-500 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600"
-          }`}
-        >
-          <span className={`text-base transition-transform duration-300 ${wasla ? "" : "group-hover:-rotate-12"}`}>
-            🚢
-          </span>
-          <span>Wasla</span>
-          <span
-            className={`overflow-hidden text-xs font-normal transition-all duration-200 ${
-              wasla ? "max-w-[120px] opacity-70" : "max-w-0 opacity-0"
-            }`}
-          >
-            · Shipping incl.
-          </span>
-        </button>
+        {/* Mileage */}
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Max Mileage</span>
+            <span className="text-xs font-semibold text-slate-600">
+              {maxMileage >= MLG_DEFAULT
+                ? <span className="text-slate-400">Any</span>
+                : <>{(maxMileage / 1000).toFixed(0)}k <span className="text-slate-400">km</span></>
+              }
+            </span>
+          </div>
+          <SingleRange
+            min={MLG_MIN} max={MLG_MAX} step={MLG_STEP}
+            value={maxMileage}
+            onChange={v => { setMaxMileage(v); push(minMc, maxMc, wasla, fuel, v); }}
+          />
+          <div className="mt-1.5 flex justify-between text-[10px] text-slate-300">
+            <span>0 km</span><span>300k km</span>
+          </div>
+        </div>
       </div>
 
-      {/* Divider */}
+      {/* ── Divider ─────────────────────────────────────── */}
       <div className="h-px bg-slate-100" />
 
-      {/* Row 2: Fuel type */}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="shrink-0 text-xs font-bold uppercase tracking-widest text-slate-400">
-          Fuel
-        </span>
-        <div className="flex flex-wrap gap-1.5">
-          {FUEL_OPTIONS.map((opt) => {
-            const active = fuel === opt.value;
+      {/* ── Fuel + Wasla + Reset row ─────────────────────── */}
+      <div className="flex flex-wrap items-center gap-3 px-6 py-4">
+        <span className="shrink-0 text-xs font-bold uppercase tracking-widest text-slate-400">Fuel</span>
+
+        <div className="flex flex-1 flex-wrap gap-1.5">
+          {FUEL_OPTIONS.map(({ label, value }) => {
+            const active = fuel === value;
             return (
               <button
-                key={opt.value}
+                key={value}
                 type="button"
-                onClick={() => selectFuel(opt.value)}
+                onClick={() => { setFuel(value); push(minMc, maxMc, wasla, value, maxMileage); }}
                 className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 ${
                   active
                     ? "bg-amber-500 text-black shadow-md shadow-amber-200/60"
                     : "border border-slate-200 bg-slate-50 text-slate-500 hover:border-amber-300 hover:text-amber-600"
                 }`}
               >
-                {opt.label}
+                {label}
               </button>
             );
           })}
         </div>
-      </div>
-    </div>
-  );
-}
 
-function PriceInput({
-  value,
-  onChange,
-  onBlur,
-  onKeyDown,
-  label,
-}: {
-  value: number;
-  onChange: (n: number) => void;
-  onBlur: () => void;
-  onKeyDown: (e: React.KeyboardEvent) => void;
-  label: string;
-}) {
-  return (
-    <div className="group relative">
-      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase tracking-wider text-slate-300 transition-colors group-focus-within:text-amber-400">
-        {label}
-      </span>
-      <input
-        type="number"
-        value={value}
-        min={0}
-        onChange={(e) => onChange(Number(e.target.value))}
-        onBlur={onBlur}
-        onKeyDown={onKeyDown}
-        className="w-28 rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm font-bold text-slate-800 outline-none transition-all focus:border-amber-400 focus:bg-white focus:shadow-[0_0_0_3px_rgba(251,191,36,0.12)]"
-      />
+        {/* Wasla */}
+        <button
+          type="button"
+          onClick={() => { const next = !wasla; setWasla(next); push(minMc, maxMc, next, fuel, maxMileage); }}
+          className={`group flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+            wasla
+              ? "bg-sky-500 text-white shadow-lg shadow-sky-200/60"
+              : "border border-slate-200 bg-slate-50 text-slate-500 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600"
+          }`}
+        >
+          <span className={`text-base transition-transform duration-300 ${wasla ? "" : "group-hover:-rotate-12"}`}>🚢</span>
+          <span>Wasla</span>
+          <span className={`overflow-hidden text-xs font-normal transition-all duration-200 ${wasla ? "max-w-[120px] opacity-70" : "max-w-0 opacity-0"}`}>
+            · Shipping incl.
+          </span>
+        </button>
+
+        {!isDefault && (
+          <button type="button" onClick={reset} className="text-xs text-amber-500 underline underline-offset-2 hover:text-amber-400">
+            Reset
+          </button>
+        )}
+      </div>
     </div>
   );
 }

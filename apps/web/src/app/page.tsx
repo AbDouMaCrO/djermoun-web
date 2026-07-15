@@ -31,11 +31,13 @@ export default async function HomePage({
     maxMc?: string;
     wasla?: string;
     fuel?: string;
+    maxMileage?: string;
   }>;
 }) {
   const {
     make, model, year, page: pageParam, tab,
     minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam,
+    maxMileage: maxMileageParam,
   } = await searchParams;
 
   const condition = tab === "new" ? "new" : tab === "used" ? "used" : null;
@@ -47,6 +49,7 @@ export default async function HomePage({
   const maxMc = Math.max(0, Number(maxMcParam ?? 250));
   const wasla = waslaParam === "1";
   const fuel = fuelParam ?? "";
+  const maxMileage = maxMileageParam ? Math.max(0, parseInt(maxMileageParam, 10)) : 300_000;
 
   const overhead = AUTOCANGO_FEES + (wasla ? DEFAULT_SHIPPING : 0);
   const minUsd = Math.max(0, Math.round((minMc * 10_000) / DZD_RATE - overhead));
@@ -82,6 +85,7 @@ export default async function HomePage({
   if (model) query = query.ilike("model", `%${model}%`);
   if (year)  query = query.eq("year", parseInt(year, 10));
   if (fuel)  query = query.ilike("fuel", `%${fuel}%`);
+  if (maxMileage < 300_000) query = query.lte("mileage", maxMileage);
 
   const { data, error, count } = await query;
 
@@ -90,7 +94,7 @@ export default async function HomePage({
 
   // Params kept across tab / filter changes
   const sharedParams = Object.fromEntries(
-    Object.entries({ make, model, year, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam })
+    Object.entries({ make, model, year, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam, maxMileage: maxMileageParam })
       .filter(([, v]) => v != null),
   ) as Record<string, string>;
 
@@ -99,7 +103,7 @@ export default async function HomePage({
   ) as Record<string, string>;
 
   const brandPickerParams = Object.fromEntries(
-    Object.entries({ tab, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam })
+    Object.entries({ tab, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam, maxMileage: maxMileageParam })
       .filter(([, v]) => v != null),
   ) as Record<string, string>;
 
@@ -149,6 +153,7 @@ export default async function HomePage({
           initialMax={maxMc}
           initialWasla={wasla}
           initialFuel={fuel}
+          initialMaxMileage={maxMileage}
           currentParams={filterCurrentParams}
         />
 
@@ -170,7 +175,7 @@ export default async function HomePage({
           currentPage={currentPage}
           totalPages={totalPages}
           searchParams={Object.fromEntries(
-            Object.entries({ make, model, year, tab, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam })
+            Object.entries({ make, model, year, tab, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam, maxMileage: maxMileageParam })
               .filter(([, v]) => v != null),
           ) as Record<string, string>}
         />
