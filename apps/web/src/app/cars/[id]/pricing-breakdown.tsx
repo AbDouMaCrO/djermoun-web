@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useExchangeRate } from "@/currency/exchange-rate-context";
 import { useCountry, AED_PER_USD } from "@/country/country-context";
 
@@ -38,7 +37,6 @@ export default function PricingBreakdown({
 }) {
   const { rate } = useExchangeRate();
   const { country, formatPrice } = useCountry();
-  const [feesOpen, setFeesOpen] = useState(false);
 
   const totalUSD = fobPrice + AUTOCANGO_FEES_TOTAL + commission + shipping;
 
@@ -54,39 +52,7 @@ export default function PricingBreakdown({
       <dl className="mt-4 space-y-3">
         <div className="flex justify-between text-sm">
           <dt className="text-slate-600">Vehicle Price (FOB China)</dt>
-          <dd className="font-medium text-slate-900">{fmt(fobPrice)}</dd>
-        </div>
-
-        <div>
-          <button
-            type="button"
-            onClick={() => setFeesOpen((o) => !o)}
-            className="flex w-full items-center justify-between text-sm text-slate-600 hover:text-slate-800"
-          >
-            <span>
-              Standard Fees
-              <span className="ml-1.5 text-xs text-slate-400">(click to {feesOpen ? "hide" : "show"})</span>
-            </span>
-            <span className="font-medium text-slate-900">{fmt(AUTOCANGO_FEES_TOTAL)}</span>
-          </button>
-
-          {feesOpen && (
-            <dl className="mt-2 space-y-1.5 rounded-lg bg-slate-50 px-4 py-3">
-              {AUTOCANGO_FEES.map((f) => (
-                <div key={f.label} className="flex justify-between text-xs text-slate-500">
-                  <dt>
-                    {f.label}
-                    {"note" in f && (
-                      <span className="ml-1.5 rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
-                        {f.note}
-                      </span>
-                    )}
-                  </dt>
-                  <dd>{fmt(f.amount)}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
+          <dd className="font-medium text-slate-900">{fmt(fobPrice + AUTOCANGO_FEES_TOTAL)}</dd>
         </div>
 
         <p className="flex items-center gap-1.5 text-xs text-slate-500">
