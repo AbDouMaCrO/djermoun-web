@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useExchangeRate } from "@/currency/exchange-rate-context";
 import { useCountry, AED_PER_USD } from "@/country/country-context";
-import type { Country } from "@/country/country-config";
 
 const AUTOCANGO_FEES = [
   { label: "Inspection Fee",         amount: 65  },
@@ -16,19 +15,16 @@ const AUTOCANGO_FEES = [
 
 const AUTOCANGO_FEES_TOTAL = AUTOCANGO_FEES.reduce((s, f) => s + f.amount, 0);
 
-function localAmount(usd: number, country: Country, rate: number): string {
-  if (country === "algeria") {
-    const mc = (usd * rate) / 10_000;
-    return `~${mc < 10 ? mc.toFixed(1) : Math.floor(mc)} M centimes`;
-  }
-  if (country === "uae") {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency", currency: "AED", maximumFractionDigits: 0,
-    }).format(Math.round(usd * AED_PER_USD));
-  }
+function fmtUSD(n: number) {
   return new Intl.NumberFormat(undefined, {
     style: "currency", currency: "USD", maximumFractionDigits: 0,
-  }).format(usd);
+  }).format(n);
+}
+
+function fmtAED(n: number) {
+  return new Intl.NumberFormat(undefined, {
+    style: "currency", currency: "AED", maximumFractionDigits: 0,
+  }).format(Math.round(n));
 }
 
 export default function PricingBreakdown({
@@ -41,14 +37,14 @@ export default function PricingBreakdown({
   shipping: number;
 }) {
   const { rate } = useExchangeRate();
-  const { country } = useCountry();
+  const { country, formatPrice } = useCountry();
   const [feesOpen, setFeesOpen] = useState(false);
 
   const totalUSD = fobPrice + AUTOCANGO_FEES_TOTAL + commission + shipping;
-  const totalAED = totalUSD * AED_PER_USD;
-  const totalDZD = totalUSD * rate;
 
-  const fmt = (usd: number) => localAmount(usd, country, rate);
+  // Single source of truth: formatPrice is the exact same function used on the card and title.
+  // For Algeria it returns "~X M centimes"; for UAE "AED X"; for international "$X".
+  const fmt = (usd: number) => formatPrice(usd);
 
   return (
     <div className="mt-8 rounded-xl border border-slate-200 bg-white p-6">
@@ -116,56 +112,32 @@ export default function PricingBreakdown({
         </div>
       </dl>
 
-      {/* Highlighted total block */}
-      {country === "algeria" && (
-        <div className="mt-6 border-t border-slate-200 pt-5">
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-amber-500">
-              Total en Centimes
-            </p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">
-              ~{Math.floor(totalDZD / 10_000)} millions centimes
-            </p>
-            <p className="mt-0.5 text-xs text-slate-500">
-              Taux utilisé : 1 USD = {rate} DZD
-            </p>
-          </div>
+      {/* Summary box — same value as Total Price line above, just highlighted */}
+      <div className="mt-6 border-t border-slate-200 pt-5">
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+          {country === "algeria" && (
+            <>
+              <p className="text-xs font-medium uppercase tracking-wide text-amber-500">Total en Centimes</p>
+              <p className="mt-1 text-2xl font-bold text-slate-900">{fmt(totalUSD)}</p>
+              <p className="mt-0.5 text-xs text-slate-500">Taux utilisé : 1 USD = {rate} DZD</p>
+            </>
+          )}
+          {country === "uae" && (
+            <>
+              <p className="text-xs font-medium uppercase tracking-wide text-amber-500">Total in AED</p>
+              <p className="mt-1 text-2xl font-bold text-slate-900">{fmtAED(totalUSD * AED_PER_USD)}</p>
+              <p className="mt-0.5 text-xs text-slate-500">1 USD = {AED_PER_USD} AED (fixed peg)</p>
+            </>
+          )}
+          {country === "international" && (
+            <>
+              <p className="text-xs font-medium uppercase tracking-wide text-amber-500">Total in USD</p>
+              <p className="mt-1 text-2xl font-bold text-slate-900">{fmtUSD(totalUSD)}</p>
+              <p className="mt-0.5 text-xs text-slate-500">FOB price — shipping to your port</p>
+            </>
+          )}
         </div>
-      )}
-
-      {country === "uae" && (
-        <div className="mt-6 border-t border-slate-200 pt-5">
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-amber-500">
-              Total in AED
-            </p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">
-              {new Intl.NumberFormat(undefined, {
-                style: "currency", currency: "AED", maximumFractionDigits: 0,
-              }).format(totalAED)}
-            </p>
-            <p className="mt-0.5 text-xs text-slate-500">
-              1 USD = {AED_PER_USD} AED (fixed peg)
-            </p>
-          </div>
-        </div>
-      )}
-
-      {country === "international" && (
-        <div className="mt-6 border-t border-slate-200 pt-5">
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-amber-500">
-              Total in USD
-            </p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">
-              {new Intl.NumberFormat(undefined, {
-                style: "currency", currency: "USD", maximumFractionDigits: 0,
-              }).format(totalUSD)}
-            </p>
-            <p className="mt-0.5 text-xs text-slate-500">FOB price — shipping to your port</p>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
