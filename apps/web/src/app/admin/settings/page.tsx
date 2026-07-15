@@ -1,5 +1,5 @@
 import { getSiteSettings, toggleCustomsCalculator, toggleCountry } from "@/app/actions/settings";
-import { COUNTRY_CONFIG } from "@/country/country-context";
+import { COUNTRY_CONFIG } from "@/country/country-config";
 
 export const dynamic = "force-dynamic";
 

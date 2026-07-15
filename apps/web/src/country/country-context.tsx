@@ -2,32 +2,16 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { useExchangeRate } from "@/currency/exchange-rate-context";
+import { AED_PER_USD, COUNTRY_CONFIG, FILTER_BOUNDS, type Country } from "@/country/country-config";
 
-export type Country = "international" | "algeria" | "uae";
-
-export const ALL_COUNTRIES: Country[] = ["algeria", "international", "uae"];
-
-export const AED_PER_USD = 3.67;
-
-export const COUNTRY_CONFIG = {
-  international: { label: "International", flag: "🌍", currency: "USD" },
-  algeria:       { label: "Algeria",       flag: "🇩🇿", currency: "DZD" },
-  uae:           { label: "UAE",           flag: "🇦🇪", currency: "AED" },
-} as const;
-
-// Filter slider bounds per country (display units)
-export const FILTER_BOUNDS: Record<Country, { max: number; step: number }> = {
-  international: { max: 80_000,  step: 500   },
-  algeria:       { max: 2_000,   step: 10    },
-  uae:           { max: 300_000, step: 2_000 },
-};
+export type { Country };
+export { COUNTRY_CONFIG, FILTER_BOUNDS, AED_PER_USD };
 
 type CountryContextValue = {
   country: Country;
   setCountry: (c: Country) => void;
   enabledCountries: Country[];
   formatPrice: (usdPrice: number | null) => string;
-  // filter bar helpers (M centimes ↔ display unit)
   mcToDisplay: (mc: number) => number;
   displayToMc: (v: number) => number;
   filterBounds: { max: number; step: number };
@@ -65,18 +49,15 @@ export function CountryProvider({ children, enabledCountries = ["algeria"] }: { 
         style: "currency", currency: "AED", maximumFractionDigits: 0,
       }).format(Math.round(usd * AED_PER_USD));
     }
-    // algeria: M centimes
     return `~${Math.floor((usd * dzdRate) / 10_000)} M centimes`;
   }
 
-  // M centimes → display unit
   function mcToDisplay(mc: number): number {
     if (country === "international") return Math.round((mc * 10_000) / dzdRate);
     if (country === "uae") return Math.round((mc * 10_000 * AED_PER_USD) / dzdRate);
     return mc;
   }
 
-  // display unit → M centimes
   function displayToMc(v: number): number {
     if (country === "international") return Math.round((v * dzdRate) / 10_000);
     if (country === "uae") return Math.round((v * dzdRate) / (AED_PER_USD * 10_000));

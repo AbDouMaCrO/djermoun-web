@@ -6,7 +6,8 @@ import ExchangeRateBanner from "@/components/exchange-rate-banner";
 import CountryModal from "@/components/country-modal";
 import { LanguageProvider } from "@/i18n/language-context";
 import { ExchangeRateProvider } from "@/currency/exchange-rate-context";
-import { CountryProvider, type Country } from "@/country/country-context";
+import { CountryProvider } from "@/country/country-context";
+import type { Country } from "@/country/country-config";
 import { getSiteSettings } from "@/app/actions/settings";
 import "./globals.css";
 
