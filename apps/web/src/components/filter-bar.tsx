@@ -25,7 +25,10 @@ const FUEL_OPTIONS = [
 
 // ─── Dual range slider ───────────────────────────────────────────────────────
 
+// pointer-events-none on the track; only the thumb is interactive
 const thumbCls = [
+  "pointer-events-none",
+  "[&::-webkit-slider-thumb]:pointer-events-auto",
   "[&::-webkit-slider-thumb]:appearance-none",
   "[&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5",
   "[&::-webkit-slider-thumb]:rounded-full",
@@ -57,19 +60,16 @@ function DualRange({
           style={{ left: `${pct(lo)}%`, width: `${pct(hi) - pct(lo)}%` }}
         />
       </div>
-      {/* Min input */}
+      {/* Both inputs span full width; only thumbs are interactive so no z-index conflict */}
       <input
         type="range" min={min} max={max} step={step} value={lo}
         onChange={e => onLo(Math.min(+e.target.value, hi - step))}
-        className={`absolute w-full appearance-none bg-transparent cursor-pointer ${thumbCls}`}
-        style={{ zIndex: lo > max * 0.5 ? 5 : 3 }}
+        className={`absolute w-full appearance-none bg-transparent ${thumbCls}`}
       />
-      {/* Max input */}
       <input
         type="range" min={min} max={max} step={step} value={hi}
         onChange={e => onHi(Math.max(+e.target.value, lo + step))}
-        className={`absolute w-full appearance-none bg-transparent cursor-pointer ${thumbCls}`}
-        style={{ zIndex: lo > max * 0.5 ? 3 : 5 }}
+        className={`absolute w-full appearance-none bg-transparent ${thumbCls}`}
       />
     </div>
   );
@@ -89,7 +89,7 @@ function SingleRange({
       <input
         type="range" min={min} max={max} step={step} value={value}
         onChange={e => onChange(+e.target.value)}
-        className={`absolute w-full appearance-none bg-transparent cursor-pointer ${thumbCls}`}
+        className={`absolute w-full cursor-pointer appearance-none bg-transparent ${thumbCls}`}
       />
     </div>
   );
