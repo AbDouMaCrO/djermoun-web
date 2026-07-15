@@ -1,37 +1,17 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-
-const STORAGE_KEY = "djermoun-usd-dzd-rate";
-
-// Database prices (Base, Commission, Shipping) are in USD. This is the
-// parallel-market USD->DZD rate shown to shoppers, adjustable at checkout.
-export const DEFAULT_USD_TO_DZD_RATE = 253;
+import { createContext, useContext, useState, type ReactNode } from "react";
 
 type ExchangeRateContextValue = {
   rate: number;
-  setRate: (rate: number) => void;
 };
 
 const ExchangeRateContext = createContext<ExchangeRateContextValue | null>(null);
 
-export function ExchangeRateProvider({ children }: { children: ReactNode }) {
-  const [rate, setRateState] = useState(DEFAULT_USD_TO_DZD_RATE);
-
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const parsed = stored ? Number(stored) : NaN;
-    if (Number.isFinite(parsed) && parsed > 0) setRateState(parsed);
-  }, []);
-
-  const setRate = (next: number) => {
-    if (!Number.isFinite(next) || next <= 0) return;
-    setRateState(next);
-    localStorage.setItem(STORAGE_KEY, String(next));
-  };
-
+export function ExchangeRateProvider({ children, defaultRate }: { children: ReactNode; defaultRate: number }) {
+  const [rate] = useState(defaultRate);
   return (
-    <ExchangeRateContext.Provider value={{ rate, setRate }}>
+    <ExchangeRateContext.Provider value={{ rate }}>
       {children}
     </ExchangeRateContext.Provider>
   );

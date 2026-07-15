@@ -16,7 +16,7 @@ export default function ExchangeRateBanner() {
   } else if (country === "uae") {
     rateText = `1 USD = ${AED_PER_USD} AED`;
   } else {
-    rateText = `1 USD = ${rate} DZD (Adjustable at checkout)`;
+    rateText = `1 USD = ${rate} DZD`;
   }
 
   return (

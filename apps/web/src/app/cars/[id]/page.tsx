@@ -4,21 +4,10 @@ import ReserveButton from "./reserve-button";
 import PricingBreakdown from "./pricing-breakdown";
 import CustomsCalculator from "./customs-calculator";
 import CarGallery from "@/components/car-gallery";
+import CarPriceHeading from "./car-price-heading";
 import { getSiteSettings } from "@/app/actions/settings";
 
 export const dynamic = "force-dynamic";
-
-function formatPrice(price: number) {
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(price);
-}
-
-function formatDZD(n: number) {
-  return `${Math.round(n).toLocaleString()} DZD`;
-}
 
 export default async function CarDetailsPage({
   params,
@@ -69,9 +58,7 @@ export default async function CarDetailsPage({
       <h1 className="text-3xl font-semibold text-slate-900">
         {car.year} {car.make} {car.model}
       </h1>
-      <p className="mt-2 text-2xl font-bold text-amber-500">
-        {formatPrice(car.price_usd != null ? car.price_usd : totalPrice)}
-      </p>
+      <CarPriceHeading totalUSD={car.price_usd != null ? car.price_usd : totalPrice} />
       {car.customs_duty_dzd != null && (
         <div className="mt-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -85,9 +72,6 @@ export default async function CarDetailsPage({
           ) : (
             <p className="mt-1 text-sm font-medium text-slate-700">
               ~{Math.floor(Number(car.customs_duty_dzd) / 10_000)} millions centimes
-              <span className="ml-1.5 text-xs font-normal text-slate-400">
-                ({formatDZD(car.customs_duty_dzd)})
-              </span>
             </p>
           )}
         </div>

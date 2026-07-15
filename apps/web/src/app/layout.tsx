@@ -43,7 +43,7 @@ export default async function RootLayout({
     <html className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-slate-50 text-slate-900">
         <LanguageProvider>
-          <ExchangeRateProvider>
+          <ExchangeRateProvider defaultRate={settings.usd_to_dzd_rate}>
             <CountryProvider enabledCountries={enabledCountries}>
               <CountryModal />
               <ExchangeRateBanner />

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useExchangeRate } from "@/currency/exchange-rate-context";
 import { useCountry, AED_PER_USD } from "@/country/country-context";
+import type { Country } from "@/country/country-config";
 
 const AUTOCANGO_FEES = [
   { label: "Inspection Fee",         amount: 65  },
@@ -13,16 +14,21 @@ const AUTOCANGO_FEES = [
   { label: "Banking Transfer Fee",   amount: 50  },
 ] as const;
 
-const AUTOCANGO_FEES_TOTAL = AUTOCANGO_FEES.reduce((s, f) => s + f.amount, 0); // 1595
+const AUTOCANGO_FEES_TOTAL = AUTOCANGO_FEES.reduce((s, f) => s + f.amount, 0);
 
-function formatUSD(n: number) {
+function localAmount(usd: number, country: Country, rate: number): string {
+  if (country === "algeria") {
+    const mc = (usd * rate) / 10_000;
+    return `~${mc < 10 ? mc.toFixed(1) : Math.floor(mc)} M centimes`;
+  }
+  if (country === "uae") {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency", currency: "AED", maximumFractionDigits: 0,
+    }).format(Math.round(usd * AED_PER_USD));
+  }
   return new Intl.NumberFormat(undefined, {
     style: "currency", currency: "USD", maximumFractionDigits: 0,
-  }).format(n);
-}
-
-function formatDZD(n: number) {
-  return `${Math.round(n).toLocaleString()} DZD`;
+  }).format(usd);
 }
 
 export default function PricingBreakdown({
@@ -34,22 +40,15 @@ export default function PricingBreakdown({
   commission: number;
   shipping: number;
 }) {
-  const { rate, setRate } = useExchangeRate();
+  const { rate } = useExchangeRate();
   const { country } = useCountry();
-  const [rateInput, setRateInput] = useState(String(rate));
   const [feesOpen, setFeesOpen] = useState(false);
 
   const totalUSD = fobPrice + AUTOCANGO_FEES_TOTAL + commission + shipping;
-  const parsedRate = Number(rateInput);
-  const effectiveRate = Number.isFinite(parsedRate) && parsedRate > 0 ? parsedRate : rate;
-  const totalDZD = totalUSD * effectiveRate;
   const totalAED = totalUSD * AED_PER_USD;
+  const totalDZD = totalUSD * rate;
 
-  function onRateChange(value: string) {
-    setRateInput(value);
-    const n = Number(value);
-    if (Number.isFinite(n) && n > 0) setRate(n);
-  }
+  const fmt = (usd: number) => localAmount(usd, country, rate);
 
   return (
     <div className="mt-8 rounded-xl border border-slate-200 bg-white p-6">
@@ -57,13 +56,11 @@ export default function PricingBreakdown({
         Transparent Pricing
       </h2>
       <dl className="mt-4 space-y-3">
-        {/* Vehicle price */}
         <div className="flex justify-between text-sm">
           <dt className="text-slate-600">Vehicle Price (FOB China)</dt>
-          <dd className="font-medium text-slate-900">{formatUSD(fobPrice)}</dd>
+          <dd className="font-medium text-slate-900">{fmt(fobPrice)}</dd>
         </div>
 
-        {/* AutoCango standard fees — collapsible */}
         <div>
           <button
             type="button"
@@ -74,7 +71,7 @@ export default function PricingBreakdown({
               Standard Fees
               <span className="ml-1.5 text-xs text-slate-400">(click to {feesOpen ? "hide" : "show"})</span>
             </span>
-            <span className="font-medium text-slate-900">{formatUSD(AUTOCANGO_FEES_TOTAL)}</span>
+            <span className="font-medium text-slate-900">{fmt(AUTOCANGO_FEES_TOTAL)}</span>
           </button>
 
           {feesOpen && (
@@ -89,14 +86,13 @@ export default function PricingBreakdown({
                       </span>
                     )}
                   </dt>
-                  <dd>{formatUSD(f.amount)}</dd>
+                  <dd>{fmt(f.amount)}</dd>
                 </div>
               ))}
             </dl>
           )}
         </div>
 
-        {/* Shipping port notice */}
         <p className="flex items-center gap-1.5 text-xs text-slate-500">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400" />
           Shipping port: <span className="font-medium text-slate-700">Guangzhou, CN</span>
@@ -105,51 +101,34 @@ export default function PricingBreakdown({
         {commission > 0 && (
           <div className="flex justify-between text-sm">
             <dt className="text-slate-600">DJERMOUN Brokerage Fee</dt>
-            <dd className="font-medium text-slate-900">{formatUSD(commission)}</dd>
+            <dd className="font-medium text-slate-900">{fmt(commission)}</dd>
           </div>
         )}
+
         <div className="flex justify-between text-sm">
           <dt className="text-slate-600">Global Shipping</dt>
-          <dd className="text-right font-medium text-slate-900">
-            {formatUSD(shipping)}
-            {country === "algeria" && (
-              <span className="ml-1.5 text-xs font-normal text-slate-400">
-                = {formatDZD(shipping * effectiveRate)}
-              </span>
-            )}
-          </dd>
+          <dd className="font-medium text-slate-900">{fmt(shipping)}</dd>
         </div>
 
         <div className="flex justify-between border-t border-slate-200 pt-3 text-base">
           <dt className="font-semibold text-slate-900">Total Price</dt>
-          <dd className="font-bold text-amber-500">{formatUSD(totalUSD)}</dd>
+          <dd className="font-bold text-amber-500">{fmt(totalUSD)}</dd>
         </div>
       </dl>
 
-      {/* Country-specific total display */}
+      {/* Highlighted total block */}
       {country === "algeria" && (
         <div className="mt-6 border-t border-slate-200 pt-5">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-slate-700">
-              Your USD to DZD Exchange Rate
-            </span>
-            <input
-              type="number"
-              min={1}
-              value={rateInput}
-              onChange={(e) => onRateChange(e.target.value)}
-              className="w-full max-w-[160px] rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-500"
-            />
-          </label>
-
-          <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-amber-500">
-              Total in DZD
+              Total en Centimes
             </p>
             <p className="mt-1 text-2xl font-bold text-slate-900">
               ~{Math.floor(totalDZD / 10_000)} millions centimes
             </p>
-            <p className="mt-0.5 text-xs text-slate-500">{formatDZD(totalDZD)}</p>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Taux utilisé : 1 USD = {rate} DZD
+            </p>
           </div>
         </div>
       )}
@@ -179,7 +158,9 @@ export default function PricingBreakdown({
               Total in USD
             </p>
             <p className="mt-1 text-2xl font-bold text-slate-900">
-              {formatUSD(totalUSD)}
+              {new Intl.NumberFormat(undefined, {
+                style: "currency", currency: "USD", maximumFractionDigits: 0,
+              }).format(totalUSD)}
             </p>
             <p className="mt-0.5 text-xs text-slate-500">FOB price — shipping to your port</p>
           </div>

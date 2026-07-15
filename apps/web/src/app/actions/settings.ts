@@ -8,6 +8,7 @@ export type SiteSettings = {
   country_algeria_enabled: boolean;
   country_international_enabled: boolean;
   country_uae_enabled: boolean;
+  usd_to_dzd_rate: number;
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -18,6 +19,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     country_algeria_enabled: true,
     country_international_enabled: false,
     country_uae_enabled: false,
+    usd_to_dzd_rate: 253,
   };
 }
 
@@ -34,6 +36,15 @@ export async function toggleCustomsCalculator(current: boolean) {
 export async function toggleCountry(column: "country_algeria_enabled" | "country_international_enabled" | "country_uae_enabled", current: boolean) {
   const supabase = createAdminClient();
   await supabase.from("site_settings").update({ [column]: !current }).eq("id", 1);
+  revalidatePath("/admin/settings");
+  revalidatePath("/", "layout");
+}
+
+export async function updateDzdRate(formData: FormData) {
+  const rate = Number(formData.get("rate"));
+  if (!Number.isFinite(rate) || rate <= 0) return;
+  const supabase = createAdminClient();
+  await supabase.from("site_settings").update({ usd_to_dzd_rate: rate }).eq("id", 1);
   revalidatePath("/admin/settings");
   revalidatePath("/", "layout");
 }

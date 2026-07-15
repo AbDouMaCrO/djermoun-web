@@ -42,7 +42,7 @@ export default function CustomsCalculator({
   customsDutyDzd?: number | null;
   defaultDestination?: string;
 }) {
-  const { rate, setRate } = useExchangeRate();
+  const { rate } = useExchangeRate();
   const [destination, setDestination] = useState<Destination>(
     (defaultDestination as Destination) ?? "algeria",
   );
@@ -98,21 +98,7 @@ export default function CustomsCalculator({
         </select>
       </label>
 
-      {isAlgeria && (
-        <label className="mt-3 flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">USD → DZD Rate</span>
-          <input
-            type="number"
-            min={1}
-            value={rate}
-            onChange={(e) => {
-              const n = Number(e.target.value);
-              if (n > 0) setRate(n);
-            }}
-            className="w-full max-w-[160px] rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-500"
-          />
-        </label>
-      )}
+
 
       <dl className="mt-5 space-y-3 border-t border-slate-200 pt-4">
         {/* Base price */}

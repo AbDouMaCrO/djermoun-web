@@ -1,4 +1,4 @@
-import { getSiteSettings, toggleCustomsCalculator, toggleCountry } from "@/app/actions/settings";
+import { getSiteSettings, toggleCustomsCalculator, toggleCountry, updateDzdRate } from "@/app/actions/settings";
 import { COUNTRY_CONFIG } from "@/country/country-config";
 
 export const dynamic = "force-dynamic";
@@ -106,6 +106,40 @@ export default async function AdminSettingsPage() {
             );
           })}
         </div>
+      </div>
+
+      <div className="mt-6 max-w-xl rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-amber-500">
+          Exchange Rate (USD → DZD)
+        </h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Used to convert all prices to M centimes on the Algeria site. Hidden from visitors.
+        </p>
+        <form action={updateDzdRate} className="mt-4 flex items-end gap-3">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-slate-700">1 USD =</span>
+            <div className="flex items-center gap-2">
+              <input
+                name="rate"
+                type="number"
+                min={1}
+                step={0.01}
+                defaultValue={settings.usd_to_dzd_rate}
+                className="w-32 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-500"
+              />
+              <span className="text-sm text-slate-500">DZD</span>
+            </div>
+          </label>
+          <button
+            type="submit"
+            className="rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-black hover:bg-amber-400"
+          >
+            Save
+          </button>
+        </form>
+        <p className="mt-2 text-xs text-slate-400">
+          Current rate: <span className="font-medium text-slate-600">1 USD = {settings.usd_to_dzd_rate} DZD</span>
+        </p>
       </div>
     </main>
   );
