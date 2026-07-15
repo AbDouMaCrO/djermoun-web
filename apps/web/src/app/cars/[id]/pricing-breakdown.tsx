@@ -1,30 +1,9 @@
 "use client";
 
 import { useExchangeRate } from "@/currency/exchange-rate-context";
-import { useCountry, AED_PER_USD } from "@/country/country-context";
+import { useCountry } from "@/country/country-context";
+import { AUTOCANGO_FEES_TOTAL } from "@/lib/fees";
 
-const AUTOCANGO_FEES = [
-  { label: "Inspection Fee",         amount: 65  },
-  { label: "Export Handling Fee",    amount: 450 },
-  { label: "Domestic Transport Fee", amount: 330 },
-  { label: "Port Local Fee",         amount: 400, note: "Guangzhou, CN" },
-  { label: "Service Fee",            amount: 400 },
-  { label: "Banking Transfer Fee",   amount: 50  },
-] as const;
-
-const AUTOCANGO_FEES_TOTAL = AUTOCANGO_FEES.reduce((s, f) => s + f.amount, 0);
-
-function fmtUSD(n: number) {
-  return new Intl.NumberFormat(undefined, {
-    style: "currency", currency: "USD", maximumFractionDigits: 0,
-  }).format(n);
-}
-
-function fmtAED(n: number) {
-  return new Intl.NumberFormat(undefined, {
-    style: "currency", currency: "AED", maximumFractionDigits: 0,
-  }).format(Math.round(n));
-}
 
 export default function PricingBreakdown({
   fobPrice,
@@ -78,32 +57,9 @@ export default function PricingBreakdown({
         </div>
       </dl>
 
-      {/* Summary box — same value as Total Price line above, just highlighted */}
-      <div className="mt-6 border-t border-slate-200 pt-5">
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
-          {country === "algeria" && (
-            <>
-              <p className="text-xs font-medium uppercase tracking-wide text-amber-500">Total en Centimes</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900">{fmt(totalUSD)}</p>
-              <p className="mt-0.5 text-xs text-slate-500">Taux utilisé : 1 USD = {rate} DZD</p>
-            </>
-          )}
-          {country === "uae" && (
-            <>
-              <p className="text-xs font-medium uppercase tracking-wide text-amber-500">Total in AED</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900">{fmtAED(totalUSD * AED_PER_USD)}</p>
-              <p className="mt-0.5 text-xs text-slate-500">1 USD = {AED_PER_USD} AED (fixed peg)</p>
-            </>
-          )}
-          {country === "international" && (
-            <>
-              <p className="text-xs font-medium uppercase tracking-wide text-amber-500">Total in USD</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900">{fmtUSD(totalUSD)}</p>
-              <p className="mt-0.5 text-xs text-slate-500">FOB price — shipping to your port</p>
-            </>
-          )}
-        </div>
-      </div>
+      {country === "algeria" && (
+        <p className="mt-3 text-right text-xs text-slate-400">Taux : 1 USD = {rate} DZD</p>
+      )}
     </div>
   );
 }

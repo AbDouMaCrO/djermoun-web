@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Calendar, Gauge, Fuel } from "lucide-react";
 import { useCountry } from "@/country/country-context";
+import { AUTOCANGO_FEES_TOTAL } from "@/lib/fees";
 
 export type CarCardData = {
   id: string;
@@ -28,9 +29,6 @@ function waLink(car: CarCardData, pageUrl: string) {
 }
 
 const NEW_LISTING_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
-
-// Must match AUTOCANGO_FEES in pricing-breakdown.tsx
-const AUTOCANGO_FEES_TOTAL = 1595;
 
 export default function CarCard({ car }: { car: CarCardData }) {
   const { formatPrice, country } = useCountry();

@@ -22,9 +22,9 @@ export default function ReserveButton({
   return (
     <button
       onClick={onReserve}
-      className="press-scale w-full rounded-md bg-amber-500 px-6 py-3 text-base font-bold text-black transition-colors duration-150 hover:bg-amber-400 disabled:opacity-50 sm:w-auto"
+      className="press-scale w-full rounded-md bg-amber-500 px-6 py-4 text-base font-bold text-black transition-colors duration-150 hover:bg-amber-400 disabled:opacity-50"
     >
-      {isAuthenticated ? "Reserve Car" : "Sign In to Reserve"}
+      {isAuthenticated ? "Réserver ce véhicule" : "Se connecter pour réserver"}
     </button>
   );
 }
