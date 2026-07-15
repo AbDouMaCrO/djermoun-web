@@ -4,10 +4,10 @@ import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 
 const PRICE_MIN = 0;
-const PRICE_MAX = 500;
-const PRICE_STEP = 5;
-const PRICE_DEFAULT_MIN = 150;
-const PRICE_DEFAULT_MAX = 250;
+const PRICE_MAX = 2000;
+const PRICE_STEP = 10;
+const PRICE_DEFAULT_MIN = 0;
+const PRICE_DEFAULT_MAX = 2000;
 
 const MLG_MIN = 0;
 const MLG_MAX = 300_000;

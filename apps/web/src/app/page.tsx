@@ -45,8 +45,8 @@ export default async function HomePage({
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  const minMc = Math.max(0, Number(minMcParam ?? 150));
-  const maxMc = Math.max(0, Number(maxMcParam ?? 250));
+  const minMc = Math.max(0, Number(minMcParam ?? 0));
+  const maxMc = Math.max(0, Number(maxMcParam ?? 2000));
   const wasla = waslaParam === "1";
   const fuel = fuelParam ?? "";
   const maxMileage = maxMileageParam ? Math.max(0, parseInt(maxMileageParam, 10)) : 300_000;
