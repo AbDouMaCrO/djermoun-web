@@ -99,7 +99,7 @@ export default function ClientDocuments({
 
       {!userId && (
         <p className="mt-2 text-sm text-amber-600">
-          This order has no linked customer account, so documents can't be attached.
+          This order has no linked customer account, so documents can&apos;t be attached.
         </p>
       )}
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}

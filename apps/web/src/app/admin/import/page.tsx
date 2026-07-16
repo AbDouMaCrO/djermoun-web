@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 const SCRAPER_API = process.env.NEXT_PUBLIC_SCRAPER_API ?? "http://localhost:8001";
 
@@ -103,9 +104,9 @@ export default function AutoCangoImporter() {
             ✓ Import complete — {summary.success} of {summary.total} vehicles imported
             {summary.failed > 0 && `, ${summary.failed} failed`}
           </div>
-          <a href="/admin/inventory" style={{ ...s.btn, display: "inline-block", textDecoration: "none" }}>
+          <Link href="/admin/inventory" style={{ ...s.btn, display: "inline-block", textDecoration: "none" }}>
             View in Inventory
-          </a>
+          </Link>
           {summary.failed_urls?.length > 0 && (
             <details style={s.details}>
               <summary style={{ cursor: "pointer", color: "#a0a0a0" }}>Failed URLs ({summary.failed_urls.length})</summary>

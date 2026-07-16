@@ -88,7 +88,7 @@ export default async function AccountPage() {
         </h2>
         {orders.length === 0 ? (
           <p className="mt-4 text-sm text-slate-500">
-            You haven't reserved any vehicles yet.
+            You haven&apos;t reserved any vehicles yet.
           </p>
         ) : (
           <ul className="mt-4 divide-y divide-slate-200">

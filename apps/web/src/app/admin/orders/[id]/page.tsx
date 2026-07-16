@@ -90,7 +90,7 @@ export default async function AdminOrderDetailPage({
           Client Documents
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          Upload export paperwork to the customer's Members Area.
+          Upload export paperwork to the customer&apos;s Members Area.
         </p>
         <div className="mt-4">
           <ClientDocuments orderId={order.id} userId={order.user_id} documents={documents} />

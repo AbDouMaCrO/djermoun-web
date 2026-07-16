@@ -28,6 +28,7 @@ export function CountryProvider({ children, enabledCountries = ["algeria"] }: { 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as Country | null;
     const fallback = enabledCountries[0] ?? "algeria";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (stored && enabledCountries.includes(stored)) setCountryState(stored);
     else setCountryState(fallback);
   }, [enabledCountries.join(",")]);

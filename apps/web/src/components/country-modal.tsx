@@ -10,6 +10,7 @@ export default function CountryModal() {
   const { setCountry, enabledCountries } = useCountry();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (enabledCountries.length > 1 && !localStorage.getItem(MODAL_KEY)) setOpen(true);
   }, [enabledCountries.length]);
 
