@@ -25,7 +25,7 @@ export default async function MarketingPage() {
   const wa   = process.env.WHATSAPP_NUMBER ?? "";
 
   const contents = (cars ?? []).map((car) =>
-    generateContent(car as MarketingCar, rate, wa)
+    generateContent(car as unknown as MarketingCar, rate, wa)
   );
 
   return (

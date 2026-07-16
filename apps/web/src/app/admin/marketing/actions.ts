@@ -17,5 +17,5 @@ export async function regenerateCar(carId: string): Promise<ContentOutput> {
   ]);
   const rate = Number(settings?.usd_to_dzd_rate) || FALLBACK_RATE;
   const wa = process.env.WHATSAPP_NUMBER ?? "";
-  return generateContent(car as MarketingCar, rate, wa);
+  return generateContent(car as unknown as MarketingCar, rate, wa);
 }
