@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import JSZip from "jszip";
 import { createClient } from "@/utils/supabase/client";
 import { generateContent, type ContentOutput, type Lang, type Platform } from "@/lib/marketing-templates";
 
@@ -86,19 +87,30 @@ function ContentTab({ content }: { content: ContentOutput }) {
 }
 
 function ImagesTab({ images }: { images: string[] }) {
+  const [zipping, setZipping] = useState(false);
+
   if (images.length === 0) return <p className="text-sm text-gray-500">No images found for this car.</p>;
 
-  function downloadAll() {
-    images.forEach((url, i) => {
+  async function downloadAll() {
+    setZipping(true);
+    try {
+      const zip = new JSZip();
+      await Promise.all(
+        images.map(async (url, i) => {
+          const res = await fetch(url);
+          const blob = await res.blob();
+          zip.file(`image-${String(i + 1).padStart(2, "0")}.jpg`, blob);
+        })
+      );
+      const content = await zip.generateAsync({ type: "blob" });
       const a = document.createElement("a");
-      a.href = url;
-      a.download = `image-${String(i + 1).padStart(2, "0")}.jpg`;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
+      a.href = URL.createObjectURL(content);
+      a.download = "car-images.zip";
       a.click();
-      document.body.removeChild(a);
-    });
+      URL.revokeObjectURL(a.href);
+    } finally {
+      setZipping(false);
+    }
   }
 
   return (
@@ -106,9 +118,10 @@ function ImagesTab({ images }: { images: string[] }) {
       <div className="mb-3 flex justify-end">
         <button
           onClick={downloadAll}
-          className="rounded bg-amber-500 px-4 py-1.5 text-sm font-medium text-black hover:bg-amber-400"
+          disabled={zipping}
+          className="rounded bg-amber-500 px-4 py-1.5 text-sm font-medium text-black hover:bg-amber-400 disabled:opacity-50"
         >
-          Download All ({images.length})
+          {zipping ? "Zipping…" : `Download All (${images.length})`}
         </button>
       </div>
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
