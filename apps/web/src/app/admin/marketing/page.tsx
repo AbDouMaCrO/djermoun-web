@@ -150,11 +150,12 @@ export default function MarketingPage() {
 
       const rate = Number(settings?.usd_to_dzd_rate) || 253;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setContent(generateContent(car as any, rate, wa));
+      const c = car as any;
+      setContent(generateContent(c, rate, wa));
 
-      const imgs: string[] = Array.isArray(car.images) && car.images.length > 0
-        ? car.images
-        : car.primary_image ? [car.primary_image] : [];
+      const imgs: string[] = Array.isArray(c.images) && c.images.length > 0
+        ? c.images
+        : c.primary_image ? [c.primary_image] : [];
       setImages(imgs);
       setTab("content");
     } catch (e) {
