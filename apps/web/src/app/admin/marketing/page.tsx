@@ -86,7 +86,7 @@ function ContentTab({ content }: { content: ContentOutput }) {
   );
 }
 
-function ImagesTab({ images }: { images: string[] }) {
+function ImagesTab({ images, title }: { images: string[]; title: string }) {
   const [zipping, setZipping] = useState(false);
 
   if (images.length === 0) return <p className="text-sm text-gray-500">No images found for this car.</p>;
@@ -105,7 +105,8 @@ function ImagesTab({ images }: { images: string[] }) {
       const content = await zip.generateAsync({ type: "blob" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(content);
-      a.download = "car-images.zip";
+      const safeName = title.replace(/[^a-z0-9؀-ۿ]+/gi, "-").replace(/^-|-$/g, "");
+      a.download = `${safeName}.zip`;
       a.click();
       URL.revokeObjectURL(a.href);
     } finally {
@@ -261,7 +262,7 @@ export default function MarketingPage() {
           </div>
 
           {tab === "content" && <ContentTab content={content} />}
-          {tab === "images"  && <ImagesTab  images={images}  />}
+          {tab === "images"  && <ImagesTab  images={images} title={content.title} />}
         </div>
       )}
     </div>
