@@ -14,7 +14,7 @@ import requests
 import pytesseract
 from bs4 import BeautifulSoup
 from curl_cffi import requests as cf_requests
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from db import supabase
 from duty_calculator import CustomsDutyCalculator
@@ -31,7 +31,7 @@ CDN_PATTERN = re.compile(
 CDN_SUFFIX = "/d?imageMogr2/format/jpg/strip"
 
 STORAGE_BUCKET = "car-images"
-REPLICATE_API_KEY = os.environ.get("REPLICATE_API_KEY")
+REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
 
 DUMMY_CARS = [
     {"make": "CHERY",  "model": "TIGGO 8 PRO", "year": 2025, "price_cny": 145000},
@@ -123,39 +123,59 @@ def clean_image_replicate(image_url: str) -> bytes | None:
         return None
 
 
-def remove_watermark_cv2(image_url: str) -> bytes | None:
-    """Download image, remove AutoCango watermark via hardcoded center mask + inpaint."""
+def clean_image_replicate(image_url: str) -> str:
+    """Remove AutoCango watermark using LaMA inpainting via Replicate.
+
+    Downloads the image locally, builds a white mask over the known logo region
+    (center 20-80% w, 40-55% h), and sends image + mask to a LaMA cleaner model.
+    Returns the cleaned image URL on success, or the original image_url on any failure.
+    Relies on REPLICATE_API_TOKEN environment variable — no keys are hardcoded.
+    """
+    if not REPLICATE_API_TOKEN:
+        print("[REPLICATE] No REPLICATE_API_TOKEN set — skipping")
+        return image_url
+
     try:
-        print(f"[WATERMARK] Processing: {image_url}")
+        import replicate
 
         raw = _download_cdn_image(image_url)
         if raw is None:
-            print("[WATERMARK] Download failed — skipping")
-            return None
+            print("[REPLICATE] Download failed — using original")
+            return image_url
 
         pil_img = Image.open(io.BytesIO(raw)).convert("RGB")
-        img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-        h, w = img.shape[:2]
-        print(f"[WATERMARK] shape={img.shape}")
+        w, h = pil_img.size
 
-        # AutoCango logo is always centered: ~20-80% width, ~40-55% height
-        x1, x2 = int(0.20 * w), int(0.80 * w)
-        y1, y2 = int(0.40 * h), int(0.55 * h)
-        mask = np.zeros((h, w), dtype=np.uint8)
-        mask[y1:y2, x1:x2] = 255
+        # White mask over AutoCango logo (center region)
+        mask_img = Image.new("L", (w, h), 0)
+        ImageDraw.Draw(mask_img).rectangle(
+            [int(0.20 * w), int(0.40 * h), int(0.80 * w), int(0.55 * h)],
+            fill=255,
+        )
 
-        img = cv2.inpaint(img, mask, inpaintRadius=7, flags=cv2.INPAINT_TELEA)
-        print(f"[WATERMARK] Inpainted center region ({x1},{y1})-({x2},{y2})")
+        img_buf = io.BytesIO()
+        pil_img.save(img_buf, format="JPEG", quality=92)
+        img_uri = "data:image/jpeg;base64," + base64.b64encode(img_buf.getvalue()).decode()
 
-        ok, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 92])
-        result_bytes = buf.tobytes() if ok else raw
-        print(f"[WATERMARK] Done: {len(result_bytes)}b JPEG")
-        return result_bytes
+        mask_buf = io.BytesIO()
+        mask_img.save(mask_buf, format="PNG")
+        mask_uri = "data:image/png;base64," + base64.b64encode(mask_buf.getvalue()).decode()
+
+        client = replicate.Client(api_token=REPLICATE_API_TOKEN)
+        output = client.run(
+            "andreasjansson/lama-cleaner-lama",
+            input={"image": img_uri, "mask": mask_uri},
+        )
+
+        if isinstance(output, list):
+            output = output[0]
+        result_url = output.url if hasattr(output, "url") else str(output)
+        print(f"[REPLICATE] Cleaned: {result_url}")
+        return result_url
 
     except Exception as e:
-        print(f"[WATERMARK] Fatal error for {image_url}: {e}")
-        traceback.print_exc()
-        return None
+        print(f"[REPLICATE] Failed ({e}) — using original")
+        return image_url
 
 
 def upload_to_storage(slug: str, idx: int, img_bytes: bytes) -> str | None:
@@ -177,15 +197,29 @@ def upload_to_storage(slug: str, idx: int, img_bytes: bytes) -> str | None:
 
 
 def process_images(images: list[str], make: str, model: str, year: int) -> list[str]:
-    """Remove watermarks from each image and upload to storage.
+    """Remove watermarks via Replicate LaMA and upload cleaned images to storage.
     Falls back to original CDN URL on any failure.
     """
     slug = f"{year}-{make}-{model}".lower().replace(" ", "-")
     result = []
     for idx, url in enumerate(images):
-        cleaned_bytes = remove_watermark_cv2(url)
-        if cleaned_bytes:
-            stored_url = upload_to_storage(slug, idx, cleaned_bytes)
+        cleaned_url = clean_image_replicate(url)
+
+        # Download cleaned image (Replicate output URL) or fall back to original CDN
+        raw = None
+        if cleaned_url != url:
+            try:
+                resp = requests.get(cleaned_url, timeout=60)
+                if resp.status_code == 200 and len(resp.content) > 5000:
+                    raw = resp.content
+            except Exception as dl_err:
+                print(f"[IMG] Cleaned URL download failed: {dl_err}")
+
+        if raw is None:
+            raw = _download_cdn_image(url)
+
+        if raw:
+            stored_url = upload_to_storage(slug, idx, raw)
             result.append(stored_url if stored_url else url)
         else:
             result.append(url)
