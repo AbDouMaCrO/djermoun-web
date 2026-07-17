@@ -124,49 +124,28 @@ def clean_image_replicate(image_url: str) -> bytes | None:
 
 
 def remove_watermark_cv2(image_url: str) -> bytes | None:
-    """Download image, clean watermark, return JPEG bytes.
-    Priority: Alibaba DashScope → OpenCV OCR+inpaint → raw re-encode.
-    Returns None only if local download fails.
-    """
+    """Download image, remove AutoCango watermark via hardcoded center mask + inpaint."""
     try:
         print(f"[WATERMARK] Processing: {image_url}")
 
-        # 1. Try Replicate AI
-        cleaned = clean_image_replicate(image_url)
-        if cleaned:
-            return cleaned
-
-        # 2. Fall back to local download + OpenCV OCR+inpaint
         raw = _download_cdn_image(image_url)
         if raw is None:
-            print(f"[WATERMARK] Download failed — skipping")
+            print("[WATERMARK] Download failed — skipping")
             return None
 
         pil_img = Image.open(io.BytesIO(raw)).convert("RGB")
         img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-        print(f"[WATERMARK] OpenCV fallback: shape={img.shape}")
+        h, w = img.shape[:2]
+        print(f"[WATERMARK] shape={img.shape}")
 
-        try:
-            data = pytesseract.image_to_data(
-                cv2.cvtColor(img, cv2.COLOR_BGR2RGB),
-                output_type=pytesseract.Output.DICT,
-            )
-            mask = np.zeros(img.shape[:2], dtype=np.uint8)
-            for i, text in enumerate(data["text"]):
-                if text.strip() and int(data["conf"][i]) > 20:
-                    x, y, w, h = data["left"][i], data["top"][i], data["width"][i], data["height"][i]
-                    mask[y : y + h, x : x + w] = 255
+        # AutoCango logo is always centered: ~20-80% width, ~40-55% height
+        x1, x2 = int(0.20 * w), int(0.80 * w)
+        y1, y2 = int(0.40 * h), int(0.55 * h)
+        mask = np.zeros((h, w), dtype=np.uint8)
+        mask[y1:y2, x1:x2] = 255
 
-            if mask.max() > 0:
-                kernel = np.ones((7, 7), np.uint8)
-                mask = cv2.dilate(mask, kernel, iterations=2)
-                img = cv2.inpaint(img, mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
-                print(f"[WATERMARK] Inpainted successfully")
-            else:
-                print(f"[WATERMARK] No text detected — uploading as-is")
-
-        except Exception as tess_err:
-            print(f"[WATERMARK] OCR failed ({tess_err}) — uploading without inpaint")
+        img = cv2.inpaint(img, mask, inpaintRadius=7, flags=cv2.INPAINT_TELEA)
+        print(f"[WATERMARK] Inpainted center region ({x1},{y1})-({x2},{y2})")
 
         ok, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 92])
         result_bytes = buf.tobytes() if ok else raw
