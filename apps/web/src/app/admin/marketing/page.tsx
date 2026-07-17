@@ -88,7 +88,29 @@ function ContentTab({ content }: { content: ContentOutput }) {
 function ImagesTab({ images }: { images: string[] }) {
   if (images.length === 0) return <p className="text-sm text-gray-500">No images found for this car.</p>;
 
+  function downloadAll() {
+    images.forEach((url, i) => {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `image-${String(i + 1).padStart(2, "0")}.jpg`;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+  }
+
   return (
+    <div>
+      <div className="mb-3 flex justify-end">
+        <button
+          onClick={downloadAll}
+          className="rounded bg-amber-500 px-4 py-1.5 text-sm font-medium text-black hover:bg-amber-400"
+        >
+          Download All ({images.length})
+        </button>
+      </div>
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       {images.map((url, i) => (
         <div key={i} className="group relative overflow-hidden rounded-lg border border-gray-200">
@@ -118,6 +140,7 @@ function ImagesTab({ images }: { images: string[] }) {
           </span>
         </div>
       ))}
+    </div>
     </div>
   );
 }
