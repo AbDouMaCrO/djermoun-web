@@ -15,6 +15,10 @@
     "expo-router": "56.2.11",
     "tsx": "^4.23.1"
   },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-linux-x64-gnu":  "4.3.1",
+    "@tailwindcss/oxide-linux-x64-musl": "4.3.1"
+  },
   "workspaces": [
     "apps/*",
     "packages/*",
