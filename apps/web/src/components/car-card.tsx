@@ -19,6 +19,7 @@ export type CarCardData = {
   primary_image: string | null;
   created_at: string;
   condition: string;
+  paint_condition: string | null;
 };
 
 const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
@@ -97,6 +98,15 @@ export default function CarCard({ car }: { car: CarCardData }) {
               <Fuel size={14} className="text-slate-500" />
               {car.fuel ?? "—"}
             </span>
+            {car.paint_condition && (
+              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                car.paint_condition === "original_paint"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-orange-100 text-orange-700"
+              }`}>
+                {car.paint_condition === "original_paint" ? "Original Paint" : "Minor Accident"}
+              </span>
+            )}
           </div>
 
           <div className="mt-4">
