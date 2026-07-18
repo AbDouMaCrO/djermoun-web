@@ -57,14 +57,14 @@ const FEATURES = [
 
 export default function HowItWorks() {
   return (
-    <section className="bg-[#050B18] px-6 py-24">
+    <section className="bg-slate-50 dark:bg-[#050B18] px-6 py-24">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">
             Our Process
           </p>
-          <h2 className="mt-2 text-3xl font-black text-white sm:text-4xl">
+          <h2 className="mt-2 text-3xl font-black text-slate-900 dark:text-white sm:text-4xl">
             Professional Used Car Export Services
           </h2>
         </div>
@@ -74,13 +74,13 @@ export default function HowItWorks() {
           {STEPS.map(({ label, Icon }, i) => (
             <div key={label} className="flex items-center">
               <div className="flex flex-col items-center gap-2 px-3 py-2">
-                <span className="text-[9px] font-semibold uppercase tracking-widest text-amber-500/60">
+                <span className="text-[9px] font-semibold uppercase tracking-widest text-amber-600/50 dark:text-amber-500/60">
                   Step{i + 1}
                 </span>
-                <div className="w-16 h-16 rounded-full border-2 border-amber-500/40 bg-[#0A0F1E] flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.1)]">
+                <div className="w-16 h-16 rounded-full border-2 border-amber-400 bg-white shadow-sm flex items-center justify-center dark:border-amber-500/40 dark:bg-[#0A0F1E] dark:shadow-[0_0_20px_rgba(245,158,11,0.1)]">
                   <Icon className="text-amber-500" size={22} />
                 </div>
-                <span className="text-xs font-semibold text-slate-300">{label}</span>
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{label}</span>
               </div>
               {i < STEPS.length - 1 && (
                 <svg
@@ -103,13 +103,13 @@ export default function HowItWorks() {
           {FEATURES.map(({ Icon, title, desc }) => (
             <div
               key={title}
-              className="rounded-2xl border border-white/5 bg-[#0A0F1E] p-6"
+              className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 dark:border-white/5 dark:bg-[#0A0F1E] dark:shadow-none"
             >
-              <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center dark:bg-amber-500/10">
                 <Icon className="text-amber-500" size={22} />
               </div>
-              <h3 className="mt-4 font-bold text-white">{title}</h3>
-              <p className="mt-1.5 text-sm text-slate-400">{desc}</p>
+              <h3 className="mt-4 font-bold text-slate-900 dark:text-white">{title}</h3>
+              <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">{desc}</p>
             </div>
           ))}
         </div>

@@ -12,20 +12,20 @@ export default function AboutSection() {
   return (
     <>
       {/* About panel */}
-      <section className="bg-[#0A0F1E] border-t border-white/5 px-6 py-24">
+      <section className="bg-white dark:bg-[#0A0F1E] border-t border-slate-100 dark:border-white/5 px-6 py-24">
         <div className="mx-auto max-w-7xl grid items-center gap-12 lg:grid-cols-2">
           {/* Left */}
           <div>
             <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">
               Who We Are
             </p>
-            <h2 className="mt-3 text-4xl font-black text-white leading-tight">
+            <h2 className="mt-3 text-4xl font-black text-slate-900 dark:text-white leading-tight">
               About Djermoun Auto
             </h2>
-            <p className="mt-2 text-lg font-medium text-slate-400">
+            <p className="mt-2 text-lg font-medium text-slate-500 dark:text-slate-400">
               Your Reliable Chinese Car Import Partner
             </p>
-            <p className="mt-5 text-sm leading-relaxed text-slate-400">
+            <p className="mt-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
               Djermoun Auto connects buyers across North Africa and the Middle East with
               the full spectrum of vehicles available in China — new and used. We handle
               every step: sourcing, professional inspection, negotiation, export
@@ -45,7 +45,7 @@ export default function AboutSection() {
               ].map(({ Icon, label }) => (
                 <div
                   key={label}
-                  className="flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-4 py-2 text-xs font-semibold text-amber-400"
+                  className="flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/5 dark:text-amber-400"
                 >
                   <Icon size={14} className="text-amber-500" />
                   {label}
@@ -66,10 +66,10 @@ export default function AboutSection() {
             {STATS.map(({ value, label }) => (
               <div
                 key={label}
-                className="rounded-2xl border border-white/5 bg-[#111827] p-8 text-center"
+                className="rounded-2xl border border-slate-100 bg-slate-50 p-8 text-center dark:border-white/5 dark:bg-[#111827]"
               >
-                <p className="text-4xl font-black text-amber-400">{value}</p>
-                <p className="mt-2 text-sm text-slate-400">{label}</p>
+                <p className="text-4xl font-black text-amber-600 dark:text-amber-400">{value}</p>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{label}</p>
               </div>
             ))}
           </div>

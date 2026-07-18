@@ -80,7 +80,7 @@ export default function BrandPicker({
 
   return (
     <div className="mt-10">
-      <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Shop by Brand</p>
+      <p className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Shop by Brand</p>
 
       <div className="mt-4 flex gap-3 overflow-x-auto pb-2 scrollbar-none">
         {BRANDS.map((brand) => {
@@ -91,20 +91,20 @@ export default function BrandPicker({
               href={href(brand.make)}
               className={`group relative flex shrink-0 flex-col items-center gap-3 rounded-2xl border px-5 py-5 transition-all duration-200 cursor-pointer ${
                 active
-                  ? "border-amber-500/60 bg-amber-500/8 shadow-[0_0_20px_rgba(245,158,11,0.15)]"
-                  : "border-white/5 bg-[#111827] hover:-translate-y-0.5 hover:border-amber-500/25 hover:bg-[#141C2F]"
+                  ? "border-amber-400 bg-amber-50 shadow-md shadow-amber-100 dark:border-amber-500/60 dark:bg-amber-500/8 dark:shadow-[0_0_20px_rgba(245,158,11,0.15)]"
+                  : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md dark:border-white/5 dark:bg-[#111827] dark:hover:border-amber-500/25 dark:hover:bg-[#141C2F]"
               }`}
             >
               <BrandLogo logo={brand.logo} name={brand.name} accent={brand.accent} />
               <span
                 className={`text-[11px] font-bold uppercase tracking-wide transition-colors ${
-                  active ? "text-amber-400" : "text-slate-400 group-hover:text-slate-200"
+                  active ? "text-amber-600 dark:text-amber-400" : "text-slate-500 group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-200"
                 }`}
               >
                 {brand.name}
               </span>
               {active && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-black">
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-black dark:bg-amber-500 dark:text-black text-[9px] font-black">
                   ✓
                 </span>
               )}
@@ -120,26 +120,26 @@ export default function BrandPicker({
               href={href("__other__")}
               className={`group relative flex shrink-0 flex-col items-center gap-3 rounded-2xl border px-5 py-5 transition-all duration-200 cursor-pointer ${
                 active
-                  ? "border-white/20 bg-white/5"
-                  : "border-white/5 bg-[#111827] hover:-translate-y-0.5 hover:border-amber-500/25 hover:bg-[#141C2F]"
+                  ? "border-amber-400/50 bg-amber-50/50 dark:border-white/20 dark:bg-white/5"
+                  : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md dark:border-white/5 dark:bg-[#111827] dark:hover:border-amber-500/25 dark:hover:bg-[#141C2F]"
               }`}
             >
               <div
                 className={`flex h-16 w-16 items-center justify-center rounded-full text-2xl ${
-                  active ? "text-slate-300" : "text-slate-600 group-hover:text-slate-400"
+                  active ? "text-amber-600 dark:text-slate-300" : "text-slate-400 group-hover:text-slate-600 dark:text-slate-600 dark:group-hover:text-slate-400"
                 }`}
               >
                 ···
               </div>
               <span
                 className={`text-[11px] font-bold uppercase tracking-wide transition-colors ${
-                  active ? "text-slate-300" : "text-slate-500 group-hover:text-slate-300"
+                  active ? "text-amber-600 dark:text-slate-300" : "text-slate-500 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-300"
                 }`}
               >
                 Other
               </span>
               {active && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-black">
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-black dark:bg-amber-500 dark:text-black text-[9px] font-black">
                   ✓
                 </span>
               )}

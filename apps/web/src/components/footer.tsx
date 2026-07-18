@@ -36,13 +36,13 @@ const QUICK_LINKS = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/5 bg-[#050B18]">
+    <footer className="border-t border-slate-200 dark:border-white/5 bg-white dark:bg-[#050B18]">
       {/* Newsletter */}
-      <div className="border-b border-white/5 bg-[#0A0F1E]">
+      <div className="border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-[#0A0F1E]">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row">
           <div>
-            <h3 className="text-lg font-semibold text-white">Stay Updated</h3>
-            <p className="mt-1 text-sm text-slate-400">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Stay Updated</h3>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               New arrivals and export deals, straight to your inbox.
             </p>
           </div>
@@ -51,7 +51,7 @@ export default function Footer() {
               type="email"
               required
               placeholder="you@example.com"
-              className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-amber-500 sm:w-64"
+              className="w-full rounded-md border border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-amber-500 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-500 px-4 py-2 text-sm outline-none sm:w-64"
             />
             <button
               type="submit"
@@ -66,10 +66,10 @@ export default function Footer() {
       {/* Main footer */}
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-3">
         <div>
-          <p className="text-lg font-black tracking-widest text-white">
+          <p className="text-lg font-black tracking-widest text-slate-900 dark:text-white">
             DJERMOUN <span className="text-amber-400">AUTO</span>
           </p>
-          <p className="mt-3 max-w-xs text-sm text-slate-400">
+          <p className="mt-3 max-w-xs text-sm text-slate-600 dark:text-slate-400">
             A premier global exporter of premium vehicles — transparent pricing, full
             inspections, and seamless shipping to your port.
           </p>
@@ -82,7 +82,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 aria-label={title}
                 title={title}
-                className={`press-scale flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-xs font-semibold text-slate-400 transition-colors duration-150 ${color}`}
+                className={`press-scale flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-600 dark:border-white/10 dark:text-slate-400 text-xs font-semibold transition-colors duration-150 ${color}`}
               >
                 {label}
               </a>
@@ -91,7 +91,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="text-sm font-semibold uppercase tracking-wide text-white">
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-900 dark:text-white">
             Quick Links
           </h4>
           <ul className="mt-4 space-y-3">
@@ -99,7 +99,7 @@ export default function Footer() {
               <li key={link.label}>
                 <Link
                   href={link.href}
-                  className="text-sm text-slate-400 transition-colors duration-150 hover:text-amber-400"
+                  className="text-sm text-slate-600 hover:text-amber-500 dark:text-slate-400 dark:hover:text-amber-400 transition-colors duration-150"
                 >
                   {link.label}
                 </Link>
@@ -109,10 +109,10 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="text-sm font-semibold uppercase tracking-wide text-white">
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-900 dark:text-white">
             Contact Info
           </h4>
-          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+          <ul className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-400">
             <li className="flex items-start gap-2">
               <MapPin size={16} className="mt-0.5 shrink-0 text-amber-500" />
               123 Export Avenue, Free Trade Zone
@@ -130,13 +130,13 @@ export default function Footer() {
       </div>
 
       {/* Bottom bar with country selector */}
-      <div className="border-t border-white/5 bg-[#050B18] px-6 py-5">
+      <div className="border-t border-slate-200 dark:border-white/5 bg-white dark:bg-[#050B18] px-6 py-5">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 sm:flex-row">
-          <p className="text-xs text-slate-600">
+          <p className="text-xs text-slate-500 dark:text-slate-600">
             © {new Date().getFullYear()} Djermoun Auto. All rights reserved.
           </p>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">Region:</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Region:</span>
             <CountrySelector />
           </div>
         </div>

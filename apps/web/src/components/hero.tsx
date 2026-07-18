@@ -26,22 +26,22 @@ export default function Hero({
   const heroTitle = dict.home.heroTitle as string[];
 
   return (
-    <section className="relative min-h-screen bg-[#050B18] overflow-hidden flex flex-col justify-center">
-      {/* Ambient gradient orbs */}
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-amber-500/8 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-blue-600/8 blur-[100px] pointer-events-none" />
-      <div className="absolute top-2/3 left-1/2 w-[400px] h-[400px] rounded-full bg-amber-300/5 blur-[100px] pointer-events-none" />
+    <section className="relative min-h-screen bg-gradient-to-b from-slate-50 to-white dark:bg-[#050B18] dark:from-[#050B18] dark:to-[#050B18] overflow-hidden flex flex-col justify-center">
+      {/* Ambient gradient orbs — dark only */}
+      <div className="hidden dark:block absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-amber-500/8 blur-[120px] pointer-events-none" />
+      <div className="hidden dark:block absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-blue-600/8 blur-[100px] pointer-events-none" />
+      <div className="hidden dark:block absolute top-2/3 left-1/2 w-[400px] h-[400px] rounded-full bg-amber-300/5 blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 pb-48 pt-32 text-center sm:pt-40">
         {/* Eyebrow pill */}
-        <div className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/5 px-4 py-1.5 mb-8">
+        <div className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-50 dark:bg-amber-500/5 px-4 py-1.5 mb-8">
           <span className="text-xs font-bold tracking-[0.3em] text-amber-400 uppercase">
             CHINA → YOUR DOOR
           </span>
         </div>
 
         {/* H1 */}
-        <h1 className="text-5xl sm:text-7xl font-black tracking-tight text-white leading-[1.05]">
+        <h1 className="text-5xl sm:text-7xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.05]">
           {heroTitle[0]}
           <br />
           <span className="bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
@@ -49,7 +49,7 @@ export default function Hero({
           </span>
         </h1>
 
-        <p className="mx-auto mt-5 max-w-xl text-lg text-slate-400">
+        <p className="mx-auto mt-5 max-w-xl text-lg text-slate-600 dark:text-slate-400">
           {dict.home.heroSubtitle as string}
         </p>
 
@@ -63,7 +63,7 @@ export default function Hero({
           </a>
           <a
             href="#how-it-works"
-            className="press-scale inline-block rounded-md border border-white/20 px-8 py-3 text-sm font-bold text-white transition-colors duration-150 hover:border-amber-500/50"
+            className="press-scale inline-block rounded-md border border-slate-300 text-slate-700 hover:border-amber-400 dark:border-white/20 dark:text-white dark:hover:border-amber-500/50 px-8 py-3 text-sm font-bold transition-colors duration-150"
           >
             How It Works
           </a>
@@ -73,10 +73,10 @@ export default function Hero({
         <div className="mt-16 flex flex-wrap items-center justify-center gap-8">
           {STATS.map(({ icon: Icon, label }, i) => (
             <div key={label} className="flex items-center gap-6">
-              {i > 0 && <div className="h-8 w-px bg-white/10" />}
+              {i > 0 && <div className="h-8 w-px bg-slate-200 dark:bg-white/10" />}
               <div className="flex flex-col items-center gap-1">
                 <Icon className="text-amber-500" size={22} />
-                <span className="text-sm font-semibold text-slate-400">{label}</span>
+                <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">{label}</span>
               </div>
             </div>
           ))}
@@ -87,17 +87,17 @@ export default function Hero({
       <form
         action="/"
         method="GET"
-        className="absolute inset-x-0 bottom-0 z-50 mx-auto w-[92%] max-w-4xl translate-y-1/2 rounded-2xl border border-white/10 bg-[#0F172A] p-5 shadow-2xl shadow-black/50 backdrop-blur-xl sm:p-6"
+        className="absolute inset-x-0 bottom-0 z-50 mx-auto w-[92%] max-w-4xl translate-y-1/2 rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-[#0F172A] p-5 shadow-2xl shadow-black/50 backdrop-blur-xl sm:p-6"
       >
         <div className="grid gap-4 sm:grid-cols-4">
           <label className="flex flex-col gap-1.5 text-left">
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
               {dict.home.searchMake as string}
             </span>
             <select
               name="make"
               defaultValue={defaultMake ?? ""}
-              className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-amber-500 [&>option]:bg-[#0F172A]"
+              className="rounded-md border border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-white outline-none focus:border-amber-500 [&>option]:bg-[#0F172A] px-3 py-2 text-sm"
             >
               <option value="">{dict.home.searchAllMakes as string}</option>
               {makes.map((make) => (
@@ -109,25 +109,25 @@ export default function Hero({
           </label>
 
           <label className="flex flex-col gap-1.5 text-left">
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
               {dict.home.searchModel as string}
             </span>
             <input
               name="model"
               defaultValue={defaultModel ?? ""}
               placeholder={dict.home.searchAnyModel as string}
-              className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-amber-500"
+              className="rounded-md border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-500 outline-none focus:border-amber-500 px-3 py-2 text-sm"
             />
           </label>
 
           <label className="flex flex-col gap-1.5 text-left">
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
               {dict.home.searchYear as string}
             </span>
             <select
               name="year"
               defaultValue={defaultYear ?? ""}
-              className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-amber-500 [&>option]:bg-[#0F172A]"
+              className="rounded-md border border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-white outline-none focus:border-amber-500 [&>option]:bg-[#0F172A] px-3 py-2 text-sm"
             >
               <option value="">{dict.home.searchAnyYear as string}</option>
               {years.map((year) => (

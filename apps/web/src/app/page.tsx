@@ -119,11 +119,11 @@ export default async function HomePage({
     <main>
       <Hero makes={makes} years={years} defaultMake={make} defaultModel={model} defaultYear={year} />
 
-      <section id="inventory" className="bg-[#0A0F1E] px-6 pb-24 pt-36">
+      <section id="inventory" className="bg-slate-50 dark:bg-[#0A0F1E] px-6 pb-24 pt-36">
         <div className="mx-auto max-w-7xl">
           <div>
             <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">Inventory</p>
-            <h2 className="mt-2 text-3xl font-black text-white">Exceptional Vehicles</h2>
+            <h2 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">Exceptional Vehicles</h2>
           </div>
 
           {/* Brand picker */}
@@ -131,15 +131,15 @@ export default async function HomePage({
 
           {/* Condition tabs */}
           <div className="mt-8 flex justify-center">
-            <div className="flex gap-1 rounded-xl border border-white/5 bg-[#111827] p-1">
+            <div className="flex gap-1 rounded-xl border border-slate-200 bg-white p-1 dark:border-white/5 dark:bg-[#111827]">
               {(["all", "new", "used"] as const).map((t) => (
                 <a
                   key={t}
                   href={tabHref(t)}
                   className={`rounded-lg px-5 py-1.5 text-sm font-semibold capitalize transition-colors duration-150 ${
                     activeTab === t
-                      ? "bg-white/10 text-white shadow-sm"
-                      : "text-slate-500 hover:text-slate-300"
+                      ? "bg-amber-500/10 text-slate-900 shadow-sm dark:bg-white/10 dark:text-white"
+                      : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                   }`}
                 >
                   {t === "all" ? "All Cars" : t === "new" ? "New Cars" : "Used Cars"}
@@ -158,7 +158,7 @@ export default async function HomePage({
           />
 
           {error && (
-            <p className="mt-6 text-sm text-red-400">Failed to load cars: {error.message}</p>
+            <p className="mt-6 text-sm text-red-500 dark:text-red-400">Failed to load cars: {error.message}</p>
           )}
 
           {cars.length === 0 && !error && (
