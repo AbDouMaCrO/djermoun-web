@@ -78,6 +78,16 @@ export default async function CarDetailsPage({
         <CarPriceHeading totalUSD={totalPrice} />
       </div>
 
+      {paintLabel && (
+        <div className="mt-2">
+          <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold text-black ${
+            car.paint_condition === "original_paint" ? "bg-green-400/80" : "bg-orange-400/80"
+          }`}>
+            {paintLabel}
+          </span>
+        </div>
+      )}
+
       {car.customs_duty_dzd != null && (
         <div className="mt-3 flex items-center justify-between gap-4">
           <p className="shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-400">

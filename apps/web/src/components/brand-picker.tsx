@@ -15,9 +15,25 @@ const BRANDS = [
   { name: "MG",          make: "MG",           logo: "/brands/mg.svg",         accent: "#FF0000" },
   { name: "Jetour",      make: "JETOUR",       logo: "/brands/jetour.svg",     accent: "#1A3A5C" },
   { name: "Toyota",      make: "TOYOTA",       logo: "/brands/toyota.svg",     accent: "#EB0A1E" },
+  { name: "Roewe",       make: "ROEWE",        logo: "/brands/roewe.svg",      accent: "#CC0000" },
+  { name: "Honda",       make: "HONDA",        logo: "/brands/honda.svg",      accent: "#CC0000" },
+  { name: "Kaiyi",       make: "KAIYI",        logo: "/brands/kaiyi.svg",      accent: "#003080" },
+  { name: "Audi",        make: "AUDI",         logo: "/brands/audi.svg",       accent: "#BB0A1E" },
+  { name: "Beijing",     make: "BEIJING",      logo: "/brands/beijing.svg",    accent: "#003366" },
+  { name: "Lynk & Co",  make: "LYNK&CO",      logo: "/brands/lynkco.svg",     accent: "#1A1A1A" },
+  { name: "Skoda",       make: "SKODA",        logo: "/brands/skoda.svg",      accent: "#4BA82E" },
+  { name: "Hyundai",     make: "HYUNDAI",      logo: "/brands/hyundai.svg",    accent: "#002C5F" },
+  { name: "Hongqi",      make: "HONGQI",       logo: "/brands/hongqi.svg",     accent: "#CC0000" },
+  { name: "Wuling",      make: "WULING",       logo: "/brands/wuling.svg",     accent: "#003366" },
+  { name: "Mazda",       make: "MAZDA",        logo: "/brands/mazda.svg",      accent: "#BA0000" },
+  { name: "GAC",         make: "GAC",          logo: "/brands/gac.svg",        accent: "#003366" },
 ];
 
-export const KNOWN_MAKES = BRANDS.map((b) => b.make);
+// Include case variants so they don't appear in "Other" even without their own brand pill
+export const KNOWN_MAKES = [
+  ...BRANDS.map((b) => b.make),
+  "Geely", "Volkswagen", "Honda", "Skoda", "Haval", "ChangAn",
+];
 
 function BrandLogo({ logo, name, accent }: { logo: string; name: string; accent: string }) {
   const [err, setErr] = useState(false);
@@ -59,7 +75,7 @@ export default function BrandPicker({
     }
     params.delete("page");
     const qs = params.toString();
-    return `/#inventory${qs ? `?${qs}` : ""}`;
+    return `/${qs ? `?${qs}` : ""}#inventory`;
   }
 
   return (

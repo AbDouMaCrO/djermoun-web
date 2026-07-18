@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 const PAGE_SIZE = 20;
 const DZD_RATE = 240;
 const AUTOCANGO_FEES = 1595;
-const DEFAULT_SHIPPING = 1900;
+const DEFAULT_SHIPPING = 1900; // always included in overhead
 
 export default async function HomePage({
   searchParams,
@@ -29,14 +29,13 @@ export default async function HomePage({
     tab?: string;
     minMc?: string;
     maxMc?: string;
-    wasla?: string;
     fuel?: string;
     maxMileage?: string;
   }>;
 }) {
   const {
     make, model, year, page: pageParam, tab,
-    minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam,
+    minMc: minMcParam, maxMc: maxMcParam, fuel: fuelParam,
     maxMileage: maxMileageParam,
   } = await searchParams;
 
@@ -47,11 +46,10 @@ export default async function HomePage({
 
   const minMc = Math.max(0, Number(minMcParam ?? 0));
   const maxMc = Math.max(0, Number(maxMcParam ?? 2000));
-  const wasla = waslaParam === "1";
   const fuel = fuelParam ?? "";
   const maxMileage = maxMileageParam ? Math.max(0, parseInt(maxMileageParam, 10)) : 300_000;
 
-  const overhead = AUTOCANGO_FEES + (wasla ? DEFAULT_SHIPPING : 0);
+  const overhead = AUTOCANGO_FEES + DEFAULT_SHIPPING;
   const minUsd = Math.max(0, Math.round((minMc * 10_000) / DZD_RATE - overhead));
   const maxUsd = Math.round((maxMc * 10_000) / DZD_RATE - overhead);
 
@@ -94,7 +92,7 @@ export default async function HomePage({
 
   // Params kept across tab / filter changes
   const sharedParams = Object.fromEntries(
-    Object.entries({ make, model, year, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam, maxMileage: maxMileageParam })
+    Object.entries({ make, model, year, minMc: minMcParam, maxMc: maxMcParam, fuel: fuelParam, maxMileage: maxMileageParam })
       .filter(([, v]) => v != null),
   ) as Record<string, string>;
 
@@ -103,7 +101,7 @@ export default async function HomePage({
   ) as Record<string, string>;
 
   const brandPickerParams = Object.fromEntries(
-    Object.entries({ tab, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam, maxMileage: maxMileageParam })
+    Object.entries({ tab, minMc: minMcParam, maxMc: maxMcParam, fuel: fuelParam, maxMileage: maxMileageParam })
       .filter(([, v]) => v != null),
   ) as Record<string, string>;
 
@@ -112,7 +110,7 @@ export default async function HomePage({
     if (t !== "all") params.set("tab", t); else params.delete("tab");
     params.delete("page");
     const qs = params.toString();
-    return `/#inventory${qs ? `?${qs}` : ""}`;
+    return `/${qs ? `?${qs}` : ""}#inventory`;
   }
 
   const activeTab = tab === "new" ? "new" : tab === "used" ? "used" : "all";
@@ -131,27 +129,28 @@ export default async function HomePage({
         <BrandPicker currentMake={make} extraParams={brandPickerParams} />
 
         {/* Condition tabs */}
-        <div className="mt-8 flex gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1 w-fit">
-          {(["all", "new", "used"] as const).map((t) => (
-            <a
-              key={t}
-              href={tabHref(t)}
-              className={`rounded-lg px-5 py-2 text-sm font-semibold capitalize transition-colors duration-150 ${
-                activeTab === t
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              {t === "all" ? "All Cars" : t === "new" ? "New Cars" : "Used Cars"}
-            </a>
-          ))}
+        <div className="mt-8 flex justify-center">
+          <div className="flex gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1">
+            {(["all", "new", "used"] as const).map((t) => (
+              <a
+                key={t}
+                href={tabHref(t)}
+                className={`rounded-lg px-5 py-1.5 text-sm font-semibold capitalize transition-colors duration-150 ${
+                  activeTab === t
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                {t === "all" ? "All Cars" : t === "new" ? "New Cars" : "Used Cars"}
+              </a>
+            ))}
+          </div>
         </div>
 
         {/* Price + Fuel filter */}
         <FilterBar
           initialMin={minMc}
           initialMax={maxMc}
-          initialWasla={wasla}
           initialFuel={fuel}
           initialMaxMileage={maxMileage}
           currentParams={filterCurrentParams}
@@ -175,7 +174,7 @@ export default async function HomePage({
           currentPage={currentPage}
           totalPages={totalPages}
           searchParams={Object.fromEntries(
-            Object.entries({ make, model, year, tab, minMc: minMcParam, maxMc: maxMcParam, wasla: waslaParam, fuel: fuelParam, maxMileage: maxMileageParam })
+            Object.entries({ make, model, year, tab, minMc: minMcParam, maxMc: maxMcParam, fuel: fuelParam, maxMileage: maxMileageParam })
               .filter(([, v]) => v != null),
           ) as Record<string, string>}
         />

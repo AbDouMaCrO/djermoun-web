@@ -97,14 +97,12 @@ function SingleRange({
 export default function FilterBar({
   initialMin = MC_DEFAULT_MIN,
   initialMax = MC_DEFAULT_MAX,
-  initialWasla = false,
   initialFuel = "",
   initialMaxMileage = MLG_DEFAULT,
   currentParams = {},
 }: {
   initialMin?: number;
   initialMax?: number;
-  initialWasla?: boolean;
   initialFuel?: string;
   initialMaxMileage?: number;
   currentParams?: Record<string, string>;
@@ -116,15 +114,13 @@ export default function FilterBar({
   // Internal state in M centimes (URL format), display shows converted values
   const [minMc, setMinMc] = useState(initialMin);
   const [maxMc, setMaxMc] = useState(initialMax);
-  const [wasla, setWasla] = useState(initialWasla);
   const [fuel, setFuel] = useState(initialFuel);
   const [maxMileage, setMaxMileage] = useState(initialMaxMileage);
 
-  function push(mn: number, mx: number, w: boolean, f: string, mlg: number) {
+  function push(mn: number, mx: number, f: string, mlg: number) {
     const params = new URLSearchParams(currentParams);
     params.set("minMc", String(mn));
     params.set("maxMc", String(mx));
-    if (w) params.set("wasla", "1"); else params.delete("wasla");
     if (f) params.set("fuel", f); else params.delete("fuel");
     if (mlg < MLG_DEFAULT) params.set("maxMileage", String(mlg)); else params.delete("maxMileage");
     params.delete("page");
@@ -134,16 +130,15 @@ export default function FilterBar({
   const isDefault =
     minMc === MC_DEFAULT_MIN &&
     maxMc === MC_DEFAULT_MAX &&
-    !wasla && !fuel &&
+    !fuel &&
     maxMileage === MLG_DEFAULT;
 
   function reset() {
     setMinMc(MC_DEFAULT_MIN);
     setMaxMc(MC_DEFAULT_MAX);
-    setWasla(false);
     setFuel("");
     setMaxMileage(MLG_DEFAULT);
-    push(MC_DEFAULT_MIN, MC_DEFAULT_MAX, false, "", MLG_DEFAULT);
+    push(MC_DEFAULT_MIN, MC_DEFAULT_MAX, "", MLG_DEFAULT);
   }
 
   // Display values converted from M centimes
@@ -154,13 +149,13 @@ export default function FilterBar({
   function onDisplayLo(displayVal: number) {
     const mc = displayToMc(displayVal);
     setMinMc(mc);
-    push(mc, maxMc, wasla, fuel, maxMileage);
+    push(mc, maxMc, fuel, maxMileage);
   }
 
   function onDisplayHi(displayVal: number) {
     const mc = displayToMc(displayVal);
     setMaxMc(mc);
-    push(minMc, mc, wasla, fuel, maxMileage);
+    push(minMc, mc, fuel, maxMileage);
   }
 
   function formatDisplayValue(v: number): string {
@@ -208,7 +203,7 @@ export default function FilterBar({
           <SingleRange
             min={MLG_MIN} max={MLG_MAX} step={MLG_STEP}
             value={maxMileage}
-            onChange={v => { setMaxMileage(v); push(minMc, maxMc, wasla, fuel, v); }}
+            onChange={v => { setMaxMileage(v); push(minMc, maxMc, fuel, v); }}
           />
           <div className="mt-1.5 flex justify-between text-[10px] text-slate-300">
             <span>0 km</span><span>300k km</span>
@@ -219,7 +214,7 @@ export default function FilterBar({
       {/* ── Divider ─────────────────────────────────────── */}
       <div className="h-px bg-slate-100" />
 
-      {/* ── Fuel + Wasla + Reset row ─────────────────────── */}
+      {/* ── Fuel + Reset row ─────────────────────── */}
       <div className="flex flex-wrap items-center gap-3 px-6 py-4">
         <span className="shrink-0 text-xs font-bold uppercase tracking-widest text-slate-400">Fuel</span>
 
@@ -230,7 +225,7 @@ export default function FilterBar({
               <button
                 key={value}
                 type="button"
-                onClick={() => { setFuel(value); push(minMc, maxMc, wasla, value, maxMileage); }}
+                onClick={() => { setFuel(value); push(minMc, maxMc, value, maxMileage); }}
                 className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 ${
                   active
                     ? "bg-amber-500 text-black shadow-md shadow-amber-200/60"
@@ -242,23 +237,6 @@ export default function FilterBar({
             );
           })}
         </div>
-
-        {/* Wasla */}
-        <button
-          type="button"
-          onClick={() => { const next = !wasla; setWasla(next); push(minMc, maxMc, next, fuel, maxMileage); }}
-          className={`group flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
-            wasla
-              ? "bg-sky-500 text-white shadow-lg shadow-sky-200/60"
-              : "border border-slate-200 bg-slate-50 text-slate-500 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600"
-          }`}
-        >
-          <span className={`text-base transition-transform duration-300 ${wasla ? "" : "group-hover:-rotate-12"}`}>🚢</span>
-          <span>Wasla</span>
-          <span className={`overflow-hidden text-xs font-normal transition-all duration-200 ${wasla ? "max-w-[120px] opacity-70" : "max-w-0 opacity-0"}`}>
-            · Shipping incl.
-          </span>
-        </button>
 
         {!isDefault && (
           <button type="button" onClick={reset} className="text-xs text-amber-500 underline underline-offset-2 hover:text-amber-400">
