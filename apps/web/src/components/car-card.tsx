@@ -117,8 +117,8 @@ export default function CarCard({ car }: { car: CarCardData }) {
             )}
           </div>
 
-          <div className="mt-4">
-            <p className="text-xl font-bold text-slate-900">{formatPrice(totalUSD)}</p>
+          <div className="mt-4 text-center">
+            <p className="text-xl font-bold text-[#4b5320]">{formatPrice(totalUSD)}</p>
             <p className="text-xs text-slate-500">{priceLabel}</p>
           </div>
         </div>
