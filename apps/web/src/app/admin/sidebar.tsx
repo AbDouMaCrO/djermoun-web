@@ -9,6 +9,7 @@ const SUPERVISOR_LINKS = [
   { href: "/admin/dashboard", label: "Scrape & Ingest Vehicles" },
   { href: "/admin/inventory", label: "Vehicle Inventory & Pricing" },
   { href: "/admin/marketing", label: "Marketing Content" },
+  { href: "/admin/scraper", label: "Trigger Scraper" },
 ];
 
 const ADMIN_ONLY_LINKS = [
