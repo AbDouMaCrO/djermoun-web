@@ -20,6 +20,7 @@ type Car = {
   autohome_url: string | null;
   destination_country: string | null;
   condition: string;
+  paint_condition: string | null;
 };
 
 function formatPrice(price: number) {
@@ -77,6 +78,7 @@ export default function CarEditForm({ car }: { car: Car }) {
   const [autohomeUrl, setAutohomeUrl] = useState(car.autohome_url ?? "");
   const [destinationCountry, setDestinationCountry] = useState(car.destination_country ?? "algeria");
   const [condition, setCondition] = useState(car.condition ?? "used");
+  const [paintCondition, setPaintCondition] = useState(car.paint_condition ?? "");
 
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -103,6 +105,7 @@ export default function CarEditForm({ car }: { car: Car }) {
       autohome_url: autohomeUrl.trim() || null,
       destination_country: destinationCountry,
       condition,
+      paint_condition: paintCondition || null,
     });
 
     setPending(false);
@@ -192,6 +195,13 @@ export default function CarEditForm({ car }: { car: Car }) {
             <select value={condition} onChange={(e) => setCondition(e.target.value)} className={inputClass}>
               <option value="used">Used</option>
               <option value="new">New</option>
+            </select>
+          </Field>
+          <Field label="Paint Condition">
+            <select value={paintCondition} onChange={(e) => setPaintCondition(e.target.value)} className={inputClass}>
+              <option value="">— Not specified —</option>
+              <option value="original_paint">Original Paint</option>
+              <option value="with_paint_minor_accident">With Paint (Minor Accident)</option>
             </select>
           </Field>
           <Field label="Destination Country">

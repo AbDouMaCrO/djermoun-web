@@ -51,8 +51,11 @@ export default async function CarDetailsPage({
     ["Engine", car.engine ?? "—"],
     ["Transmission", car.transmission ?? "—"],
     ["Fuel", car.fuel ?? "—"],
+    ["Paint", car.paint_condition === "original_paint" ? "Original Paint"
+           : car.paint_condition === "with_paint_minor_accident" ? "With Paint (Minor Accident)"
+           : null],
     ["Status", car.status],
-  ];
+  ].filter(([, v]) => v != null) as [string, unknown][];
 
   const fobPrice = Number(car.price_cny ?? 0);
   const commission = Number(car.commission ?? 0);

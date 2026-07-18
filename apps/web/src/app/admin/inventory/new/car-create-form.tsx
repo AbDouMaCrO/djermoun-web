@@ -72,6 +72,7 @@ export default function CarCreateForm() {
   const [status, setStatus] = useState("available");
   const [isVisible, setIsVisible] = useState(true);
   const [condition, setCondition] = useState("used");
+  const [paintCondition, setPaintCondition] = useState("");
 
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,6 +110,7 @@ export default function CarCreateForm() {
       source_url: sourceUrl.trim() || null,
       autohome_url: autohomeUrl.trim() || null,
       condition,
+      paint_condition: paintCondition || null,
       status,
       is_visible: isVisible,
     });
@@ -194,6 +196,13 @@ export default function CarCreateForm() {
               <select value={condition} onChange={(e) => setCondition(e.target.value)} className={selectClass}>
                 <option value="used">Used</option>
                 <option value="new">New</option>
+              </select>
+            </Field>
+            <Field label="Paint Condition">
+              <select value={paintCondition} onChange={(e) => setPaintCondition(e.target.value)} className={selectClass}>
+                <option value="">— Not specified —</option>
+                <option value="original_paint">Original Paint</option>
+                <option value="with_paint_minor_accident">With Paint (Minor Accident)</option>
               </select>
             </Field>
             <Field label="Status">
