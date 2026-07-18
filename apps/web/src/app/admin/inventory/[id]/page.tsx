@@ -15,7 +15,7 @@ export default async function AdminInventoryEditPage({
   const { data: car } = await supabase
     .from("cars")
     .select(
-      "id, title, make, model, year, mileage, fuel, price_cny, commission, shipping_cost, source_url, autohome_url, destination_country, condition",
+      "id, title, make, model, year, mileage, fuel, price_cny, commission, shipping_cost, source_url, autohome_url, destination_country, condition, paint_condition",
     )
     .eq("id", id)
     .single();

@@ -43,19 +43,21 @@ export default async function CarDetailsPage({
 
   const images: string[] = car.images ?? (car.primary_image ? [car.primary_image] : []);
 
-  const specs: [string, unknown][] = [
-    ["Make", car.make],
-    ["Model", car.model],
-    ["Year", car.year],
-    ["Mileage", car.mileage != null ? `${car.mileage.toLocaleString()} km` : "—"],
-    ["Engine", car.engine ?? "—"],
+  const paintLabel = car.paint_condition === "original_paint" ? "Original Paint"
+    : car.paint_condition === "with_paint_minor_accident" ? "With Paint (Minor Accident)"
+    : null;
+
+  const specs: [string, string][] = [
+    ["Make",         car.make],
+    ["Model",        car.model],
+    ["Year",         String(car.year)],
+    ["Mileage",      car.mileage != null ? `${car.mileage.toLocaleString()} km` : "—"],
+    ["Engine",       car.engine ?? "—"],
     ["Transmission", car.transmission ?? "—"],
-    ["Fuel", car.fuel ?? "—"],
-    ["Paint", car.paint_condition === "original_paint" ? "Original Paint"
-           : car.paint_condition === "with_paint_minor_accident" ? "With Paint (Minor Accident)"
-           : null],
-    ["Status", car.status],
-  ].filter(([, v]) => v != null) as [string, unknown][];
+    ["Fuel",         car.fuel ?? "—"],
+    ...(paintLabel ? [["Paint", paintLabel] as [string, string]] : []),
+    ["Status",       car.status],
+  ];
 
   const fobPrice = Number(car.price_cny ?? 0);
   const commission = Number(car.commission ?? 0);
