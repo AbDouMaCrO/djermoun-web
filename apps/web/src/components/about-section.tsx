@@ -12,26 +12,26 @@ export default function AboutSection() {
   return (
     <>
       {/* About panel */}
-      <section className="border-t border-slate-100 bg-white px-6 py-20">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2">
+      <section className="bg-[#0A0F1E] border-t border-white/5 px-6 py-24">
+        <div className="mx-auto max-w-7xl grid items-center gap-12 lg:grid-cols-2">
           {/* Left */}
           <div>
             <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">
               Who We Are
             </p>
-            <h2 className="mt-3 text-4xl font-black leading-tight text-slate-900">
+            <h2 className="mt-3 text-4xl font-black text-white leading-tight">
               About Djermoun Auto
             </h2>
-            <p className="mt-2 text-lg font-semibold text-slate-500">
+            <p className="mt-2 text-lg font-medium text-slate-400">
               Your Reliable Chinese Car Import Partner
             </p>
-            <p className="mt-5 text-sm leading-relaxed text-slate-600">
+            <p className="mt-5 text-sm leading-relaxed text-slate-400">
               Djermoun Auto connects buyers across North Africa and the Middle East with
               the full spectrum of vehicles available in China — new and used. We handle
               every step: sourcing, professional inspection, negotiation, export
               licensing, international shipping, and customs documentation.
             </p>
-            <p className="mt-3 text-sm leading-relaxed text-slate-600">
+            <p className="mt-3 text-sm leading-relaxed text-slate-400">
               Our team operates directly from China with decades of combined experience
               in automotive export, giving you unmatched access and competitive pricing
               that no local dealer can match.
@@ -45,7 +45,7 @@ export default function AboutSection() {
               ].map(({ Icon, label }) => (
                 <div
                   key={label}
-                  className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-700"
+                  className="flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/5 px-4 py-2 text-xs font-semibold text-amber-400"
                 >
                   <Icon size={14} className="text-amber-500" />
                   {label}
@@ -66,10 +66,10 @@ export default function AboutSection() {
             {STATS.map(({ value, label }) => (
               <div
                 key={label}
-                className="rounded-2xl border border-slate-100 bg-slate-50 p-8 text-center shadow-sm"
+                className="rounded-2xl border border-white/5 bg-[#111827] p-8 text-center"
               >
-                <p className="text-4xl font-black text-amber-500">{value}</p>
-                <p className="mt-2 text-sm font-semibold text-slate-600">{label}</p>
+                <p className="text-4xl font-black text-amber-400">{value}</p>
+                <p className="mt-2 text-sm text-slate-400">{label}</p>
               </div>
             ))}
           </div>
@@ -77,17 +77,17 @@ export default function AboutSection() {
       </section>
 
       {/* CTA banner */}
-      <div className="bg-slate-900 px-6 py-14 text-center">
-        <h3 className="text-3xl font-black text-white">
+      <div className="bg-gradient-to-r from-amber-500 to-amber-400 px-6 py-16 text-center">
+        <h3 className="text-3xl font-black text-black">
           Start Your Journey Now{" "}
-          <span className="text-amber-400">@Djermoun Auto</span>
+          <span className="opacity-70">@Djermoun Auto</span>
         </h3>
-        <p className="mt-2 text-slate-400">
+        <p className="mt-2 text-black/70">
           Discover China&rsquo;s Leading Auto Export Platform
         </p>
         <Link
           href="/#inventory"
-          className="mt-8 inline-flex items-center gap-2 rounded-full bg-amber-500 px-8 py-3 text-sm font-bold text-black transition-colors hover:bg-amber-400"
+          className="mt-8 inline-flex items-center gap-2 rounded-full bg-black px-8 py-3 text-sm font-bold text-white transition-colors hover:bg-black/80"
         >
           Browse Inventory <ArrowRight size={15} />
         </Link>

@@ -26,50 +26,78 @@ export default function Hero({
   const heroTitle = dict.home.heroTitle as string[];
 
   return (
-    <section className="relative border-b border-slate-200 bg-[url('/hero-car.jpg')] bg-cover bg-center bg-no-repeat">
-      {/* Light overlay so dark text stays readable over the hero image. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/85 via-white/80 to-slate-50" />
+    <section className="relative min-h-screen bg-[#050B18] overflow-hidden flex flex-col justify-center">
+      {/* Ambient gradient orbs */}
+      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full bg-amber-500/8 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full bg-blue-600/8 blur-[100px] pointer-events-none" />
+      <div className="absolute top-2/3 left-1/2 w-[400px] h-[400px] rounded-full bg-amber-300/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 pb-32 pt-24 text-center sm:pt-32">
-        <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 pb-48 pt-32 text-center sm:pt-40">
+        {/* Eyebrow pill */}
+        <div className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/5 px-4 py-1.5 mb-8">
+          <span className="text-xs font-bold tracking-[0.3em] text-amber-400 uppercase">
+            CHINA → YOUR DOOR
+          </span>
+        </div>
+
+        {/* H1 */}
+        <h1 className="text-5xl sm:text-7xl font-black tracking-tight text-white leading-[1.05]">
           {heroTitle[0]}
-          <span className="text-amber-500">{heroTitle[1]}</span>
+          <br />
+          <span className="bg-gradient-to-r from-amber-400 to-amber-300 bg-clip-text text-transparent">
+            {heroTitle[1]}
+          </span>
         </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-base text-slate-600 sm:text-lg">
+
+        <p className="mx-auto mt-5 max-w-xl text-lg text-slate-400">
           {dict.home.heroSubtitle as string}
         </p>
-        <a
-          href="#inventory"
-          className="press-scale mt-8 inline-block rounded-full bg-amber-500 px-8 py-3 text-sm font-bold text-black transition-colors duration-150 hover:bg-amber-400"
-        >
-          {dict.home.browseInventory as string}
-        </a>
 
-        <div className="mt-14 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-          {STATS.map(({ icon: Icon, label }) => (
-            <div key={label} className="flex items-center gap-2 text-slate-900">
-              <Icon className="text-amber-500" size={20} />
-              <span className="text-sm font-semibold sm:text-base">{label}</span>
+        {/* CTAs */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <a
+            href="#inventory"
+            className="press-scale inline-block rounded-md bg-amber-500 px-8 py-3 text-sm font-bold text-black transition-colors duration-150 hover:bg-amber-400"
+          >
+            {dict.home.browseInventory as string} →
+          </a>
+          <a
+            href="#how-it-works"
+            className="press-scale inline-block rounded-md border border-white/20 px-8 py-3 text-sm font-bold text-white transition-colors duration-150 hover:border-amber-500/50"
+          >
+            How It Works
+          </a>
+        </div>
+
+        {/* Stats bar */}
+        <div className="mt-16 flex flex-wrap items-center justify-center gap-8">
+          {STATS.map(({ icon: Icon, label }, i) => (
+            <div key={label} className="flex items-center gap-6">
+              {i > 0 && <div className="h-8 w-px bg-white/10" />}
+              <div className="flex flex-col items-center gap-1">
+                <Icon className="text-amber-500" size={22} />
+                <span className="text-sm font-semibold text-slate-400">{label}</span>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Floating glass quick-search, overlapping the hero bottom edge. */}
+      {/* Floating dark search bar */}
       <form
         action="/"
         method="GET"
-        className="absolute inset-x-0 bottom-0 z-50 mx-auto w-[92%] max-w-4xl translate-y-1/2 rounded-2xl border border-slate-300/60 bg-white/80 p-5 shadow-2xl backdrop-blur-xl sm:p-6"
+        className="absolute inset-x-0 bottom-0 z-50 mx-auto w-[92%] max-w-4xl translate-y-1/2 rounded-2xl border border-white/10 bg-[#0F172A] p-5 shadow-2xl shadow-black/50 backdrop-blur-xl sm:p-6"
       >
         <div className="grid gap-4 sm:grid-cols-4">
           <label className="flex flex-col gap-1.5 text-left">
-            <span className="text-xs font-medium text-slate-600">
+            <span className="text-xs font-medium text-slate-400">
               {dict.home.searchMake as string}
             </span>
             <select
               name="make"
               defaultValue={defaultMake ?? ""}
-              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-500"
+              className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-amber-500 [&>option]:bg-[#0F172A]"
             >
               <option value="">{dict.home.searchAllMakes as string}</option>
               {makes.map((make) => (
@@ -81,25 +109,25 @@ export default function Hero({
           </label>
 
           <label className="flex flex-col gap-1.5 text-left">
-            <span className="text-xs font-medium text-slate-600">
+            <span className="text-xs font-medium text-slate-400">
               {dict.home.searchModel as string}
             </span>
             <input
               name="model"
               defaultValue={defaultModel ?? ""}
               placeholder={dict.home.searchAnyModel as string}
-              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-500 focus:border-amber-500"
+              className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none placeholder:text-slate-500 focus:border-amber-500"
             />
           </label>
 
           <label className="flex flex-col gap-1.5 text-left">
-            <span className="text-xs font-medium text-slate-600">
+            <span className="text-xs font-medium text-slate-400">
               {dict.home.searchYear as string}
             </span>
             <select
               name="year"
               defaultValue={defaultYear ?? ""}
-              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-500"
+              className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-amber-500 [&>option]:bg-[#0F172A]"
             >
               <option value="">{dict.home.searchAnyYear as string}</option>
               {years.map((year) => (

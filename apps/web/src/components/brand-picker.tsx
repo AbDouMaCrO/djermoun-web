@@ -40,7 +40,7 @@ function BrandLogo({ logo, name, accent }: { logo: string; name: string; accent:
   if (err) {
     return (
       <div
-        className="flex h-16 w-16 items-center justify-center rounded-full text-2xl font-black text-white"
+        className="flex h-16 w-16 items-center justify-center rounded-full text-xl font-black text-white opacity-90"
         style={{ background: accent }}
       >
         {name[0]}
@@ -80,7 +80,7 @@ export default function BrandPicker({
 
   return (
     <div className="mt-10">
-      <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Shop by Brand</p>
+      <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Shop by Brand</p>
 
       <div className="mt-4 flex gap-3 overflow-x-auto pb-2 scrollbar-none">
         {BRANDS.map((brand) => {
@@ -89,22 +89,22 @@ export default function BrandPicker({
             <Link
               key={brand.make}
               href={href(brand.make)}
-              className={`group relative flex shrink-0 flex-col items-center gap-2.5 rounded-2xl border px-5 py-4 transition-all duration-200 ${
+              className={`group relative flex shrink-0 flex-col items-center gap-3 rounded-2xl border px-5 py-5 transition-all duration-200 cursor-pointer ${
                 active
-                  ? "border-amber-400 bg-amber-50 shadow-md shadow-amber-100"
-                  : "border-slate-100 bg-white shadow-sm hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
+                  ? "border-amber-500/60 bg-amber-500/8 shadow-[0_0_20px_rgba(245,158,11,0.15)]"
+                  : "border-white/5 bg-[#111827] hover:-translate-y-0.5 hover:border-amber-500/25 hover:bg-[#141C2F]"
               }`}
             >
               <BrandLogo logo={brand.logo} name={brand.name} accent={brand.accent} />
               <span
                 className={`text-[11px] font-bold uppercase tracking-wide transition-colors ${
-                  active ? "text-amber-600" : "text-slate-500 group-hover:text-slate-700"
+                  active ? "text-amber-400" : "text-slate-400 group-hover:text-slate-200"
                 }`}
               >
                 {brand.name}
               </span>
               {active && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-[9px] font-black text-black">
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-black">
                   ✓
                 </span>
               )}
@@ -118,28 +118,28 @@ export default function BrandPicker({
           return (
             <Link
               href={href("__other__")}
-              className={`group relative flex shrink-0 flex-col items-center gap-2.5 rounded-2xl border px-5 py-4 transition-all duration-200 ${
+              className={`group relative flex shrink-0 flex-col items-center gap-3 rounded-2xl border px-5 py-5 transition-all duration-200 cursor-pointer ${
                 active
-                  ? "border-slate-700 bg-slate-800 shadow-md shadow-slate-300"
-                  : "border-slate-100 bg-white shadow-sm hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                  ? "border-white/20 bg-white/5"
+                  : "border-white/5 bg-[#111827] hover:-translate-y-0.5 hover:border-amber-500/25 hover:bg-[#141C2F]"
               }`}
             >
               <div
-                className={`flex h-16 w-16 items-center justify-center rounded-full text-2xl transition-colors ${
-                  active ? "bg-slate-700 text-white" : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
+                className={`flex h-16 w-16 items-center justify-center rounded-full text-2xl ${
+                  active ? "text-slate-300" : "text-slate-600 group-hover:text-slate-400"
                 }`}
               >
                 ···
               </div>
               <span
-                className={`text-[11px] font-bold uppercase tracking-wide ${
-                  active ? "text-white" : "text-slate-500 group-hover:text-slate-700"
+                className={`text-[11px] font-bold uppercase tracking-wide transition-colors ${
+                  active ? "text-slate-300" : "text-slate-500 group-hover:text-slate-300"
                 }`}
               >
                 Other
               </span>
               {active && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-slate-600 text-[9px] font-black text-white">
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-black">
                   ✓
                 </span>
               )}

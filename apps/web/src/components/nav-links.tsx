@@ -39,7 +39,7 @@ export default function NavLinks({
           <Link
             key={link.id}
             href={link.href}
-            className="text-sm font-medium text-slate-900 transition-colors duration-150 hover:text-amber-500"
+            className="text-sm font-medium text-slate-400 transition-colors duration-150 hover:text-amber-400"
           >
             {link.label}
           </Link>
@@ -53,7 +53,7 @@ export default function NavLinks({
           value={lang}
           onChange={(e) => setLang(e.target.value as Language)}
           aria-label="Language"
-          className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm font-medium text-slate-900"
+          className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-sm font-medium text-slate-300 [&>option]:bg-[#0A0F1E]"
         >
           {languages.map((l) => (
             <option key={l.code} value={l.code}>

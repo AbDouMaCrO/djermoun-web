@@ -11,10 +11,15 @@ export default async function Navbar() {
   const role = user ? await getUserRole(user.id) : null;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 bg-[#0A0F1E]/95 backdrop-blur-xl border-b border-white/5">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link href="/" className="text-lg font-extrabold tracking-wide text-slate-900">
-          DJERMOUN <span className="text-amber-500">AUTO</span>
+        <Link href="/" className="leading-none">
+          <span className="text-lg font-black tracking-widest text-white">
+            DJERMOUN <span className="text-amber-400">AUTO</span>
+          </span>
+          <span className="block text-[9px] tracking-[0.4em] text-slate-500 uppercase mt-0.5">
+            Premium Import
+          </span>
         </Link>
 
         <NavLinks isLoggedIn={!!user} role={role} />

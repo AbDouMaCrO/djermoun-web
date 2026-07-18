@@ -60,29 +60,31 @@ const SOLUTIONS = [
 
 export default function ExportSolutions() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-20">
-      <div className="text-center">
-        <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">
-          What We Offer
-        </p>
-        <h2 className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
-          Comprehensive Car Export Solutions
-        </h2>
-      </div>
+    <section className="bg-[#050B18] px-6 py-24">
+      <div className="mx-auto max-w-7xl">
+        <div className="text-center">
+          <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">
+            What We Offer
+          </p>
+          <h2 className="mt-2 text-3xl font-black text-white sm:text-4xl">
+            Comprehensive Car Export Solutions
+          </h2>
+        </div>
 
-      <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {SOLUTIONS.map(({ Icon, title, desc }) => (
-          <div
-            key={title}
-            className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
-          >
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-amber-50 transition-colors group-hover:bg-amber-100">
-              <Icon className="text-amber-500" size={22} />
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {SOLUTIONS.map(({ Icon, title, desc }) => (
+            <div
+              key={title}
+              className="group rounded-2xl border border-white/5 bg-[#0A0F1E] p-7 transition-all duration-300 hover:border-amber-500/20 hover:bg-[#111827]"
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-500/10 transition-colors group-hover:bg-amber-500/15">
+                <Icon className="text-amber-500" size={22} />
+              </div>
+              <h3 className="mt-5 font-bold text-white">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-400">{desc}</p>
             </div>
-            <h3 className="mt-4 font-semibold text-slate-900">{title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-slate-500">{desc}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

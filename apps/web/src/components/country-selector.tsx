@@ -12,7 +12,7 @@ export default function CountrySelector({ className }: { className?: string }) {
       value={country}
       onChange={(e) => setCountry(e.target.value as Country)}
       aria-label="Country / Currency"
-      className={`rounded-md border border-slate-300 bg-white px-2 py-1 text-sm font-medium text-slate-900 cursor-pointer ${className ?? ""}`}
+      className={`rounded-md border border-white/10 bg-white/5 px-2 py-1 text-sm font-medium text-slate-300 cursor-pointer [&>option]:bg-[#0A0F1E] ${className ?? ""}`}
     >
       {enabledCountries.map((key) => {
         const cfg = COUNTRY_CONFIG[key];

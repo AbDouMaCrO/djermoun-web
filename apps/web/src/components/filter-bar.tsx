@@ -31,11 +31,11 @@ const thumbCls = [
   "[&::-webkit-slider-thumb]:appearance-none",
   "[&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5",
   "[&::-webkit-slider-thumb]:rounded-full",
-  "[&::-webkit-slider-thumb]:bg-white",
+  "[&::-webkit-slider-thumb]:bg-[#0F172A]",
   "[&::-webkit-slider-thumb]:border-[2.5px] [&::-webkit-slider-thumb]:border-amber-500",
   "[&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-grab",
   "[&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5",
-  "[&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white",
+  "[&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#0F172A]",
   "[&::-moz-range-thumb]:border-[2.5px] [&::-moz-range-thumb]:border-amber-500",
   "[&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-grab",
   "[&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:border-solid",
@@ -52,9 +52,9 @@ function DualRange({
   const pct = (v: number) => ((v - min) / (max - min)) * 100;
   return (
     <div className="relative flex h-5 items-center">
-      <div className="pointer-events-none absolute h-1.5 w-full rounded-full bg-slate-200">
+      <div className="pointer-events-none absolute h-1.5 w-full rounded-full bg-white/5">
         <div
-          className="absolute h-1.5 rounded-full bg-amber-400"
+          className="absolute h-1.5 rounded-full bg-amber-500"
           style={{ left: `${pct(lo)}%`, width: `${pct(hi) - pct(lo)}%` }}
         />
       </div>
@@ -80,8 +80,8 @@ function SingleRange({
   const pct = ((value - min) / (max - min)) * 100;
   return (
     <div className="relative flex h-5 items-center">
-      <div className="pointer-events-none absolute h-1.5 w-full rounded-full bg-slate-200">
-        <div className="absolute h-1.5 rounded-full bg-amber-400" style={{ width: `${pct}%` }} />
+      <div className="pointer-events-none absolute h-1.5 w-full rounded-full bg-white/5">
+        <div className="absolute h-1.5 rounded-full bg-amber-500" style={{ width: `${pct}%` }} />
       </div>
       <input
         type="range" min={min} max={max} step={step} value={value}
@@ -165,17 +165,17 @@ export default function FilterBar({
   }
 
   return (
-    <div className="mt-4 rounded-2xl border border-slate-100 bg-white shadow-[0_2px_20px_-4px_rgba(0,0,0,0.08)]">
+    <div className="mt-4 rounded-2xl border border-white/5 bg-[#0F172A] shadow-xl shadow-black/30">
       {/* ── Sliders row ─────────────────────────────────── */}
       <div className="grid gap-6 px-6 pt-6 pb-5 sm:grid-cols-2">
 
         {/* Budget */}
         <div>
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Budget</span>
-            <span className="text-xs font-semibold text-slate-600">
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">Budget</span>
+            <span className="text-xs font-semibold text-slate-300">
               {formatDisplayValue(displayMin)} – {formatDisplayValue(displayMax)}
-              <span className="ml-1 text-slate-400">{filterUnit}</span>
+              <span className="ml-1 text-slate-500">{filterUnit}</span>
             </span>
           </div>
           <DualRange
@@ -184,7 +184,7 @@ export default function FilterBar({
             onLo={onDisplayLo}
             onHi={onDisplayHi}
           />
-          <div className="mt-1.5 flex justify-between text-[10px] text-slate-300">
+          <div className="mt-1.5 flex justify-between text-[10px] text-slate-600">
             <span>0</span><span>{formatDisplayValue(sliderMax)}</span>
           </div>
         </div>
@@ -192,11 +192,11 @@ export default function FilterBar({
         {/* Mileage */}
         <div>
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Max Mileage</span>
-            <span className="text-xs font-semibold text-slate-600">
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">Max Mileage</span>
+            <span className="text-xs font-semibold text-slate-300">
               {maxMileage >= MLG_DEFAULT
-                ? <span className="text-slate-400">Any</span>
-                : <>{(maxMileage / 1000).toFixed(0)}k <span className="text-slate-400">km</span></>
+                ? <span className="text-slate-500">Any</span>
+                : <>{(maxMileage / 1000).toFixed(0)}k <span className="text-slate-500">km</span></>
               }
             </span>
           </div>
@@ -205,18 +205,18 @@ export default function FilterBar({
             value={maxMileage}
             onChange={v => { setMaxMileage(v); push(minMc, maxMc, fuel, v); }}
           />
-          <div className="mt-1.5 flex justify-between text-[10px] text-slate-300">
+          <div className="mt-1.5 flex justify-between text-[10px] text-slate-600">
             <span>0 km</span><span>300k km</span>
           </div>
         </div>
       </div>
 
       {/* ── Divider ─────────────────────────────────────── */}
-      <div className="h-px bg-slate-100" />
+      <div className="h-px bg-white/5" />
 
       {/* ── Fuel + Reset row ─────────────────────── */}
       <div className="flex flex-wrap items-center gap-3 px-6 py-4">
-        <span className="shrink-0 text-xs font-bold uppercase tracking-widest text-slate-400">Fuel</span>
+        <span className="shrink-0 text-xs font-bold uppercase tracking-widest text-slate-500">Fuel</span>
 
         <div className="flex flex-1 flex-wrap gap-1.5">
           {FUEL_OPTIONS.map(({ label, value }) => {
@@ -228,8 +228,8 @@ export default function FilterBar({
                 onClick={() => { setFuel(value); push(minMc, maxMc, value, maxMileage); }}
                 className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 ${
                   active
-                    ? "bg-amber-500 text-black shadow-md shadow-amber-200/60"
-                    : "border border-slate-200 bg-slate-50 text-slate-500 hover:border-amber-300 hover:text-amber-600"
+                    ? "bg-amber-500 text-black shadow-md shadow-amber-500/20"
+                    : "border border-white/10 bg-white/5 text-slate-400 hover:border-amber-500/30 hover:text-amber-400"
                 }`}
               >
                 {label}

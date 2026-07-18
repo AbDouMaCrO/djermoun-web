@@ -119,65 +119,67 @@ export default async function HomePage({
     <main>
       <Hero makes={makes} years={years} defaultMake={make} defaultModel={model} defaultYear={year} />
 
-      <section id="inventory" className="mx-auto max-w-7xl px-6 pb-20 pt-36">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">Inventory</p>
-          <h2 className="mt-2 text-3xl font-bold text-slate-900">Exceptional Vehicles</h2>
-        </div>
+      <section id="inventory" className="bg-[#0A0F1E] px-6 pb-24 pt-36">
+        <div className="mx-auto max-w-7xl">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">Inventory</p>
+            <h2 className="mt-2 text-3xl font-black text-white">Exceptional Vehicles</h2>
+          </div>
 
-        {/* Brand picker */}
-        <BrandPicker currentMake={make} extraParams={brandPickerParams} />
+          {/* Brand picker */}
+          <BrandPicker currentMake={make} extraParams={brandPickerParams} />
 
-        {/* Condition tabs */}
-        <div className="mt-8 flex justify-center">
-          <div className="flex gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1">
-            {(["all", "new", "used"] as const).map((t) => (
-              <a
-                key={t}
-                href={tabHref(t)}
-                className={`rounded-lg px-5 py-1.5 text-sm font-semibold capitalize transition-colors duration-150 ${
-                  activeTab === t
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
-                }`}
-              >
-                {t === "all" ? "All Cars" : t === "new" ? "New Cars" : "Used Cars"}
-              </a>
+          {/* Condition tabs */}
+          <div className="mt-8 flex justify-center">
+            <div className="flex gap-1 rounded-xl border border-white/5 bg-[#111827] p-1">
+              {(["all", "new", "used"] as const).map((t) => (
+                <a
+                  key={t}
+                  href={tabHref(t)}
+                  className={`rounded-lg px-5 py-1.5 text-sm font-semibold capitalize transition-colors duration-150 ${
+                    activeTab === t
+                      ? "bg-white/10 text-white shadow-sm"
+                      : "text-slate-500 hover:text-slate-300"
+                  }`}
+                >
+                  {t === "all" ? "All Cars" : t === "new" ? "New Cars" : "Used Cars"}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Price + Fuel filter */}
+          <FilterBar
+            initialMin={minMc}
+            initialMax={maxMc}
+            initialFuel={fuel}
+            initialMaxMileage={maxMileage}
+            currentParams={filterCurrentParams}
+          />
+
+          {error && (
+            <p className="mt-6 text-sm text-red-400">Failed to load cars: {error.message}</p>
+          )}
+
+          {cars.length === 0 && !error && (
+            <p className="mt-6 text-sm text-slate-500">No vehicles match your filters.</p>
+          )}
+
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {cars.map((car) => (
+              <CarCard key={car.id} car={car} />
             ))}
           </div>
+
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            searchParams={Object.fromEntries(
+              Object.entries({ make, model, year, tab, minMc: minMcParam, maxMc: maxMcParam, fuel: fuelParam, maxMileage: maxMileageParam })
+                .filter(([, v]) => v != null),
+            ) as Record<string, string>}
+          />
         </div>
-
-        {/* Price + Fuel filter */}
-        <FilterBar
-          initialMin={minMc}
-          initialMax={maxMc}
-          initialFuel={fuel}
-          initialMaxMileage={maxMileage}
-          currentParams={filterCurrentParams}
-        />
-
-        {error && (
-          <p className="mt-6 text-sm text-red-400">Failed to load cars: {error.message}</p>
-        )}
-
-        {cars.length === 0 && !error && (
-          <p className="mt-6 text-sm text-slate-600">No vehicles match your filters.</p>
-        )}
-
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {cars.map((car) => (
-            <CarCard key={car.id} car={car} />
-          ))}
-        </div>
-
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          searchParams={Object.fromEntries(
-            Object.entries({ make, model, year, tab, minMc: minMcParam, maxMc: maxMcParam, fuel: fuelParam, maxMileage: maxMileageParam })
-              .filter(([, v]) => v != null),
-          ) as Record<string, string>}
-        />
       </section>
 
       <ShippingHighlights />

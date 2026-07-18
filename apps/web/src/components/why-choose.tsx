@@ -40,27 +40,31 @@ export default function WhyChoose() {
   ];
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-20">
-      <div className="text-center">
-        <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">
-          {dict.home.whyChooseUs as string}
-        </p>
-        <h2 className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
-          {dict.home.whyChooseDjermoun as string}
-        </h2>
-      </div>
+    <section className="bg-[#0A0F1E] px-6 py-24">
+      <div className="mx-auto max-w-7xl">
+        <div className="text-center">
+          <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">
+            {dict.home.whyChooseUs as string}
+          </p>
+          <h2 className="mt-2 text-3xl font-black text-white sm:text-4xl">
+            {dict.home.whyChooseDjermoun as string}
+          </h2>
+        </div>
 
-      <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map(({ icon: Icon, title, description }) => (
-          <div
-            key={title}
-            className="rounded-xl border border-slate-200 bg-white p-6"
-          >
-            <Icon className="text-amber-500" size={28} />
-            <h3 className="mt-4 font-semibold text-slate-900">{title}</h3>
-            <p className="mt-2 text-sm text-slate-600">{description}</p>
-          </div>
-        ))}
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map(({ icon: Icon, title, description }) => (
+            <div
+              key={title}
+              className="group rounded-2xl border border-white/5 bg-[#111827] p-7 transition-all duration-300 hover:border-amber-500/20 hover:bg-[#141C2F]"
+            >
+              <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-5 group-hover:bg-amber-500/20 transition-colors">
+                <Icon className="text-amber-500" size={24} />
+              </div>
+              <h3 className="text-white font-bold mt-4">{title}</h3>
+              <p className="text-slate-400 text-sm mt-2 leading-relaxed">{description}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
