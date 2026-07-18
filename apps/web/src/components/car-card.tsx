@@ -82,12 +82,12 @@ export default function CarCard({ car }: { car: CarCardData }) {
           </div>
         </div>
 
-        <div className="px-5 pt-5">
+        <div className="px-5 pt-5 text-center">
           <h3 className="font-semibold text-slate-900">
             {car.year} {car.make} {car.model}{car.engine ? ` — ${car.engine}` : ""}
           </h3>
 
-          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-slate-600">
+          <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-xs text-slate-600">
             <span className="flex items-center gap-1.5">
               <Calendar size={14} className="text-slate-500" />
               {car.year}
@@ -117,7 +117,7 @@ export default function CarCard({ car }: { car: CarCardData }) {
             )}
           </div>
 
-          <div className="mt-4 text-center">
+          <div className="mt-4">
             <p className="text-xl font-bold text-[#4b5320]">{formatPrice(totalUSD)}</p>
             <p className="text-xs text-slate-500">{priceLabel}</p>
           </div>
