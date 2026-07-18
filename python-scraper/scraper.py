@@ -163,7 +163,7 @@ def clean_image_replicate(image_url: str) -> str:
 
         client = replicate.Client(api_token=REPLICATE_API_TOKEN)
         output = client.run(
-            "andreasjansson/lama-cleaner-lama",
+            "allenhooo/lama",
             input={"image": img_uri, "mask": mask_uri},
         )
 
