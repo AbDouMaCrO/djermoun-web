@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Calendar, Gauge, Fuel } from "lucide-react";
+import { Calendar, Gauge, Fuel, Cog } from "lucide-react";
 import { useCountry } from "@/country/country-context";
 import { AUTOCANGO_FEES_TOTAL } from "@/lib/fees";
 
@@ -20,6 +20,8 @@ export type CarCardData = {
   created_at: string;
   condition: string;
   paint_condition: string | null;
+  transmission: string | null;
+  engine: string | null;
 };
 
 const WA_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
@@ -82,7 +84,7 @@ export default function CarCard({ car }: { car: CarCardData }) {
 
         <div className="px-5 pt-5">
           <h3 className="font-semibold text-slate-900">
-            {car.year} {car.make} {car.model}
+            {car.year} {car.make} {car.model}{car.engine ? ` — ${car.engine}` : ""}
           </h3>
 
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-slate-600">
@@ -98,6 +100,12 @@ export default function CarCard({ car }: { car: CarCardData }) {
               <Fuel size={14} className="text-slate-500" />
               {car.fuel ?? "—"}
             </span>
+            {car.transmission && (
+              <span className="flex items-center gap-1.5">
+                <Cog size={14} className="text-slate-500" />
+                {car.transmission}
+              </span>
+            )}
             {car.paint_condition && (
               <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                 car.paint_condition === "original_paint"

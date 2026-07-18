@@ -69,7 +69,7 @@ export default async function HomePage({
   let query = supabase
     .from("cars")
     .select(
-      "id, make, model, year, mileage, fuel, price_cny, commission, shipping_cost, primary_image, created_at, condition, paint_condition",
+      "id, make, model, year, mileage, fuel, transmission, engine, price_cny, commission, shipping_cost, primary_image, created_at, condition, paint_condition",
       { count: "exact" },
     )
     .eq("status", "available")
