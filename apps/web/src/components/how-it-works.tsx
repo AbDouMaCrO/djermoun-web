@@ -103,9 +103,9 @@ export default function HowItWorks() {
           {FEATURES.map(({ Icon, title, desc }) => (
             <div
               key={title}
-              className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 dark:border-white/5 dark:bg-[#0A0F1E] dark:shadow-none"
+              className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 text-center dark:border-white/5 dark:bg-[#0A0F1E] dark:shadow-none"
             >
-              <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center dark:bg-amber-500/10">
+              <div className="mx-auto w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center dark:bg-amber-500/10">
                 <Icon className="text-amber-500" size={22} />
               </div>
               <h3 className="mt-4 font-bold text-slate-900 dark:text-white">{title}</h3>
