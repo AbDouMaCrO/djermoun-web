@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { requireRole } from "@/utils/supabase/roles";
 
 export type ActionResult = { success: true } | { success: false; error: string };
 
@@ -10,6 +11,7 @@ export type ActionResult = { success: true } | { success: false; error: string }
 // only) — see packages/database/sql/export_documents_setup.sql. Uploads to
 // storage under the buyer's uid prefix, then links it in user_documents.
 export async function uploadClientDocument(formData: FormData): Promise<ActionResult> {
+  await requireRole("admin", "supervisor");
   const orderId = String(formData.get("order_id") ?? "");
   const userId = String(formData.get("user_id") ?? "");
   const name = String(formData.get("document_name") ?? "").trim();
@@ -54,6 +56,7 @@ export async function deleteClientDocument(
   fileUrl: string,
   orderId: string,
 ): Promise<ActionResult> {
+  await requireRole("admin", "supervisor");
   const supabase = createAdminClient();
 
   const { error: delErr } = await supabase.from("user_documents").delete().eq("id", docId);

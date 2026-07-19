@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { requireRole } from "@/utils/supabase/roles";
 
 export type ActionResult =
   | { success: true }
@@ -10,15 +11,12 @@ export type ActionResult =
 // ponytail: car status is updated in a second statement, not one DB transaction.
 // Fine at this volume; if two admins race the same order, move both updates into a
 // SECURITY DEFINER SQL function and call it via rpc().
-//
-// SECURITY: this runs with the service-role key and bypasses RLS, but is NOT yet
-// gated behind auth — there's no admin login wired up. Before launch, restore an
-// is_admin() / getUser() check (see git history) so non-admins can't invoke it.
 export async function updateOrderStatusAction(
   orderId: string,
   newStatus: string,
   depositAmount?: number,
 ): Promise<ActionResult> {
+  await requireRole("admin", "supervisor");
   const supabase = createAdminClient();
 
   // Need the car this order is attached to for the cascading status change.
@@ -66,6 +64,7 @@ export async function addDepositAction(
   orderId: string,
   amount: number,
 ): Promise<ActionResult> {
+  await requireRole("admin", "supervisor");
   if (!Number.isFinite(amount) || amount <= 0) {
     return { success: false, error: "Enter a valid deposit amount." };
   }
@@ -115,6 +114,7 @@ export async function addDepositAction(
 
 // Marks the order's funds as wired to China.
 export async function transferFundsAction(orderId: string): Promise<ActionResult> {
+  await requireRole("admin", "supervisor");
   const supabase = createAdminClient();
   const { error } = await supabase
     .from("orders")

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { requireRole } from "@/utils/supabase/roles";
 
 export type ActionResult = { success: true } | { success: false; error: string };
 
@@ -38,6 +39,7 @@ export type CreateCarPayload = CarDetailsPayload & {
 export async function createCar(
   payload: CreateCarPayload,
 ): Promise<{ success: true; id: string } | { success: false; error: string }> {
+  await requireRole("admin", "supervisor");
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("cars")
@@ -56,6 +58,7 @@ export async function toggleCarVisibility(
   id: string,
   currentStatus: boolean,
 ): Promise<ActionResult> {
+  await requireRole("admin", "supervisor");
   const supabase = createAdminClient();
 
   const { error } = await supabase
@@ -70,12 +73,11 @@ export async function toggleCarVisibility(
   return { success: true };
 }
 
-// SECURITY: uses the service-role key and bypasses RLS — same known gap as
-// adminOrders.ts (no admin login wired up yet). See that file's note.
 export async function updateCarDetails(
   carId: string,
   payload: CarDetailsPayload,
 ): Promise<ActionResult> {
+  await requireRole("admin", "supervisor");
   const supabase = createAdminClient();
 
   const { error } = await supabase

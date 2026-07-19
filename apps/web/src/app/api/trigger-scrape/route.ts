@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireRole, UnauthorizedError } from "@/utils/supabase/roles";
 
 export async function POST(req: NextRequest) {
+  try {
+    await requireRole("admin", "supervisor");
+  } catch (e) {
+    if (e instanceof UnauthorizedError) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    throw e;
+  }
+
   const { url } = await req.json();
   if (!url?.trim()) return NextResponse.json({ error: "No URL provided" }, { status: 400 });
 
