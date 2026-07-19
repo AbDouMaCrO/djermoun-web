@@ -310,16 +310,16 @@ export const dictionaries = {
     home: {
       inventory: "السيارات",
       exceptionalVehicles: "سيارات من الأحسن",
-      viewAllVehicles: "شوف كل السيارات →",
+      viewAllVehicles: "اشتري كل السيارات →",
       failedToLoad: "ماقدرناش نحملو السيارات: {errorMessage}",
       noVehiclesFound: "ماكاش سيارة تناسب بحثك.",
       statsVehicles: "+300 سيارة",
       statsBrands: "+50 ماركة",
       statsSecure: "100% مضمون",
-      heroTitle: ["شوف ", "سيارة أحلامك"],
+      heroTitle: ["اشتري ", "سيارة أحلامك"],
       heroSubtitle:
         "أثمان صافية، فحص كامل، وشحن لأي بلاصة في العالم.",
-      browseInventory: "شوف السيارات",
+      browseInventory: "اشتري سيارتك",
       searchMake: "الماركة",
       searchAllMakes: "كل الماركات",
       searchModel: "الموديل",
@@ -349,7 +349,7 @@ export const dictionaries = {
       steps: [
         {
           title: "الاختيار والحجز",
-          description: "شوف السيارات المتاحة واحجز السيارة ديالك بضغطة زر.",
+          description: "اشتري السيارة ديالك من قائمتنا واحجز بضغطة زر.",
         },
         {
           title: "العقد والعربون",
@@ -382,7 +382,7 @@ export const dictionaries = {
       learnMore: "اعرف أكثر",
       ctaTitle: "ابدأ رحلتك دروك",
       ctaSubtitle: "اكتشف أحسن منصة لاستيراد السيارات من الصين",
-      ctaBrowse: "شوف السيارات",
+      ctaBrowse: "اشتري سيارتك",
     },
     contact: {
       heading: "تواصل معانا",
@@ -424,7 +424,7 @@ export const dictionaries = {
       whatsapp: "استفسر على واتساب",
     },
     brandPicker: {
-      shopByBrand: "شوف بالماركة",
+      shopByBrand: "اشتري بالماركة",
       other: "الباقيين",
     },
     pagination: {
