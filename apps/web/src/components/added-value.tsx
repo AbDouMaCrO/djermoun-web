@@ -80,9 +80,9 @@ export default function AddedValue() {
           {SERVICES.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
-              className="border border-slate-100 bg-slate-50 rounded-2xl p-6 dark:border-white/5 dark:bg-[#111827]"
+              className="border border-slate-100 bg-slate-50 rounded-2xl p-6 text-center dark:border-white/5 dark:bg-[#111827]"
             >
-              <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center mb-4">
+              <div className="mx-auto w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center mb-4">
                 <Icon size={22} className="text-amber-500" />
               </div>
               <p className="text-sm font-bold text-slate-900 dark:text-white mb-1">{title}</p>

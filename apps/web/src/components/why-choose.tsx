@@ -55,9 +55,9 @@ export default function WhyChoose() {
           {FEATURES.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
-              className="group rounded-2xl border border-slate-200 bg-white p-7 transition-all duration-300 hover:border-amber-400/40 hover:bg-amber-50/30 dark:border-white/5 dark:bg-[#111827] dark:hover:border-amber-500/20 dark:hover:bg-[#141C2F]"
+              className="group rounded-2xl border border-slate-200 bg-white p-7 text-center transition-all duration-300 hover:border-amber-400/40 hover:bg-amber-50/30 dark:border-white/5 dark:bg-[#111827] dark:hover:border-amber-500/20 dark:hover:bg-[#141C2F]"
             >
-              <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center mb-5 group-hover:bg-amber-100 transition-colors dark:bg-amber-500/10 dark:group-hover:bg-amber-500/20">
+              <div className="mx-auto w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center mb-5 group-hover:bg-amber-100 transition-colors dark:bg-amber-500/10 dark:group-hover:bg-amber-500/20">
                 <Icon className="text-amber-500" size={24} />
               </div>
               <h3 className="text-slate-900 dark:text-white font-bold mt-4">{title}</h3>

@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 import { useCountry } from "@/country/country-context";
+import { useLanguage } from "@/i18n/language-context";
 
 const MC_MIN = 0;
 const MC_MAX = 2000;
@@ -120,6 +121,7 @@ export default function FilterBar({
   const router = useRouter();
   const pathname = usePathname();
   const { mcToDisplay, displayToMc, filterBounds, filterUnit } = useCountry();
+  const { dict } = useLanguage();
 
   const [minMc, setMinMc] = useState(initialMin);
   const [maxMc, setMaxMc] = useState(initialMax);
@@ -185,7 +187,7 @@ export default function FilterBar({
         {/* Budget */}
         <div>
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">Budget</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">{dict.filter.budget}</span>
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               {formatDisplayValue(displayMin)} – {formatDisplayValue(displayMax)}
               <span className="ml-1 text-slate-400 dark:text-slate-500">{filterUnit}</span>
@@ -205,10 +207,10 @@ export default function FilterBar({
         {/* Mileage */}
         <div>
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">Max Mileage</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">{dict.filter.maxMileage}</span>
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               {maxMileage >= MLG_DEFAULT
-                ? <span className="text-slate-400 dark:text-slate-500">Any</span>
+                ? <span className="text-slate-400 dark:text-slate-500">{dict.filter.any}</span>
                 : <>{(maxMileage / 1000).toFixed(0)}k <span className="text-slate-400 dark:text-slate-500">km</span></>
               }
             </span>
@@ -229,7 +231,7 @@ export default function FilterBar({
 
       {/* ── Fuel + Reset row ─────────────────────── */}
       <div className="flex flex-wrap items-center gap-3 px-6 py-4">
-        <span className="shrink-0 text-xs font-bold uppercase tracking-widest text-slate-500">Fuel</span>
+        <span className="shrink-0 text-xs font-bold uppercase tracking-widest text-slate-500">{dict.filter.fuel}</span>
 
         <div className="flex flex-1 flex-wrap gap-1.5">
           {FUEL_OPTIONS.map(({ label, value }) => {
@@ -258,7 +260,7 @@ export default function FilterBar({
 
       {/* ── Car Type row ─────────────────────────── */}
       <div className="flex flex-wrap items-center gap-3 px-6 py-4">
-        <span className="shrink-0 text-xs font-bold uppercase tracking-widest text-slate-500">Type</span>
+        <span className="shrink-0 text-xs font-bold uppercase tracking-widest text-slate-500">{dict.filter.type}</span>
         <div className="flex flex-1 flex-wrap gap-1.5">
           {TYPE_OPTIONS.map(({ label, value }) => {
             const active = carType === value;
@@ -281,7 +283,7 @@ export default function FilterBar({
 
         {!isDefault && (
           <button type="button" onClick={reset} className="text-xs text-amber-500 underline underline-offset-2 hover:text-amber-400">
-            Reset
+            {dict.filter.reset}
           </button>
         )}
       </div>

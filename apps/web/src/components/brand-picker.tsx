@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/i18n/language-context";
 
 const BRANDS = [
   { name: "Geely",       make: "GEELY",       logo: "/brands/geely.svg",      accent: "#0070b2" },
@@ -66,6 +67,8 @@ export default function BrandPicker({
   currentMake?: string;
   extraParams?: Record<string, string>;
 }) {
+  const { dict } = useLanguage();
+
   function href(make: string) {
     const params = new URLSearchParams(extraParams);
     if (currentMake === make) {
@@ -80,7 +83,7 @@ export default function BrandPicker({
 
   return (
     <div className="mt-10">
-      <p className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Shop by Brand</p>
+      <p className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">{dict.brandPicker.shopByBrand}</p>
 
       <div className="mt-4 flex gap-3 overflow-x-auto pb-2 scrollbar-none">
         {BRANDS.map((brand) => {
@@ -136,7 +139,7 @@ export default function BrandPicker({
                   active ? "text-amber-600 dark:text-slate-300" : "text-slate-500 group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-slate-300"
                 }`}
               >
-                Other
+                {dict.brandPicker.other}
               </span>
               {active && (
                 <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-black dark:bg-amber-500 dark:text-black text-[9px] font-black">

@@ -75,9 +75,9 @@ export default function ExportSolutions() {
           {SOLUTIONS.map(({ Icon, title, desc }) => (
             <div
               key={title}
-              className="group rounded-2xl border border-slate-200 bg-white p-7 transition-all duration-300 hover:border-amber-400/40 hover:bg-amber-50/20 hover:shadow-md dark:border-white/5 dark:bg-[#0A0F1E] dark:hover:border-amber-500/20 dark:hover:bg-[#111827]"
+              className="group rounded-2xl border border-slate-200 bg-white p-7 text-center transition-all duration-300 hover:border-amber-400/40 hover:bg-amber-50/20 hover:shadow-md dark:border-white/5 dark:bg-[#0A0F1E] dark:hover:border-amber-500/20 dark:hover:bg-[#111827]"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 transition-colors group-hover:bg-amber-100 dark:bg-amber-500/10 dark:group-hover:bg-amber-500/15">
+              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 transition-colors group-hover:bg-amber-100 dark:bg-amber-500/10 dark:group-hover:bg-amber-500/15">
                 <Icon className="text-amber-500" size={22} />
               </div>
               <h3 className="mt-5 font-bold text-slate-900 dark:text-white">{title}</h3>

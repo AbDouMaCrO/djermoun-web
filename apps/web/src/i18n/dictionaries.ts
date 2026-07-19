@@ -101,7 +101,45 @@ export const dictionaries = {
         submit: "Send Message",
       },
     },
+    filter: {
+      budget: "Budget",
+      maxMileage: "Max Mileage",
+      fuel: "Fuel",
+      type: "Type",
+      reset: "Reset",
+      any: "Any",
+    },
+    inventory: {
+      label: "Inventory",
+      title: "Exceptional Vehicles",
+      allCars: "All Cars",
+      newCars: "New Cars",
+      usedCars: "Used Cars",
+      noMatch: "No vehicles match your filters.",
+      errorPrefix: "Failed to load cars:",
+    },
+    carCard: {
+      new: "New",
+      used: "Used",
+      recent: "Recent",
+      whatsapp: "Ask on WhatsApp",
+    },
+    brandPicker: {
+      shopByBrand: "Shop by Brand",
+      other: "Other",
+    },
+    pagination: {
+      prev: "← Previous",
+      next: "Next →",
+    },
+    common: {
+      loginSignup: "Login / Sign Up",
+      welcomeModal: "Welcome to Djermoun Auto",
+      welcomeModalSub: "Select your region to see prices in your local currency.",
+      pricesIn: "Prices in",
+    },
   },
+
   fr: {
     nav: {
       inventory: "Inventaire",
@@ -199,124 +237,172 @@ export const dictionaries = {
         submit: "Envoyer le Message",
       },
     },
+    filter: {
+      budget: "Budget",
+      maxMileage: "Kilométrage Max",
+      fuel: "Carburant",
+      type: "Type",
+      reset: "Réinitialiser",
+      any: "Tous",
+    },
+    inventory: {
+      label: "Inventaire",
+      title: "Véhicules d'Exception",
+      allCars: "Tous",
+      newCars: "Neuves",
+      usedCars: "Occasion",
+      noMatch: "Aucun véhicule ne correspond à vos filtres.",
+      errorPrefix: "Erreur de chargement :",
+    },
+    carCard: {
+      new: "Neuve",
+      used: "Occasion",
+      recent: "Récent",
+      whatsapp: "Demander sur WhatsApp",
+    },
+    brandPicker: {
+      shopByBrand: "Chercher par Marque",
+      other: "Autres",
+    },
+    pagination: {
+      prev: "← Précédent",
+      next: "Suivant →",
+    },
+    common: {
+      loginSignup: "Connexion / Inscription",
+      welcomeModal: "Bienvenue chez Djermoun Auto",
+      welcomeModalSub: "Sélectionnez votre région pour voir les prix en monnaie locale.",
+      pricesIn: "Prix en",
+    },
   },
+
+  // ─── Algerian Darija ────────────────────────────────────────────────────────
   ar: {
     nav: {
       inventory: "السيارات",
-      howItWorks: "كيف نعمل",
-      aboutUs: "من نحن",
-      contact: "اتصل بنا",
+      howItWorks: "كيفاش نخدمو",
+      aboutUs: "من احنا",
+      contact: "تواصل معانا",
       account: "حسابي",
     },
     home: {
-      inventory: "المخزون",
-      exceptionalVehicles: "سيارات استثنائية",
-      viewAllVehicles: "عرض كل السيارات →",
-      failedToLoad: "فشل تحميل السيارات: {errorMessage}",
-      noVehiclesFound: "لا توجد سيارات تطابق بحثك.",
-      statsVehicles: "300+ سيارة",
-      statsBrands: "50+ علامة تجارية",
-      statsSecure: "آمن 100%",
-      heroTitle: ["اكتشف ", "سيارة أحلامك"],
+      inventory: "السيارات",
+      exceptionalVehicles: "سيارات من الأحسن",
+      viewAllVehicles: "شوف كل السيارات →",
+      failedToLoad: "ماقدرناش نحملو السيارات: {errorMessage}",
+      noVehiclesFound: "ماكاش سيارة تناسب بحثك.",
+      statsVehicles: "+300 سيارة",
+      statsBrands: "+50 ماركة",
+      statsSecure: "100% مضمون",
+      heroTitle: ["شوف ", "سيارة أحلامك"],
       heroSubtitle:
-        "أسعار شفافة، فحص كامل، وشحن عالمي سلس حتى ميناء وجهتك.",
-      browseInventory: "تصفح المخزون",
-      searchMake: "الشركة المصنعة",
-      searchAllMakes: "كل الشركات",
+        "أثمان صافية، فحص كامل، وشحن لأي بلاصة في العالم.",
+      browseInventory: "شوف السيارات",
+      searchMake: "الماركة",
+      searchAllMakes: "كل الماركات",
       searchModel: "الموديل",
       searchAnyModel: "أي موديل",
       searchYear: "السنة",
       searchAnyYear: "أي سنة",
-      searchButton: "ابحث عن سيارة",
-      whyChooseUs: "لماذا تختارنا",
-      whyChooseDjermoun: "لماذا تختار DJERMOUN AUTO",
-      secureTransactions: "معاملات آمنة",
-      secureTransactionsDesc: "يتم تتبع وحماية كل إيداع ودفع من البداية إلى النهاية.",
-      globalShipping: "شحن عالمي",
-      globalShippingDesc: "نحن نصدر إلى الموانئ في جميع أنحاء العالم مع وثائق جمركية كاملة.",
-      fullInspections: "فحص كامل",
-      fullInspectionsDesc: "تمر كل سيارة بفحص كامل متعدد النقاط قبل عرضها.",
-      dedicatedSupport: "دعم مخصص",
-      dedicatedSupportDesc: "مندوب مبيعات معك من الحجز حتى التسليم.",
-      transparentPaperwork: "أوراق شفافة",
+      searchButton: "ابحث على سيارة",
+      whyChooseUs: "علاش تختارنا",
+      whyChooseDjermoun: "علاش تختار DJERMOUN AUTO",
+      secureTransactions: "معاملات مضمونة",
+      secureTransactionsDesc: "كل عربون ودفعة متتبعة ومحمية من الأول للآخر.",
+      globalShipping: "شحن للعالم",
+      globalShippingDesc: "نصدرو لكل موانئ العالم مع الوثائق الجمركية كاملة.",
+      fullInspections: "فحص شامل",
+      fullInspectionsDesc: "كل سيارة تعدي على فحص كامل على كل النقاط قبل ما تعرض.",
+      dedicatedSupport: "خدمة خاصة",
+      dedicatedSupportDesc: "عندك مسؤول معاك من الحجز حتى التسليم.",
+      transparentPaperwork: "أوراق صافية",
       transparentPaperworkDesc:
-        "سندات ملكية ووثائق تصدير واضحة، بدون رسوم خفية أو مفاجآت.",
-      fairPricing: "أسعار عادلة",
-      fairPricingDesc: "التوريد المباشر يعني أسعارًا تنافسية بدون طبقات ترميز.",
+        "عقود وأوراق التصدير واضحة، بلا مصاريف خفية ولا مفاجآت.",
+      fairPricing: "أثمان عادلة",
+      fairPricingDesc: "الاستيراد المباشر يعني أثمان منافسة بدون وسطاء.",
     },
     howItWorks: {
       heroTitle: "سيارة أحلامك، تصلك بأمان",
-      stepLabel: "الخطوة",
+      stepLabel: "المرحلة",
       steps: [
         {
           title: "الاختيار والحجز",
-          description: "تصفح سياراتنا المتاحة واحجز سيارتك بضغطة زر.",
+          description: "شوف السيارات المتاحة واحجز السيارة ديالك بضغطة زر.",
         },
         {
           title: "العقد والعربون",
-          description: "أكمل ملفك وقم بتوقيع عقد الشراء لضمان حقك.",
+          description: "كمل ملفك وإمضا على عقد الشراء لتضمن حقك.",
         },
         {
-          title: "الخدمات اللوجستية العالمية",
-          description: "نتكفل بجميع أوراق التصدير والشحن البحري حتى ميناء وصولك.",
+          title: "الشحن والتصدير",
+          description: "نتكفلو بأوراق التصدير والشحن البحري لحتى ميناء وجهتك.",
         },
         {
           title: "الجمارك والتسليم",
-          description: "استلم أوراقك، قم بالتخليص الجمركي، واستلم مفاتيحك.",
+          description: "خلص الجمارك بالأوراق اللي نعطيوك وقود السيارة ديالك.",
         },
       ],
     },
     aboutUs: {
-      heading: "من نحن",
+      heading: "من احنا",
       missionEyebrow: "مهمتنا",
       missionText:
-        "تقوم DJERMOUN AUTO بسد الفجوة بين أسواق السيارات العالمية والمشترين، وتضمن أسعارًا شفافة وفحوصات دقيقة لكل سيارة.",
-      trustEyebrow: "لماذا تثق بنا",
-      trustStats: ["مصدرون مرخصون", "ضمان بنكي موثق", "شحن مؤمن بنسبة 100%"],
+        "DJERMOUN AUTO تربط بين أسواق السيارات العالمية والزبائن بأثمان صافية وفحص دقيق لكل سيارة.",
+      trustEyebrow: "علاش تثق فينا",
+      trustStats: ["مصدرون مرخصين", "ضمان بنكي موثق", "شحن مؤمن بنسبة 100%"],
     },
     contact: {
-      heading: "تواصل معنا",
+      heading: "تواصل معانا",
       officeLabel: "عنوان المكتب",
       officeValue: "16 شارع الإخوة بوعادو، الجزائر العاصمة، الجزائر",
       portLabel: "عمليات الميناء",
       portValue: "ميناء جن جن، جيجل، الجزائر",
       whatsappLabel: "واتساب",
-      emailLabel: "البريد الإلكتروني",
+      emailLabel: "الإيميل",
       form: {
         name: "الاسم",
-        email: "البريد الإلكتروني",
+        email: "الإيميل",
         phone: "الهاتف",
-        message: "الرسالة",
-        submit: "إرسال الرسالة",
+        message: "رسالتك",
+        submit: "أرسل الرسالة",
       },
     },
+    filter: {
+      budget: "الميزانية",
+      maxMileage: "أقصى مسافة",
+      fuel: "الوقود",
+      type: "النوع",
+      reset: "مسح الكل",
+      any: "الكل",
+    },
+    inventory: {
+      label: "السيارات",
+      title: "سيارات من الأحسن",
+      allCars: "الكل",
+      newCars: "جديدة",
+      usedCars: "مستعملة",
+      noMatch: "ماكاش سيارة تناسب فلترتك.",
+      errorPrefix: "ماقدرناش نحملو السيارات:",
+    },
+    carCard: {
+      new: "جديدة",
+      used: "مستعملة",
+      recent: "جديد وصل",
+      whatsapp: "استفسر على واتساب",
+    },
+    brandPicker: {
+      shopByBrand: "شوف بالماركة",
+      other: "الباقيين",
+    },
+    pagination: {
+      prev: "→ السابق",
+      next: "التالي ←",
+    },
+    common: {
+      loginSignup: "دخول / تسجيل",
+      welcomeModal: "أهلا بيك في Djermoun Auto",
+      welcomeModalSub: "اختار منطقتك باش تشوف الأثمان بالعملة ديالك.",
+      pricesIn: "الأثمان بـ",
+    },
   },
-} satisfies Record<
-  Language,
-  {
-    nav: Record<string, string>;
-    home: Record<string, string | string[]>;
-    howItWorks: {
-      heroTitle: string;
-      stepLabel: string;
-      steps: { title: string; description: string }[];
-    };
-    aboutUs: {
-      heading: string;
-      missionEyebrow: string;
-      missionText: string;
-      trustEyebrow: string;
-      trustStats: string[];
-    };
-    contact: {
-      heading: string;
-      officeLabel: string;
-      officeValue: string;
-      portLabel: string;
-      portValue: string;
-      whatsappLabel: string;
-      emailLabel: string;
-      form: { name: string; email: string; phone: string; message: string; submit: string };
-    };
-  }
->;
+};

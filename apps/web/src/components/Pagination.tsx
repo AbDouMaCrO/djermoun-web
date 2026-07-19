@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useLanguage } from "@/i18n/language-context";
 
 type Props = {
   currentPage: number;
@@ -25,6 +28,7 @@ const btnBase =
   "flex h-9 min-w-[2.25rem] items-center justify-center rounded-md px-3 text-sm font-medium transition-colors duration-150";
 
 export default function Pagination({ currentPage, totalPages, searchParams = {} }: Props) {
+  const { dict } = useLanguage();
   if (totalPages <= 1) return null;
 
   const pages = getPages(currentPage, totalPages);
@@ -32,10 +36,10 @@ export default function Pagination({ currentPage, totalPages, searchParams = {} 
   return (
     <nav className="mt-12 flex items-center justify-center gap-1" aria-label="Pagination">
       {currentPage <= 1 ? (
-        <span className={`${btnBase} cursor-not-allowed text-slate-300`}>← Previous</span>
+        <span className={`${btnBase} cursor-not-allowed text-slate-300`}>{dict.pagination.prev}</span>
       ) : (
         <Link href={buildHref(currentPage - 1, searchParams)} className={`${btnBase} text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/5`}>
-          ← Previous
+          {dict.pagination.prev}
         </Link>
       )}
 
@@ -59,10 +63,10 @@ export default function Pagination({ currentPage, totalPages, searchParams = {} 
       )}
 
       {currentPage >= totalPages ? (
-        <span className={`${btnBase} cursor-not-allowed text-slate-300`}>Next →</span>
+        <span className={`${btnBase} cursor-not-allowed text-slate-300`}>{dict.pagination.next}</span>
       ) : (
         <Link href={buildHref(currentPage + 1, searchParams)} className={`${btnBase} text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/5`}>
-          Next →
+          {dict.pagination.next}
         </Link>
       )}
     </nav>
