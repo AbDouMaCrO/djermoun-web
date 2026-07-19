@@ -23,6 +23,14 @@ const FUEL_OPTIONS = [
   { label: "Diesel", value: "Diesel" },
 ];
 
+const TYPE_OPTIONS = [
+  { label: "All",       value: ""          },
+  { label: "SUV",       value: "SUV"       },
+  { label: "Sedan",     value: "Sedan"     },
+  { label: "Hatchback", value: "Hatchback" },
+  { label: "MPV",       value: "MPV"       },
+];
+
 // ─── Dual range slider ───────────────────────────────────────────────────────
 
 const thumbCls = [
@@ -99,30 +107,33 @@ export default function FilterBar({
   initialMax = MC_DEFAULT_MAX,
   initialFuel = "",
   initialMaxMileage = MLG_DEFAULT,
+  initialCarType = "",
   currentParams = {},
 }: {
   initialMin?: number;
   initialMax?: number;
   initialFuel?: string;
   initialMaxMileage?: number;
+  initialCarType?: string;
   currentParams?: Record<string, string>;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const { mcToDisplay, displayToMc, filterBounds, filterUnit } = useCountry();
 
-  // Internal state in M centimes (URL format), display shows converted values
   const [minMc, setMinMc] = useState(initialMin);
   const [maxMc, setMaxMc] = useState(initialMax);
   const [fuel, setFuel] = useState(initialFuel);
   const [maxMileage, setMaxMileage] = useState(initialMaxMileage);
+  const [carType, setCarType] = useState(initialCarType);
 
-  function push(mn: number, mx: number, f: string, mlg: number) {
+  function push(mn: number, mx: number, f: string, mlg: number, ct: string) {
     const params = new URLSearchParams(currentParams);
     params.set("minMc", String(mn));
     params.set("maxMc", String(mx));
     if (f) params.set("fuel", f); else params.delete("fuel");
     if (mlg < MLG_DEFAULT) params.set("maxMileage", String(mlg)); else params.delete("maxMileage");
+    if (ct) params.set("carType", ct); else params.delete("carType");
     params.delete("page");
     router.push(`${pathname}?${params.toString()}#inventory`);
   }
@@ -131,14 +142,16 @@ export default function FilterBar({
     minMc === MC_DEFAULT_MIN &&
     maxMc === MC_DEFAULT_MAX &&
     !fuel &&
+    !carType &&
     maxMileage === MLG_DEFAULT;
 
   function reset() {
     setMinMc(MC_DEFAULT_MIN);
     setMaxMc(MC_DEFAULT_MAX);
     setFuel("");
+    setCarType("");
     setMaxMileage(MLG_DEFAULT);
-    push(MC_DEFAULT_MIN, MC_DEFAULT_MAX, "", MLG_DEFAULT);
+    push(MC_DEFAULT_MIN, MC_DEFAULT_MAX, "", MLG_DEFAULT, "");
   }
 
   // Display values converted from M centimes
@@ -149,13 +162,13 @@ export default function FilterBar({
   function onDisplayLo(displayVal: number) {
     const mc = displayToMc(displayVal);
     setMinMc(mc);
-    push(mc, maxMc, fuel, maxMileage);
+    push(mc, maxMc, fuel, maxMileage, carType);
   }
 
   function onDisplayHi(displayVal: number) {
     const mc = displayToMc(displayVal);
     setMaxMc(mc);
-    push(minMc, mc, fuel, maxMileage);
+    push(minMc, mc, fuel, maxMileage, carType);
   }
 
   function formatDisplayValue(v: number): string {
@@ -203,7 +216,7 @@ export default function FilterBar({
           <SingleRange
             min={MLG_MIN} max={MLG_MAX} step={MLG_STEP}
             value={maxMileage}
-            onChange={v => { setMaxMileage(v); push(minMc, maxMc, fuel, v); }}
+            onChange={v => { setMaxMileage(v); push(minMc, maxMc, fuel, v, carType); }}
           />
           <div className="mt-1.5 flex justify-between text-[10px] text-slate-400 dark:text-slate-600">
             <span>0 km</span><span>300k km</span>
@@ -225,7 +238,35 @@ export default function FilterBar({
               <button
                 key={value}
                 type="button"
-                onClick={() => { setFuel(value); push(minMc, maxMc, value, maxMileage); }}
+                onClick={() => { setFuel(value); push(minMc, maxMc, value, maxMileage, carType); }}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 ${
+                  active
+                    ? "bg-amber-500 text-black shadow-md shadow-amber-200/60 dark:shadow-amber-500/20"
+                    : "border border-slate-200 bg-slate-50 text-slate-500 hover:border-amber-300 hover:text-amber-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:border-amber-500/30 dark:hover:text-amber-400"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+      </div>
+
+      {/* ── Divider ─────────────────────────────────────── */}
+      <div className="h-px bg-slate-100 dark:bg-white/5" />
+
+      {/* ── Car Type row ─────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-3 px-6 py-4">
+        <span className="shrink-0 text-xs font-bold uppercase tracking-widest text-slate-500">Type</span>
+        <div className="flex flex-1 flex-wrap gap-1.5">
+          {TYPE_OPTIONS.map(({ label, value }) => {
+            const active = carType === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => { setCarType(value); push(minMc, maxMc, fuel, maxMileage, value); }}
                 className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-150 ${
                   active
                     ? "bg-amber-500 text-black shadow-md shadow-amber-200/60 dark:shadow-amber-500/20"

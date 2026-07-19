@@ -6,6 +6,7 @@ import HowItWorks from "@/components/how-it-works";
 import ExportSolutions from "@/components/export-solutions";
 import HowToBuyTeaser from "@/components/how-to-buy-teaser";
 import ShippingHighlights from "@/components/shipping-highlights";
+import AddedValue from "@/components/added-value";
 import AboutSection from "@/components/about-section";
 import Pagination from "@/components/Pagination";
 import FilterBar from "@/components/filter-bar";
@@ -31,12 +32,13 @@ export default async function HomePage({
     maxMc?: string;
     fuel?: string;
     maxMileage?: string;
+    carType?: string;
   }>;
 }) {
   const {
     make, model, year, page: pageParam, tab,
     minMc: minMcParam, maxMc: maxMcParam, fuel: fuelParam,
-    maxMileage: maxMileageParam,
+    maxMileage: maxMileageParam, carType: carTypeParam,
   } = await searchParams;
 
   const condition = tab === "new" ? "new" : tab === "used" ? "used" : null;
@@ -48,6 +50,7 @@ export default async function HomePage({
   const maxMc = Math.max(0, Number(maxMcParam ?? 2000));
   const fuel = fuelParam ?? "";
   const maxMileage = maxMileageParam ? Math.max(0, parseInt(maxMileageParam, 10)) : 300_000;
+  const carType = carTypeParam ?? "";
 
   const overhead = AUTOCANGO_FEES + DEFAULT_SHIPPING;
   const minUsd = Math.max(0, Math.round((minMc * 10_000) / DZD_RATE - overhead));
@@ -82,7 +85,8 @@ export default async function HomePage({
   else if (make) query = query.eq("make", make);
   if (model) query = query.ilike("model", `%${model}%`);
   if (year)  query = query.eq("year", parseInt(year, 10));
-  if (fuel)  query = query.ilike("fuel", `%${fuel}%`);
+  if (fuel)    query = query.ilike("fuel", `%${fuel}%`);
+  if (carType) query = query.eq("car_type", carType);
   if (maxMileage < 300_000) query = query.lte("mileage", maxMileage);
 
   const { data, error, count } = await query;
@@ -92,7 +96,7 @@ export default async function HomePage({
 
   // Params kept across tab / filter changes
   const sharedParams = Object.fromEntries(
-    Object.entries({ make, model, year, minMc: minMcParam, maxMc: maxMcParam, fuel: fuelParam, maxMileage: maxMileageParam })
+    Object.entries({ make, model, year, minMc: minMcParam, maxMc: maxMcParam, fuel: fuelParam, maxMileage: maxMileageParam, carType: carTypeParam })
       .filter(([, v]) => v != null),
   ) as Record<string, string>;
 
@@ -101,7 +105,7 @@ export default async function HomePage({
   ) as Record<string, string>;
 
   const brandPickerParams = Object.fromEntries(
-    Object.entries({ tab, minMc: minMcParam, maxMc: maxMcParam, fuel: fuelParam, maxMileage: maxMileageParam })
+    Object.entries({ tab, minMc: minMcParam, maxMc: maxMcParam, fuel: fuelParam, maxMileage: maxMileageParam, carType: carTypeParam })
       .filter(([, v]) => v != null),
   ) as Record<string, string>;
 
@@ -148,12 +152,13 @@ export default async function HomePage({
             </div>
           </div>
 
-          {/* Price + Fuel filter */}
+          {/* Price + Fuel + Type filter */}
           <FilterBar
             initialMin={minMc}
             initialMax={maxMc}
             initialFuel={fuel}
             initialMaxMileage={maxMileage}
+            initialCarType={carType}
             currentParams={filterCurrentParams}
           />
 
@@ -175,7 +180,7 @@ export default async function HomePage({
             currentPage={currentPage}
             totalPages={totalPages}
             searchParams={Object.fromEntries(
-              Object.entries({ make, model, year, tab, minMc: minMcParam, maxMc: maxMcParam, fuel: fuelParam, maxMileage: maxMileageParam })
+              Object.entries({ make, model, year, tab, minMc: minMcParam, maxMc: maxMcParam, fuel: fuelParam, maxMileage: maxMileageParam, carType: carTypeParam })
                 .filter(([, v]) => v != null),
             ) as Record<string, string>}
           />
@@ -183,6 +188,8 @@ export default async function HomePage({
       </section>
 
       <ShippingHighlights />
+
+      <AddedValue />
 
       <HowToBuyTeaser />
 
