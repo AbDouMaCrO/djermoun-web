@@ -66,7 +66,7 @@ export default function CustomsCalculator({
   const totalUsd = basePrice + dutyUsd + shippingUsd;
 
   return (
-    <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50">
+    <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-[#111827]">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -82,13 +82,13 @@ export default function CustomsCalculator({
       </button>
 
       {open && (
-      <div className="border-t border-slate-200 px-6 pb-6 pt-4">
+      <div className="border-t border-slate-200 px-6 pb-6 pt-4 dark:border-white/10">
       <label className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium text-slate-700">Destination Country</span>
+        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Destination Country</span>
         <select
           value={destination}
           onChange={(e) => setDestination(e.target.value as Destination)}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-500"
+          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-amber-500 dark:border-white/10 dark:bg-[#0F172A] dark:text-slate-200"
         >
           {DESTINATIONS.map((d) => (
             <option key={d.value} value={d.value}>
@@ -100,17 +100,17 @@ export default function CustomsCalculator({
 
 
 
-      <dl className="mt-5 space-y-3 border-t border-slate-200 pt-4">
+      <dl className="mt-5 space-y-3 border-t border-slate-200 pt-4 dark:border-white/10">
         {/* Base price */}
         <div className="flex justify-between text-sm">
-          <dt className="text-slate-600">Base Car Price</dt>
-          <dd className="font-medium text-slate-900">{formatUSD(basePrice)}</dd>
+          <dt className="text-slate-600 dark:text-slate-400">Base Car Price</dt>
+          <dd className="font-medium text-slate-900 dark:text-slate-200">{formatUSD(basePrice)}</dd>
         </div>
 
         {/* Duties */}
         <div className="flex justify-between text-sm">
-          <dt className="text-slate-600">Estimated Customs &amp; Duties</dt>
-          <dd className="text-right font-medium text-slate-900">
+          <dt className="text-slate-600 dark:text-slate-400">Estimated Customs &amp; Duties</dt>
+          <dd className="text-right font-medium text-slate-900 dark:text-slate-200">
             {isAlgeria ? (
               <>
                 <span>{formatMillions(dutyDzd)}</span>
@@ -130,7 +130,7 @@ export default function CustomsCalculator({
               min={0}
               value={shippingInput}
               onChange={(e) => setShippingInput(e.target.value)}
-              className="w-20 rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 outline-none focus:border-amber-500"
+              className="w-20 rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 outline-none focus:border-amber-500 dark:border-white/10 dark:bg-[#0F172A] dark:text-slate-200"
             />
             {isAlgeria && (
               <span className="text-xs text-slate-500">= {formatDZD(shippingDzd)}</span>
@@ -139,9 +139,9 @@ export default function CustomsCalculator({
         </div>
 
         {/* Total */}
-        <div className="flex flex-col gap-0.5 border-t border-slate-200 pt-3">
+        <div className="flex flex-col gap-0.5 border-t border-slate-200 pt-3 dark:border-white/10">
           <div className="flex justify-between text-base">
-            <dt className="font-semibold text-slate-900">
+            <dt className="font-semibold text-slate-900 dark:text-white">
               Estimated Total Delivered Price
               <span className="ml-1.5 text-xs font-normal text-slate-400">(without port fees)</span>
             </dt>

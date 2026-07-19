@@ -11,14 +11,14 @@ export default function AboutUsPage() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-24">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">{dict.aboutUs.heading}</h1>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">{dict.aboutUs.heading}</h1>
       </div>
 
       <section className="mt-16 text-center">
         <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">
           {dict.aboutUs.missionEyebrow}
         </p>
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-700">
+        <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-700 dark:text-slate-300">
           {dict.aboutUs.missionText}
         </p>
       </section>
@@ -34,10 +34,10 @@ export default function AboutUsPage() {
             return (
               <div
                 key={stat}
-                className="rounded-xl border border-slate-200 bg-white p-6 text-center"
+                className="rounded-xl border border-slate-200 bg-white p-6 text-center dark:border-white/10 dark:bg-[#111827]"
               >
                 <Icon className="mx-auto text-amber-500" size={28} />
-                <p className="mt-4 font-semibold text-slate-900">{stat}</p>
+                <p className="mt-4 font-semibold text-slate-900 dark:text-white">{stat}</p>
               </div>
             );
           })}

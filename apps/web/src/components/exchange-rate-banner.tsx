@@ -20,7 +20,7 @@ export default function ExchangeRateBanner() {
   }
 
   return (
-    <div className="border-b border-slate-200 bg-white px-6 py-2 text-center text-xs text-slate-700 sm:text-sm">
+    <div className="border-b border-slate-200 bg-white px-6 py-2 text-center text-xs text-slate-700 sm:text-sm dark:border-white/5 dark:bg-[#0A0F1E] dark:text-slate-300">
       <span className="inline-flex items-center gap-2">
         <Landmark size={14} className="shrink-0 text-amber-500" />
         <span>{cfg.flag} {cfg.label}</span>

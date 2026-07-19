@@ -24,35 +24,35 @@ export default function PricingBreakdown({
   const fmt = (usd: number) => formatPrice(usd);
 
   return (
-    <div className="mt-8 rounded-xl border border-slate-200 bg-white p-6">
+    <div className="mt-8 rounded-xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-[#111827]">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-amber-500">
         Transparent Pricing
       </h2>
       <dl className="mt-4 space-y-3">
         <div className="flex justify-between text-sm">
-          <dt className="text-slate-600">Vehicle Price (FOB China)</dt>
-          <dd className="font-medium text-slate-900">{fmt(fobPrice + AUTOCANGO_FEES_TOTAL)}</dd>
+          <dt className="text-slate-600 dark:text-slate-400">Vehicle Price (FOB China)</dt>
+          <dd className="font-medium text-slate-900 dark:text-slate-200">{fmt(fobPrice + AUTOCANGO_FEES_TOTAL)}</dd>
         </div>
 
         <p className="flex items-center gap-1.5 text-xs text-slate-500">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400" />
-          Shipping port: <span className="font-medium text-slate-700">Guangzhou, CN</span>
+          Shipping port: <span className="font-medium text-slate-700 dark:text-slate-300">Guangzhou, CN</span>
         </p>
 
         {commission > 0 && (
           <div className="flex justify-between text-sm">
-            <dt className="text-slate-600">DJERMOUN Brokerage Fee</dt>
-            <dd className="font-medium text-slate-900">{fmt(commission)}</dd>
+            <dt className="text-slate-600 dark:text-slate-400">DJERMOUN Brokerage Fee</dt>
+            <dd className="font-medium text-slate-900 dark:text-slate-200">{fmt(commission)}</dd>
           </div>
         )}
 
         <div className="flex justify-between text-sm">
-          <dt className="text-slate-600">Global Shipping</dt>
-          <dd className="font-medium text-slate-900">{fmt(shipping)}</dd>
+          <dt className="text-slate-600 dark:text-slate-400">Global Shipping</dt>
+          <dd className="font-medium text-slate-900 dark:text-slate-200">{fmt(shipping)}</dd>
         </div>
 
-        <div className="flex justify-between border-t border-slate-200 pt-3 text-base">
-          <dt className="font-semibold text-slate-900">Total Price</dt>
+        <div className="flex justify-between border-t border-slate-200 pt-3 text-base dark:border-white/10">
+          <dt className="font-semibold text-slate-900 dark:text-white">Total Price</dt>
           <dd className="font-bold text-amber-500">{fmt(totalUSD)}</dd>
         </div>
       </dl>

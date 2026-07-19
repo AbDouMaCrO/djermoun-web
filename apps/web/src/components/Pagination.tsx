@@ -34,7 +34,7 @@ export default function Pagination({ currentPage, totalPages, searchParams = {} 
       {currentPage <= 1 ? (
         <span className={`${btnBase} cursor-not-allowed text-slate-300`}>← Previous</span>
       ) : (
-        <Link href={buildHref(currentPage - 1, searchParams)} className={`${btnBase} text-slate-700 hover:bg-slate-100`}>
+        <Link href={buildHref(currentPage - 1, searchParams)} className={`${btnBase} text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/5`}>
           ← Previous
         </Link>
       )}
@@ -49,7 +49,7 @@ export default function Pagination({ currentPage, totalPages, searchParams = {} 
             className={
               p === currentPage
                 ? `${btnBase} bg-amber-500 text-white shadow-sm`
-                : `${btnBase} text-slate-700 hover:bg-slate-100`
+                : `${btnBase} text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/5`
             }
             aria-current={p === currentPage ? "page" : undefined}
           >
@@ -61,7 +61,7 @@ export default function Pagination({ currentPage, totalPages, searchParams = {} 
       {currentPage >= totalPages ? (
         <span className={`${btnBase} cursor-not-allowed text-slate-300`}>Next →</span>
       ) : (
-        <Link href={buildHref(currentPage + 1, searchParams)} className={`${btnBase} text-slate-700 hover:bg-slate-100`}>
+        <Link href={buildHref(currentPage + 1, searchParams)} className={`${btnBase} text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/5`}>
           Next →
         </Link>
       )}

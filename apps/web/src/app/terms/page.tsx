@@ -143,17 +143,17 @@ Address: Algeria`,
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 dark:bg-[#0A0F1E]">
       {/* Hero */}
-      <div className="bg-white border-b border-slate-100 px-6 py-16">
+      <div className="bg-white border-b border-slate-100 px-6 py-16 dark:bg-[#0A0F1E] dark:border-white/5">
         <div className="mx-auto max-w-4xl">
           <Link href="/" className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-amber-500 mb-8">
             ← Back to home
           </Link>
           <p className="text-sm font-semibold uppercase tracking-widest text-amber-500">Legal</p>
-          <h1 className="mt-2 text-4xl font-black text-slate-900">Terms of Service</h1>
+          <h1 className="mt-2 text-4xl font-black text-slate-900 dark:text-white">Terms of Service</h1>
           <p className="mt-3 text-slate-500 text-sm">Last updated: {LAST_UPDATED}</p>
-          <p className="mt-4 max-w-2xl text-slate-600 text-sm leading-relaxed">
+          <p className="mt-4 max-w-2xl text-slate-600 text-sm leading-relaxed dark:text-slate-400">
             Please read these terms carefully before using Djermoun Auto services. By placing an order or using our platform, you agree to these terms in full.
           </p>
 
@@ -163,7 +163,7 @@ export default function TermsPage() {
               <a
                 key={id}
                 href={`#${id}`}
-                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-amber-400 hover:text-amber-600"
+                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-amber-400 hover:text-amber-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:border-amber-500/50 dark:hover:text-amber-400"
               >
                 {title}
               </a>
@@ -175,9 +175,9 @@ export default function TermsPage() {
       {/* Content */}
       <div className="mx-auto max-w-4xl px-6 py-16 space-y-10">
         {SECTIONS.map(({ id, title, content }) => (
-          <section key={id} id={id} className="scroll-mt-24 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">{title}</h2>
-            <div className="text-sm leading-relaxed text-slate-600 whitespace-pre-line">
+          <section key={id} id={id} className="scroll-mt-24 rounded-xl border border-slate-200 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-[#111827]">
+            <h2 className="text-lg font-bold text-slate-900 mb-4 dark:text-white">{title}</h2>
+            <div className="text-sm leading-relaxed text-slate-600 whitespace-pre-line dark:text-slate-400">
               {content}
             </div>
           </section>

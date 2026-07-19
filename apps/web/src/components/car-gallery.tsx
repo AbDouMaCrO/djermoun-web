@@ -27,7 +27,7 @@ export default function CarGallery({ images }: { images: string[] }) {
   }, [isLightboxOpen, prev, next]);
 
   if (count === 0) {
-    return <div className="aspect-video w-full rounded-xl border border-slate-200 bg-slate-100" />;
+    return <div className="aspect-video w-full rounded-xl border border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-[#111827]" />;
   }
 
   const active = images[currentIndex];
@@ -35,7 +35,7 @@ export default function CarGallery({ images }: { images: string[] }) {
   return (
     <div>
       {/* Main image */}
-      <div className="group relative overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+      <div className="group relative overflow-hidden rounded-xl border border-slate-200 shadow-sm dark:border-white/10">
         <button
           type="button"
           onClick={() => setIsLightboxOpen(true)}

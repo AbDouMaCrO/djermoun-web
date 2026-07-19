@@ -144,16 +144,16 @@ const SECTIONS = [
 
 export default function HowToBuyPage() {
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 dark:bg-[#0A0F1E]">
       {/* Hero */}
-      <div className="bg-white border-b border-slate-100 px-6 py-16 text-center">
+      <div className="bg-white border-b border-slate-100 px-6 py-16 text-center dark:bg-[#0A0F1E] dark:border-white/5">
         <Link
           href="/"
           className="mb-8 inline-flex items-center gap-1 text-sm text-slate-400 hover:text-amber-500"
         >
           ← Back to inventory
         </Link>
-        <h1 className="text-5xl font-black text-slate-900">How To Buy</h1>
+        <h1 className="text-5xl font-black text-slate-900 dark:text-white">How To Buy</h1>
         <p className="mt-4 text-xl font-semibold text-amber-500">
           Key Questions Answered for How to Import Cars from China
         </p>
@@ -167,7 +167,7 @@ export default function HowToBuyPage() {
             <a
               key={id}
               href={`#${id}`}
-              className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-amber-400 hover:text-amber-600"
+              className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-amber-400 hover:text-amber-600 dark:border-white/10 dark:bg-[#111827] dark:text-slate-300 dark:hover:border-amber-500/50 dark:hover:text-amber-400"
             >
               <Icon size={15} />
               {title}
@@ -184,23 +184,23 @@ export default function HowToBuyPage() {
               <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${color}`}>
                 <Icon size={20} />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{title}</h2>
             </div>
 
             <div className="space-y-4">
               {items.map(({ q, a }) => (
                 <details
                   key={q}
-                  className="group rounded-xl border border-slate-200 bg-white shadow-sm"
+                  className="group rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#111827]"
                 >
                   <summary className="flex cursor-pointer select-none items-center justify-between gap-4 px-6 py-5">
-                    <span className="font-semibold text-slate-800">{q}</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{q}</span>
                     <ChevronRight
                       size={16}
                       className="shrink-0 text-slate-400 transition-transform group-open:rotate-90"
                     />
                   </summary>
-                  <p className="border-t border-slate-100 px-6 py-5 text-sm leading-relaxed text-slate-600">
+                  <p className="border-t border-slate-100 px-6 py-5 text-sm leading-relaxed text-slate-600 dark:border-white/5 dark:text-slate-400">
                     {a}
                   </p>
                 </details>
@@ -211,8 +211,8 @@ export default function HowToBuyPage() {
       </div>
 
       {/* CTA */}
-      <div className="border-t border-slate-100 bg-white px-6 py-16 text-center">
-        <h3 className="text-2xl font-bold text-slate-900">Ready to get started?</h3>
+      <div className="border-t border-slate-100 bg-white px-6 py-16 text-center dark:border-white/5 dark:bg-[#0A0F1E]">
+        <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Ready to get started?</h3>
         <p className="mt-2 text-sm text-slate-500">Browse our live inventory and find your next vehicle.</p>
         <Link
           href="/#inventory"

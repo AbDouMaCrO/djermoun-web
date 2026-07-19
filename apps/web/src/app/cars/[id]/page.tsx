@@ -72,7 +72,7 @@ export default async function CarDetailsPage({
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
       <div className="flex items-baseline justify-between gap-6">
-        <h1 className="text-3xl font-semibold text-slate-900">
+        <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">
           {car.year} {car.make} {car.model}
         </h1>
         <CarPriceHeading totalUSD={totalPrice} />
@@ -94,12 +94,12 @@ export default async function CarDetailsPage({
             Algerian Customs &amp; Duties Estimate
           </p>
           {car.customs_duty_dzd === 0 ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
               <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
               European Origin: Exempt (EUR.1)
             </span>
           ) : (
-            <p className="text-sm font-medium text-slate-700">
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
               ~{Math.floor(Number(car.customs_duty_dzd) / 10_000)} millions centimes
             </p>
           )}
@@ -113,9 +113,9 @@ export default async function CarDetailsPage({
 
           <dl className="mt-8 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
             {specs.map(([label, value]) => (
-              <div key={label} className="flex justify-between border-b border-slate-200 py-2">
-                <dt className="text-sm text-slate-600">{label}</dt>
-                <dd className="text-sm font-medium text-slate-900">{String(value ?? "—")}</dd>
+              <div key={label} className="flex justify-between border-b border-slate-200 py-2 dark:border-white/10">
+                <dt className="text-sm text-slate-600 dark:text-slate-400">{label}</dt>
+                <dd className="text-sm font-medium text-slate-900 dark:text-slate-200">{String(value ?? "—")}</dd>
               </div>
             ))}
           </dl>
@@ -125,7 +125,7 @@ export default async function CarDetailsPage({
               <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Accessories</h3>
               <ul className="mt-3 flex flex-wrap gap-2">
                 {(car.accessories as string[]).map((item) => (
-                  <li key={item} className="rounded-full border border-amber-500/40 px-3 py-1 text-xs font-medium text-slate-700">
+                  <li key={item} className="rounded-full border border-amber-500/40 px-3 py-1 text-xs font-medium text-slate-700 dark:text-slate-300">
                     {item}
                   </li>
                 ))}
