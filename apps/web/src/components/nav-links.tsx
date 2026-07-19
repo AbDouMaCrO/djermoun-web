@@ -71,15 +71,33 @@ export default function NavLinks({
         </Link>
       </div>
 
-      {/* ── Mobile hamburger button ──────────────────────── */}
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Open menu"
-        className="flex items-center justify-center rounded-lg p-2 text-slate-600 hover:text-amber-500 dark:text-slate-400 dark:hover:text-amber-400 md:hidden"
-      >
-        <Menu size={22} />
-      </button>
+      {/* ── Mobile: always-visible controls + hamburger ─── */}
+      <div className="flex items-center gap-2 md:hidden">
+        <select
+          value={lang}
+          onChange={(e) => setLang(e.target.value as Language)}
+          aria-label="Language"
+          className="rounded-md border border-slate-300 bg-white text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:[&>option]:bg-[#0A0F1E] px-2 py-1 text-xs font-medium"
+        >
+          {languages.map((l) => (
+            <option key={l.code} value={l.code}>{l.label}</option>
+          ))}
+        </select>
+        <Link
+          href={isLoggedIn ? accountHref : "/login"}
+          className="press-scale rounded-full bg-amber-500 px-4 py-1.5 text-xs font-bold text-black transition-colors duration-150 hover:bg-amber-400"
+        >
+          {isLoggedIn ? dict.nav.account : dict.common.loginSignup}
+        </Link>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Open menu"
+          className="flex items-center justify-center rounded-lg p-2 text-slate-600 hover:text-amber-500 dark:text-slate-400 dark:hover:text-amber-400"
+        >
+          <Menu size={22} />
+        </button>
+      </div>
 
       {/* ── Mobile backdrop ──────────────────────────────── */}
       {open && (
@@ -126,27 +144,8 @@ export default function NavLinks({
         </nav>
 
         {/* Drawer footer */}
-        <div className="border-t border-slate-100 px-5 py-5 dark:border-white/5 space-y-3">
-          <div className="flex items-center gap-3">
-            <CountrySelector />
-            <select
-              value={lang}
-              onChange={(e) => setLang(e.target.value as Language)}
-              aria-label="Language"
-              className="flex-1 rounded-md border border-slate-300 bg-white text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:[&>option]:bg-[#0A0F1E] px-2 py-1.5 text-sm font-medium"
-            >
-              {languages.map((l) => (
-                <option key={l.code} value={l.code}>{l.label}</option>
-              ))}
-            </select>
-          </div>
-          <Link
-            href={isLoggedIn ? accountHref : "/login"}
-            onClick={() => setOpen(false)}
-            className="press-scale flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-bold text-black transition-colors duration-150 hover:bg-amber-400"
-          >
-            {isLoggedIn ? dict.nav.account : dict.common.loginSignup}
-          </Link>
+        <div className="border-t border-slate-100 px-5 py-5 dark:border-white/5">
+          <CountrySelector className="w-full" />
         </div>
       </div>
     </>
