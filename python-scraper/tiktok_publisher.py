@@ -100,7 +100,7 @@ def generate_tiktok_payload(car_data: dict, clean_image_urls: list[str]) -> dict
     }
 
 
-def publish_car_to_tiktok(car_data: dict, clean_image_urls: list[str]) -> bool:
+def publish_car_to_tiktok(car_data: dict, clean_image_urls: list[str], video_url: str | None = None) -> bool:
     """
     Send a car listing photo post to TikTok as an inbox draft.
 
