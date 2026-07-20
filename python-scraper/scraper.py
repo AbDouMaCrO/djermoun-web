@@ -395,7 +395,7 @@ def parse_sellwellauto(url):
     price_m = re.search(r'EXW[:\s]*\$?([\d,]+)', html, re.IGNORECASE) or re.search(r'\$([\d,]+)', html)
     if price_m:
         try:
-            price_usd = float(price_m.group(1).replace(",", ""))
+            price_usd = float(price_m.group(1).replace(",", "")) + 400  # EXW → FOB
         except ValueError:
             pass
 
