@@ -344,44 +344,88 @@ def parse_sellwellauto(url):
     soup = BeautifulSoup(r.text, "html.parser")
     html = r.text
 
-    # Make/model/year from URL slug: /usedcar/{make}-{model}-{year}-{SWAcode}
-    make = model = "UNKNOWN"
+    # --- JSON-LD Product schema (server-rendered, most reliable) ---
+    import json as _json
+    ld_data: dict = {}
+    for script in soup.find_all("script", type="application/ld+json"):
+        try:
+            data = _json.loads(script.string or "")
+            types = data.get("@type", [])
+            if isinstance(types, str):
+                types = [types]
+            if "Car" in types or "usedCar" in types or "Product" in types:
+                ld_data = data
+                break
+        except Exception:
+            pass
+
+    # Make from JSON-LD brand, fallback to URL slug
+    make = "UNKNOWN"
+    model = "UNKNOWN"
     year = datetime.now().year
-    slug_m = re.search(r'/usedcar/([^/?#]+)', url)
-    if slug_m:
-        parts = slug_m.group(1).split("-")
-        # Strip trailing SWA code and extract year
-        non_code = [p for p in parts if not re.match(r'^SWA\d+$', p, re.IGNORECASE)]
-        year_candidates = [p for p in non_code if re.match(r'^20\d\d$', p)]
-        if year_candidates:
-            year = int(year_candidates[-1])
-            rest = [p for p in non_code if p != year_candidates[-1]]
-        else:
-            rest = non_code
-        if rest:
-            make = rest[0].upper()
-            model = " ".join(rest[1:]).upper() if len(rest) > 1 else "UNKNOWN"
 
-    # dt/dd spec pairs
-    specs = {}
-    for dt in soup.find_all("dt"):
-        dd = dt.find_next_sibling("dd")
-        if dd:
-            specs[dt.get_text(strip=True)] = dd.get_text(strip=True)
+    brand = ld_data.get("brand", {})
+    if isinstance(brand, dict) and brand.get("name"):
+        make = brand["name"].upper()
 
-    # Prefer spec values over URL slug for make/model/year
-    if specs.get("Brand"):
-        make = specs["Brand"].upper()
-    if specs.get("Series"):
-        model = specs["Series"].upper()
-    if specs.get("Year"):
-        y_m = re.search(r'\d{4}', specs["Year"])
-        if y_m:
-            year = int(y_m.group())
+    # Year + model from JSON-LD name: "Audi A3 2024 15,000km ..."
+    ld_name = ld_data.get("name", "")
+    year_m = re.search(r'\b(20\d\d)\b', ld_name)
+    if year_m:
+        year = int(year_m.group(1))
+    # Model = tokens between make and year in name
+    name_stripped = re.sub(r'\s+' + re.escape(year_m.group(1)) + r'.*$', '', ld_name) if year_m else ld_name
+    name_stripped = re.sub(re.escape(make.title()), '', name_stripped, flags=re.IGNORECASE).strip()
+    if name_stripped:
+        model = name_stripped.upper()
+
+    # Fallback: URL slug /usedcar/{make}-{model}-{year}-{SWAcode}
+    if make == "UNKNOWN":
+        slug_m = re.search(r'/usedcar/([^/?#]+)', url)
+        if slug_m:
+            parts = slug_m.group(1).split("-")
+            non_code = [p for p in parts if not re.match(r'^SWA\d+$', p, re.IGNORECASE)]
+            year_candidates = [p for p in non_code if re.match(r'^20\d\d$', p)]
+            if year_candidates:
+                year = int(year_candidates[-1])
+                rest = [p for p in non_code if p != year_candidates[-1]]
+            else:
+                rest = non_code
+            if rest:
+                make = rest[0].upper()
+                model = " ".join(rest[1:]).upper() if len(rest) > 1 else "UNKNOWN"
+
+    # Price from JSON-LD offers (EXW) + $400 FOB markup
+    price_usd = 0.0
+    offers = ld_data.get("offers", {})
+    if isinstance(offers, dict) and offers.get("price"):
+        try:
+            price_usd = float(offers["price"]) + 400  # EXW → FOB
+        except (ValueError, TypeError):
+            pass
+    if price_usd == 0.0:
+        # Fallback: first $X,XXX on page
+        price_m = re.search(r'EXW[:\s]*\$?([\d,]+)', html, re.IGNORECASE) or re.search(r'\$([\d,]+)', html)
+        if price_m:
+            try:
+                price_usd = float(price_m.group(1).replace(",", "")) + 400
+            except ValueError:
+                pass
+
+    # --- Spec spans: <span class="info-label">Key</span><span class="info-value">Val</span> ---
+    specs: dict[str, str] = {}
+    for label in soup.find_all("span", class_="info-label"):
+        value = label.find_next_sibling("span", class_="info-value")
+        if value:
+            specs[label.get_text(strip=True)] = value.get_text(strip=True)
 
     # Mileage
     mileage = None
     mileage_raw = specs.get("Mileage", "")
+    if not mileage_raw:
+        # Fallback: parse from JSON-LD description "15,000km"
+        mile_m = re.search(r'([\d,]+)\s*km', ld_data.get("description", ""))
+        mileage_raw = mile_m.group(0) if mile_m else ""
     if mileage_raw:
         m = re.search(r'[\d,]+', mileage_raw)
         if m:
@@ -390,16 +434,22 @@ def parse_sellwellauto(url):
             except ValueError:
                 pass
 
-    # Price — "EXW: $16,839" or fallback to first $X,XXX on page
-    price_usd = 0.0
-    price_m = re.search(r'EXW[:\s]*\$?([\d,]+)', html, re.IGNORECASE) or re.search(r'\$([\d,]+)', html)
-    if price_m:
-        try:
-            price_usd = float(price_m.group(1).replace(",", "")) + 400  # EXW → FOB
-        except ValueError:
-            pass
+    # Fuel / engine from specs, fallback to JSON-LD description
+    ld_desc = ld_data.get("description", "")
+    fuel = specs.get("Fuel") or None
+    if not fuel:
+        fuel_m = re.search(r'Gasoline|Diesel|Electric|Hybrid|PHEV|HEV', ld_desc, re.IGNORECASE)
+        fuel = fuel_m.group(0).capitalize() if fuel_m else None
 
-    # Images from sellwellauto CDN
+    engine = specs.get("Engine") or None
+    if not engine:
+        eng_m = re.search(r'\d+\.\d+T?\s+\d+\s+\w+\d+', ld_desc)
+        engine = eng_m.group(0).strip() if eng_m else None
+
+    color = specs.get("Color") or specs.get("Colour") or None
+    transmission = specs.get("Transmission") or specs.get("Gearbox") or None
+
+    # --- Images from CDN regex ---
     img_pattern = re.compile(
         r'(https://cdn\.sellwellauto\.com/[^\s"\'<>]+\.(?:jpg|jpeg|png|webp))',
         re.IGNORECASE,
@@ -416,16 +466,12 @@ def parse_sellwellauto(url):
             seen.add(src)
             raw_images.append(src)
 
-    # Download + upload (CDN is public, no watermark removal needed)
+    # Download + upload to Supabase storage
     slug = f"{year}-{make}-{model}".lower().replace(" ", "-")
     images: list[str] = []
     for idx, img_url in enumerate(raw_images):
         try:
-            resp = requests.get(
-                img_url,
-                headers={"User-Agent": "Mozilla/5.0"},
-                timeout=40,
-            )
+            resp = requests.get(img_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=40)
             if resp.status_code == 200 and len(resp.content) >= 5000:
                 stored = upload_to_storage(slug, idx, resp.content)
                 images.append(stored if stored else img_url)
@@ -439,8 +485,7 @@ def parse_sellwellauto(url):
     primary_image = images[0] if images else None
 
     # Title — strip boilerplate suffix
-    title_tag = soup.find("title")
-    raw_title = title_tag.get_text(strip=True) if title_tag else f"{year} {make} {model}"
+    raw_title = ld_name or f"{year} {make} {model}"
     title = re.sub(r'\s+Priced.*$', '', raw_title, flags=re.IGNORECASE).strip()
     title = re.sub(r'\s+Used Car.*$', '', title, flags=re.IGNORECASE).strip()
 
@@ -452,11 +497,11 @@ def parse_sellwellauto(url):
         "title":          title,
         "source_url":     url,
         "mileage":        mileage,
-        "fuel":           specs.get("Fuel") or None,
-        "fuel_type":      specs.get("Fuel") or None,
-        "transmission":   specs.get("Transmission") or None,
-        "engine":         specs.get("Engine") or None,
-        "exterior_color": specs.get("Color") or None,
+        "fuel":           fuel,
+        "fuel_type":      fuel,
+        "transmission":   transmission,
+        "engine":         engine,
+        "exterior_color": color,
         "accessories":    None,
         "primary_image":  primary_image,
         "images":         images,
@@ -465,7 +510,8 @@ def parse_sellwellauto(url):
         f"[SCRAPE] {result['year']} {result['make']} {result['model']} | "
         f"${result['price_cny']} | mileage={result['mileage']} | "
         f"images={len(images)} | fuel={result['fuel']} | "
-        f"engine={result['engine']} | color={result['exterior_color']}"
+        f"engine={result['engine']} | color={result['exterior_color']} | "
+        f"transmission={result['transmission']}"
     )
     return result
 
