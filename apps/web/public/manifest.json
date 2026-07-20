@@ -1,0 +1,26 @@
+{
+  "name": "Djermoun Auto",
+  "short_name": "Djermoun",
+  "description": "Direct access to premium vehicles — transparent pricing, complete inspections, seamless global shipping.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050B18",
+  "theme_color": "#050B18",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["automotive", "shopping"],
+  "lang": "en"
+}

@@ -25,6 +25,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Djermoun Auto — Direct Access to Premium Vehicles",
   description: "Transparent pricing, complete inspections, and seamless global shipping.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Djermoun Auto",
+  },
+  formatDetection: { telephone: false },
 };
 
 export default async function RootLayout({
