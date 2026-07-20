@@ -330,6 +330,146 @@ def parse_autocango(url):
     return result
 
 
+def parse_sellwellauto(url):
+    print(f"[SCRAPE] Fetching: {url}")
+    r = requests.get(
+        url,
+        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
+        timeout=60,
+    )
+    if r.status_code != 200:
+        print(f"[ERR] HTTP {r.status_code} for {url}")
+        return None
+
+    soup = BeautifulSoup(r.text, "html.parser")
+    html = r.text
+
+    # Make/model/year from URL slug: /usedcar/{make}-{model}-{year}-{SWAcode}
+    make = model = "UNKNOWN"
+    year = datetime.now().year
+    slug_m = re.search(r'/usedcar/([^/?#]+)', url)
+    if slug_m:
+        parts = slug_m.group(1).split("-")
+        # Strip trailing SWA code and extract year
+        non_code = [p for p in parts if not re.match(r'^SWA\d+$', p, re.IGNORECASE)]
+        year_candidates = [p for p in non_code if re.match(r'^20\d\d$', p)]
+        if year_candidates:
+            year = int(year_candidates[-1])
+            rest = [p for p in non_code if p != year_candidates[-1]]
+        else:
+            rest = non_code
+        if rest:
+            make = rest[0].upper()
+            model = " ".join(rest[1:]).upper() if len(rest) > 1 else "UNKNOWN"
+
+    # dt/dd spec pairs
+    specs = {}
+    for dt in soup.find_all("dt"):
+        dd = dt.find_next_sibling("dd")
+        if dd:
+            specs[dt.get_text(strip=True)] = dd.get_text(strip=True)
+
+    # Prefer spec values over URL slug for make/model/year
+    if specs.get("Brand"):
+        make = specs["Brand"].upper()
+    if specs.get("Series"):
+        model = specs["Series"].upper()
+    if specs.get("Year"):
+        y_m = re.search(r'\d{4}', specs["Year"])
+        if y_m:
+            year = int(y_m.group())
+
+    # Mileage
+    mileage = None
+    mileage_raw = specs.get("Mileage", "")
+    if mileage_raw:
+        m = re.search(r'[\d,]+', mileage_raw)
+        if m:
+            try:
+                mileage = int(m.group().replace(",", ""))
+            except ValueError:
+                pass
+
+    # Price — "EXW: $16,839" or fallback to first $X,XXX on page
+    price_usd = 0.0
+    price_m = re.search(r'EXW[:\s]*\$?([\d,]+)', html, re.IGNORECASE) or re.search(r'\$([\d,]+)', html)
+    if price_m:
+        try:
+            price_usd = float(price_m.group(1).replace(",", ""))
+        except ValueError:
+            pass
+
+    # Images from sellwellauto CDN
+    img_pattern = re.compile(
+        r'(https://cdn\.sellwellauto\.com/[^\s"\'<>]+\.(?:jpg|jpeg|png|webp))',
+        re.IGNORECASE,
+    )
+    seen: set[str] = set()
+    raw_images: list[str] = []
+    for img_url in img_pattern.findall(html):
+        if img_url not in seen:
+            seen.add(img_url)
+            raw_images.append(img_url)
+    for img_tag in soup.find_all("img"):
+        src = img_tag.get("src", "")
+        if "sellwellauto.com" in src and src not in seen:
+            seen.add(src)
+            raw_images.append(src)
+
+    # Download + upload (CDN is public, no watermark removal needed)
+    slug = f"{year}-{make}-{model}".lower().replace(" ", "-")
+    images: list[str] = []
+    for idx, img_url in enumerate(raw_images):
+        try:
+            resp = requests.get(
+                img_url,
+                headers={"User-Agent": "Mozilla/5.0"},
+                timeout=40,
+            )
+            if resp.status_code == 200 and len(resp.content) >= 5000:
+                stored = upload_to_storage(slug, idx, resp.content)
+                images.append(stored if stored else img_url)
+            else:
+                images.append(img_url)
+        except Exception as e:
+            print(f"[IMG] Download failed ({img_url}): {e}")
+            images.append(img_url)
+        print(f"[IMG] {idx + 1}/{len(raw_images)} processed for {make} {model}")
+
+    primary_image = images[0] if images else None
+
+    # Title — strip boilerplate suffix
+    title_tag = soup.find("title")
+    raw_title = title_tag.get_text(strip=True) if title_tag else f"{year} {make} {model}"
+    title = re.sub(r'\s+Priced.*$', '', raw_title, flags=re.IGNORECASE).strip()
+    title = re.sub(r'\s+Used Car.*$', '', title, flags=re.IGNORECASE).strip()
+
+    result = {
+        "make":           make,
+        "model":          model,
+        "year":           year,
+        "price_cny":      price_usd,
+        "title":          title,
+        "source_url":     url,
+        "mileage":        mileage,
+        "fuel":           specs.get("Fuel") or None,
+        "fuel_type":      specs.get("Fuel") or None,
+        "transmission":   specs.get("Transmission") or None,
+        "engine":         specs.get("Engine") or None,
+        "exterior_color": specs.get("Color") or None,
+        "accessories":    None,
+        "primary_image":  primary_image,
+        "images":         images,
+    }
+    print(
+        f"[SCRAPE] {result['year']} {result['make']} {result['model']} | "
+        f"${result['price_cny']} | mileage={result['mileage']} | "
+        f"images={len(images)} | fuel={result['fuel']} | "
+        f"engine={result['engine']} | color={result['exterior_color']}"
+    )
+    return result
+
+
 def insert_car_record(car):
     try:
         existing = (
@@ -399,7 +539,10 @@ def main():
 
     if target_url:
         print(f"[RUN] TARGET_URL: {target_url}")
-        car = parse_autocango(target_url)
+        if "sellwellauto.com" in target_url:
+            car = parse_sellwellauto(target_url)
+        else:
+            car = parse_autocango(target_url)
         if car:
             insert_car_record(car)
     else:
