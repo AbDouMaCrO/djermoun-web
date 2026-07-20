@@ -20,6 +20,7 @@ from db import supabase
 from duty_calculator import CustomsDutyCalculator
 from tiktok_publisher import publish_car_to_tiktok
 from video_creator import create_car_video
+from caption_generator import generate_and_store
 
 calculator = CustomsDutyCalculator()
 
@@ -573,7 +574,9 @@ def insert_car_record(car):
         if res.data:
             duty_fmt = f"{duty:,.0f}" if duty is not None else "N/A"
             print(f"[OK] Inserted {car['year']} {car['make']} {car['model']} — Duty: {duty_fmt} DZD")
-            # Create promo video then push to TikTok
+            car_id = res.data[0]["id"]
+            # Generate AI captions, create promo video, push to TikTok
+            generate_and_store(car_id, car)
             video_url = create_car_video(car, car.get("images") or [])
             publish_car_to_tiktok(car, car.get("images") or [], video_url=video_url)
         else:

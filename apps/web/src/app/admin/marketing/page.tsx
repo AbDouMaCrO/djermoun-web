@@ -17,6 +17,15 @@ const LANGS: { key: Lang; label: string }[] = [
   { key: "en", label: "EN" },
 ];
 
+type AiPlatform = "tiktok" | "instagram" | "facebook";
+type AiCaptions = Record<AiPlatform, Record<string, string>>;
+
+const AI_PLATFORMS: { key: AiPlatform; label: string }[] = [
+  { key: "tiktok",     label: "TikTok"    },
+  { key: "instagram",  label: "Instagram" },
+  { key: "facebook",   label: "Facebook"  },
+];
+
 const CAR_FIELDS =
   "id, make, model, year, mileage, fuel, transmission, engine, " +
   "exterior_color, accessories, primary_image, images, condition, " +
@@ -159,14 +168,55 @@ function ImagesTab({ images, title }: { images: string[]; title: string }) {
   );
 }
 
+function AiCaptionsTab({ captions }: { captions: AiCaptions }) {
+  const [platform, setPlatform] = useState<AiPlatform>("tiktok");
+  const [lang, setLang]         = useState<string>("fr");
+  const text = captions[platform]?.[lang] ?? "";
+
+  return (
+    <div>
+      <div className="mb-2 flex gap-1">
+        {AI_PLATFORMS.map(({ key, label }) => (
+          <button key={key} onClick={() => setPlatform(key)}
+            className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
+              platform === key ? "bg-amber-500 text-black" : "text-gray-600 hover:bg-gray-100"
+            }`}>
+            {label}
+          </button>
+        ))}
+        <div className="ml-auto flex gap-1">
+          {LANGS.map(({ key, label }) => (
+            <button key={key} onClick={() => setLang(key)}
+              className={`rounded px-2 py-1 text-xs font-medium transition-colors ${
+                lang === key ? "bg-gray-800 text-white" : "text-gray-500 hover:bg-gray-100"
+              }`}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="relative">
+        <textarea
+          readOnly value={text || "No AI caption available for this combination."}
+          dir={lang === "ar" ? "rtl" : "ltr"}
+          rows={10}
+          className="w-full resize-none rounded border border-gray-200 bg-gray-50 p-3 font-mono text-xs text-gray-800 focus:outline-none"
+        />
+        {text && <CopyButton text={text} />}
+      </div>
+    </div>
+  );
+}
+
 export default function MarketingPage() {
-  const [input, setInput]     = useState("");
-  const [wa, setWa]           = useState("");
-  const [content, setContent] = useState<ContentOutput | null>(null);
-  const [images, setImages]   = useState<string[]>([]);
-  const [tab, setTab]         = useState<"content" | "images">("content");
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState<string | null>(null);
+  const [input, setInput]         = useState("");
+  const [wa, setWa]               = useState("");
+  const [content, setContent]     = useState<ContentOutput | null>(null);
+  const [aiCaptions, setAiCaptions] = useState<AiCaptions | null>(null);
+  const [images, setImages]       = useState<string[]>([]);
+  const [tab, setTab]             = useState<"content" | "ai" | "images">("content");
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState<string | null>(null);
 
   async function generate() {
     const carId = extractId(input);
@@ -175,12 +225,14 @@ export default function MarketingPage() {
     setLoading(true);
     setError(null);
     setContent(null);
+    setAiCaptions(null);
 
     try {
       const db = createClient();
-      const [{ data: car, error: carErr }, { data: settings }] = await Promise.all([
+      const [{ data: car, error: carErr }, { data: settings }, { data: captionRows }] = await Promise.all([
         db.from("cars").select(CAR_FIELDS).eq("id", carId).single(),
         db.from("site_settings").select("usd_to_dzd_rate").eq("id", 1).single(),
+        db.from("car_captions").select("platform,language,caption").eq("car_id", carId),
       ]);
       if (carErr) throw new Error(carErr.message);
       if (!car)   throw new Error("Car not found.");
@@ -194,6 +246,18 @@ export default function MarketingPage() {
         ? c.images
         : c.primary_image ? [c.primary_image] : [];
       setImages(imgs);
+
+      // Build AI captions map from DB rows
+      if (captionRows && captionRows.length > 0) {
+        const map = {} as AiCaptions;
+        for (const row of captionRows) {
+          const p = row.platform as AiPlatform;
+          if (!map[p]) map[p] = {};
+          map[p][row.language] = row.caption;
+        }
+        setAiCaptions(map);
+      }
+
       setTab("content");
     } catch (e) {
       setError((e as Error).message);
@@ -246,23 +310,26 @@ export default function MarketingPage() {
 
           {/* Tabs */}
           <div className="mb-4 flex gap-1 border-b border-gray-200 mt-3">
-            {(["content", "images"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`px-4 py-2 text-sm font-medium capitalize border-b-2 transition-colors ${
-                  tab === t
-                    ? "border-amber-500 text-amber-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                {t === "images" ? `Images (${images.length})` : "Content"}
-              </button>
-            ))}
+            <button onClick={() => setTab("content")}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === "content" ? "border-amber-500 text-amber-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+              Templates
+            </button>
+            <button onClick={() => setTab("ai")}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === "ai" ? "border-amber-500 text-amber-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+              AI Captions {aiCaptions ? "✓" : <span className="ml-1 text-xs text-gray-400">(none yet)</span>}
+            </button>
+            <button onClick={() => setTab("images")}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === "images" ? "border-amber-500 text-amber-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+              Images ({images.length})
+            </button>
           </div>
 
           {tab === "content" && <ContentTab content={content} />}
-          {tab === "images"  && <ImagesTab  images={images} title={content.title} />}
+          {tab === "ai"      && (aiCaptions
+            ? <AiCaptionsTab captions={aiCaptions} />
+            : <p className="text-sm text-gray-500">No AI captions found. They are generated automatically when a car is scraped.</p>
+          )}
+          {tab === "images"  && <ImagesTab images={images} title={content.title} />}
         </div>
       )}
     </div>
