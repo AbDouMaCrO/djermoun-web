@@ -1,14 +1,15 @@
 """
-Generates AI marketing captions for a car listing using Claude.
+Generates AI marketing captions for a car listing via OpenRouter.
 Produces 9 captions: 3 platforms (tiktok, instagram, facebook) x 3 languages (en, fr, ar).
 Stores results in the car_captions Supabase table.
-Requires: ANTHROPIC_API_KEY env var.
+Requires: OPENROUTER_API_KEY env var.
+Optional: OPENROUTER_MODEL (defaults to a free model).
 """
 
 import json
 import os
 
-import anthropic
+import requests as _http
 
 
 PLATFORMS = ["tiktok", "instagram", "facebook"]
@@ -59,23 +60,35 @@ Return ONLY valid JSON, no markdown, no extra text:
 }}"""
 
 
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+DEFAULT_MODEL  = "meta-llama/llama-3.3-8b-instruct:free"
+
+
 def generate_captions(car: dict) -> dict | None:
-    """
-    Call Claude to generate captions. Returns parsed dict or None on failure.
-    """
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    """Call OpenRouter to generate captions. Returns parsed dict or None on failure."""
+    api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
-        print("[CAPTIONS] ANTHROPIC_API_KEY not set — skipping")
+        print("[CAPTIONS] OPENROUTER_API_KEY not set — skipping")
         return None
 
+    model = os.environ.get("OPENROUTER_MODEL", DEFAULT_MODEL)
+
     try:
-        client = anthropic.Anthropic(api_key=api_key)
-        message = client.messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=2048,
-            messages=[{"role": "user", "content": _build_prompt(car)}],
+        resp = _http.post(
+            OPENROUTER_URL,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": model,
+                "max_tokens": 2048,
+                "messages": [{"role": "user", "content": _build_prompt(car)}],
+            },
+            timeout=60,
         )
-        raw = message.content[0].text.strip()
+        resp.raise_for_status()
+        raw = resp.json()["choices"][0]["message"]["content"].strip()
         # Strip markdown code fences if model wraps output
         if raw.startswith("```"):
             raw = raw.split("```", 2)[1]
